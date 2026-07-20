@@ -36,6 +36,7 @@ def add(
 
     silver = SilverGraph()
     from lof.silver.extractor import SpacyExtractor
+
     extractor = SpacyExtractor(silver)
     claims = extractor.extract_from_entry(entry)
     for c in claims:
