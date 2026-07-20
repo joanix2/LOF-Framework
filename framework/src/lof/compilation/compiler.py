@@ -3,11 +3,13 @@ from pathlib import Path
 from lof.compilation.manifest import ManifestManager
 from lof.compilation.pipeline import Pipeline
 from lof.graph.builder import GraphBuilder
+from lof.graph.instance_graph import InstanceGraph
 from lof.graph.validator import GraphValidator
 from lof.loading.loader import Loader
 from lof.loading.registry import Registry
 from lof.models.artifact import CompilationReport, ProjectManifest
 from lof.validation.semantic_validator import SemanticValidator
+from lof.validation.smt.validation_engine import SemanticValidationEngine
 
 
 class Compiler:
@@ -41,6 +43,19 @@ class Compiler:
 
         return errors
 
+    def validate_semantic(self) -> list[str]:
+        errors: list[str] = []
+        instance_graph = InstanceGraph()
+        instance_graph.build(self.registry.instances)
+        engine = SemanticValidationEngine(self.registry, instance_graph)
+        result = engine.validate_with_json_diagnostics(output_dir=self.root)
+        for d in result.diagnostics:
+            errors.append(
+                f"[{d.code}] {d.message} "
+                f"(constraint: {d.constraint_id}, instances: {', '.join(d.instance_ids)})"
+            )
+        return errors
+
     def compile(self) -> CompilationReport:
         report = CompilationReport()
         self.load_all()
@@ -51,6 +66,12 @@ class Compiler:
         validation_errors = self.validate_all()
         if validation_errors:
             report.errors.extend(validation_errors)
+            report.success = False
+            return report
+
+        semantic_errors = self.validate_semantic()
+        if semantic_errors:
+            report.errors.extend(semantic_errors)
             report.success = False
             return report
 
