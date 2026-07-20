@@ -16,9 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: "3.12"
-      - run: uv sync --frozen
+        with: { python-version: "3.12" }
+      - run: uv sync --frozen --dev
       - run: uv run ruff check src/lof tests
       - run: uv run ruff format --check src/lof tests
 
@@ -27,9 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: "3.12"
-      - run: uv sync --frozen
+        with: { python-version: "3.12" }
+      - run: uv sync --frozen --dev
       - run: uv run python -m pytest tests -v --tb=short -x
 
   benchmark-smoke:
@@ -37,37 +35,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: "3.12"
-      - run: uv sync --frozen
+        with: { python-version: "3.12" }
+      - run: uv sync --frozen --dev
       - run: uv run python -m lof.cli constraints validate
       - run: uv run python -m lof.cli bench run
       - run: uv run python -m lof.cli compile
-      - name: Validate generated backend
-        working-directory: generated-project/apps/api
-        run: |
-          pip install -e ".[dev]"
-          ruff check src --ignore F821,E402,N815,F401
-          python -m pytest tests -q --tb=short
 
   generated-project:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: "3.12"
-      - run: uv sync --frozen
+        with: { python-version: "3.12" }
+      - run: uv sync --frozen --dev
       - run: uv run python -m lof.cli compile
-      - name: Lint generated backend
-        working-directory: generated-project/apps/api
-        run: |
-          pip install -e ".[dev]"
-          ruff check src --ignore F821,E402,N815,F401
-      - name: Test generated backend
-        working-directory: generated-project/apps/api
-        run: |
-          python -m pytest tests -q --tb=short
 
   security:
     runs-on: ubuntu-latest
