@@ -15,54 +15,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - run: ruff check framework/src framework/tests
-      - run: ruff format --check framework/src framework/tests
+      - run: uv sync --frozen
+      - run: uv run ruff check src/lof tests
+      - run: uv run ruff format --check src/lof tests
 
   unit-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - run: python -m pytest framework/tests -v --tb=short -x
+      - run: uv sync --frozen
+      - run: uv run python -m pytest tests -v --tb=short -x
 
   benchmark-smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - run: python -m lof.cli constraints validate
-      - run: python -m lof.cli bench run
-      - run: python -m lof.cli compile
+      - run: uv sync --frozen
+      - run: uv run python -m lof.cli constraints validate
+      - run: uv run python -m lof.cli bench run
+      - run: uv run python -m lof.cli compile
       - name: Validate generated backend
         working-directory: generated-project/apps/api
         run: |
           pip install -e ".[dev]"
-          python -m ruff check src --ignore F821,E402,N815,F401
+          ruff check src --ignore F821,E402,N815,F401
           python -m pytest tests -q --tb=short
 
   generated-project:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - run: python -m lof.cli compile
+      - run: uv sync --frozen
+      - run: uv run python -m lof.cli compile
       - name: Lint generated backend
         working-directory: generated-project/apps/api
         run: |
