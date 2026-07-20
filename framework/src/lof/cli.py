@@ -1,46 +1,45 @@
+"""LOF CLI — main dispatcher."""
+
 import json
-from datetime import datetime
 from pathlib import Path
-from uuid import uuid4
 
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.tree import Tree
 
-from lof.bronze.models import BronzeEntry
-from lof.bronze.store import BronzeStore
+from lof.bench.runner import BenchmarkRunner
+from lof.bench.scenario_loader import ScenarioLoader
 from lof.compilation.compiler import Compiler
 from lof.compilation.manifest import ManifestManager
 from lof.graph.builder import GraphBuilder
-from lof.graph.instance_graph import InstanceGraph
 from lof.graph.validator import GraphValidator
+from lof.interfaces.commands_bronze import bronze_app
+from lof.interfaces.commands_constraints import constraints_app
+from lof.interfaces.commands_gold import gold_app
+from lof.interfaces.commands_reason import reason_app
+from lof.interfaces.commands_silver import silver_app
 from lof.loading.loader import Loader
-from lof.silver.extractor import SpacyExtractor
-from lof.silver.graph import SilverGraph
-from lof.validation.smt.validation_engine import SemanticValidationEngine
 
-app = typer.Typer(
-    name="lof",
-    help="Language-Oriented Programming Framework",
-    no_args_is_help=True,
-)
 console = Console()
+
+app = typer.Typer(name="lof", help="Language-Oriented Programming Framework", no_args_is_help=True)
+app.add_typer(bronze_app, name="bronze")
+app.add_typer(silver_app, name="silver")
+app.add_typer(gold_app, name="gold")
+app.add_typer(reason_app, name="reason")
+app.add_typer(constraints_app, name="constraints")
 
 
 @app.command()
 def init() -> None:
     root = Path.cwd()
-    dirs = [
-        "definitions/types", "definitions/targets",
-        "templates/python", "templates/typescript",
-        "templates/markdown", "templates/mermaid",
-        "instances", "patches/python", "patches/typescript",
-        "interfaces/python", "interfaces/typescript",
-        "generated/python", "generated/typescript",
-        "generated/docs", "generated/diagrams",
-    ]
-    for d in dirs:
+    for d in ["definitions/types", "definitions/targets", "templates/python",
+              "templates/typescript", "templates/markdown", "templates/mermaid",
+              "instances", "patches/python", "patches/typescript",
+              "interfaces/python", "interfaces/typescript",
+              "generated/python", "generated/typescript",
+              "generated/docs", "generated/diagrams"]:
         (root / d).mkdir(parents=True, exist_ok=True)
     console.print("[green]LOF project initialized[/green]")
 
@@ -55,17 +54,14 @@ def validate() -> None:
             console.print(f"[red]ERROR:[/red] {e}")
         raise typer.Exit(1)
     console.print("[green]Structural validation passed[/green]")
-    console.print(f"  Types: {compiler.registry.type_count}")
-    console.print(f"  Instances: {compiler.registry.instance_count}")
-    console.print(f"  Patches: {compiler.registry.patch_count}")
+    console.print(f"  Types: {compiler.registry.type_count}, "
+                  f"Instances: {compiler.registry.instance_count}, "
+                  f"Patches: {compiler.registry.patch_count}")
 
 
 @app.command()
-def graph(
-    format: str = typer.Option("text", "--format", "-f", help="Output format: text or mermaid"),
-) -> None:
-    root = Path.cwd()
-    compiler = Compiler(root)
+def graph(format: str = typer.Option("text", "--format", "-f", help="text or mermaid")) -> None:
+    compiler = Compiler(Path.cwd())
     compiler.load_all()
     builder = GraphBuilder(compiler.registry)
     builder.build()
@@ -77,8 +73,8 @@ def graph(
     order = builder.get_types_in_order()
     tree = Tree("Dependency Graph")
     for type_id in order:
-        node_data = builder.graph.nodes.get(type_id)
-        if node_data and node_data.get("type") == "type":
+        node = builder.graph.nodes.get(type_id)
+        if node and node.get("type") == "type":
             t = compiler.registry.get_type(type_id)
             if t:
                 branch = tree.add(f"[bold]{type_id}[/bold]")
@@ -86,11 +82,8 @@ def graph(
                     deps = branch.add("depends on")
                     for dep in t.depends_on:
                         deps.add(dep)
-                instances = compiler.registry.instances_for_type(type_id)
-                if instances:
-                    insts = branch.add("instances")
-                    for inst in instances:
-                        insts.add(inst.id)
+                for inst in compiler.registry.instances_for_type(type_id):
+                    branch.add(f"[instance] {inst.id}")
     console.print(tree)
 
     cycles = GraphValidator(compiler.registry).validate(builder.graph)
@@ -110,23 +103,20 @@ def compile_cmd(
     dry_run: bool = typer.Option(False, "--dry-run"),
     force: bool = typer.Option(False, "--force"),
     json_output: bool = typer.Option(False, "--json"),
-    diagnostics_json: bool = typer.Option(False, "--diagnostics-json"),
 ) -> None:
-    root = Path.cwd()
-    compiler = Compiler(root, dry_run=dry_run)
+    compiler = Compiler(Path.cwd(), dry_run=dry_run)
     report = compiler.compile()
 
-    if json_output or diagnostics_json:
+    if json_output:
         console.print(json.dumps(report.model_dump(), indent=2))
         if report.errors:
-            ec = 3 if any('UNSAT' in e or 'DUPLICATE' in e for e in report.errors) else 5
-            raise typer.Exit(ec)
+            raise typer.Exit(3)
         return
 
     if report.errors:
         for e in report.errors:
-            tag = 'SMT ERROR' if 'UNSAT' in e or 'DUPLICATE' in e else 'ERROR'
-            console.print(f'[red]{tag}:[/red] {e}')
+            tag = "SMT ERROR" if "UNSAT" in e else "ERROR"
+            console.print(f"[red]{tag}:[/red] {e}")
         raise typer.Exit(3)
 
     console.print("[green]Compilation successful[/green]")
@@ -135,9 +125,7 @@ def compile_cmd(
     for a in report.artifacts_generated:
         console.print(f"    - {a}")
     if report.artifacts_patched:
-        console.print(f"  Patched: {len(report.artifacts_patched)} files")
-        for a in report.artifacts_patched:
-            console.print(f"    - {a}")
+        console.print(f"  Patched: {len(report.artifacts_patched)}")
 
 
 @app.command()
@@ -145,44 +133,37 @@ def inspect(
     what: str = typer.Argument(..., help="type or instance"),
     id: str = typer.Option(..., "--id"),
 ) -> None:
-    root = Path.cwd()
-    loader = Loader(root)
+    loader = Loader(Path.cwd())
     if what == "type":
         for t in loader.load_types_from_dir():
             if t.id == id:
                 console.print(json.dumps(t.model_dump(exclude_none=True), indent=2, default=str))
                 return
-        console.print(f"[red]Type '{id}' not found[/red]")
-        raise typer.Exit(1)
     elif what == "instance":
         for inst in loader.load_instances_from_dir():
             if inst.id == id:
                 console.print(json.dumps(inst.model_dump(exclude_none=True), indent=2, default=str))
                 return
-        console.print(f"[red]Instance '{id}' not found[/red]")
-        raise typer.Exit(1)
-    console.print("[red]Must specify 'type' or 'instance'[/red]")
+    console.print(f"[red]{what.capitalize()} '{id}' not found[/red]")
     raise typer.Exit(1)
 
 
 @app.command()
 def diff() -> None:
     root = Path.cwd()
-    manifest_manager = ManifestManager(root)
-    old_manifest = manifest_manager.load()
-    if not old_manifest.artifacts:
-        console.print("[yellow]No prior manifest found.[/yellow]")
+    mm = ManifestManager(root)
+    old = mm.load()
+    if not old.artifacts:
+        console.print("[yellow]No prior manifest.[/yellow]")
         return
     compiler = Compiler(root, dry_run=True)
     report = compiler.compile()
     from lof.models.artifact import Artifact, ProjectManifest
     from lof.utils.hashing import compute_hash
-    new_artifacts = [
-        Artifact(instance="", type="", output=a, hash=compute_hash(""))
-        for a in report.artifacts_generated
-    ]
-    new_manifest = ProjectManifest(project_hash="", artifacts=new_artifacts)
-    changes = manifest_manager.diff(old_manifest, new_manifest)
+    new = ProjectManifest(project_hash="", artifacts=[
+        Artifact(instance="", type="", output=a, hash=compute_hash("")) for a in report.artifacts_generated  # noqa: E501
+    ])
+    changes = mm.diff(old, new)
     if changes:
         for c in changes:
             console.print(c)
@@ -192,8 +173,7 @@ def diff() -> None:
 
 @app.command()
 def check() -> None:
-    root = Path.cwd()
-    compiler = Compiler(root)
+    compiler = Compiler(Path.cwd())
     compiler.load_all()
     errors = compiler.validate_all()
     if errors:
@@ -211,13 +191,12 @@ def clean() -> None:
         if d.exists():
             shutil.rmtree(d)
             d.mkdir(exist_ok=True)
-    console.print("[green]Cleaned generated directories[/green]")
+    console.print("[green]Cleaned[/green]")
 
 
 @app.command()
 def manifest() -> None:
-    root = Path.cwd()
-    m = ManifestManager(root).load()
+    m = ManifestManager(Path.cwd()).load()
     if not m.artifacts:
         console.print("[yellow]No artifacts (run compile first)[/yellow]")
         return
@@ -232,355 +211,13 @@ def manifest() -> None:
     console.print(f"Project hash: {m.project_hash}")
 
 
-constraints_app = typer.Typer(help="SMT semantic constraint management")
-app.add_typer(constraints_app, name="constraints")
-
-
-@constraints_app.command("list")
-def constraints_list() -> None:
-    engine = _engine()
-    constraints = engine.build_builtin_constraints()
-    table = Table(title="Built-in Constraints")
-    table.add_column("ID", style="cyan")
-    table.add_column("Type", style="green")
-    table.add_column("Severity", style="yellow")
-    table.add_column("Description")
-    for c in constraints:
-        table.add_row(c.id, c.type, c.severity, c.description or "")
-    console.print(table)
-
-
-@constraints_app.command("validate")
-def constraints_validate(
-    json_output: bool = typer.Option(False, "--json"),
-) -> None:
-    root = Path.cwd()
-    compiler = Compiler(root)
-    compiler.load_all()
-    instance_graph = InstanceGraph()
-    instance_graph.build(compiler.registry.instances)
-    engine = SemanticValidationEngine(compiler.registry, instance_graph)
-    result = engine.validate_with_json_diagnostics(output_dir=root)
-
-    if json_output:
-        console.print(json.dumps(result.model_dump(), indent=2))
-    elif result.status == "sat":
-        console.print("[green]SAT[/green] — All semantic constraints satisfied.")
-    elif result.status == "unsat":
-        console.print(f"[red]UNSAT[/red] — {len(result.diagnostics)} violation(s):")
-        for d in result.diagnostics:
-            hint = f" ({d.hint})" if d.hint else ""
-            console.print(f"  [{d.code}] {d.message}{hint}")
-            if d.instance_ids:
-                console.print(f"    instances: {', '.join(d.instance_ids)}")
-            if d.json_paths:
-                console.print(f"    paths: {', '.join(d.json_paths)}")
-        raise typer.Exit(3)
-    else:
-        console.print("[yellow]UNKNOWN[/yellow] — Solver returned unknown.")
-        raise typer.Exit(4)
-
-
-@constraints_app.command("inspect")
-def constraints_inspect(
-    id: str = typer.Argument(..., help="Constraint ID"),
-) -> None:
-    engine = _engine()
-    for c in engine.build_builtin_constraints():
-        if c.id == id:
-            console.print(json.dumps(c.model_dump(), indent=2))
-            return
-    console.print(f"[red]Constraint '{id}' not found[/red]")
-    raise typer.Exit(1)
-
-
-@constraints_app.command("explain")
-def constraints_explain(
-    code: str = typer.Argument(..., help="Diagnostic error code"),
-) -> None:
-    engine = _engine()
-    diag_path = Path.cwd() / ".lof" / "diagnostics" / "latest.json"
-    if diag_path.exists():
-        data = json.loads(diag_path.read_text())
-        for v in data.get("violations", []):
-            if v.get("code") == code:
-                console.print(f"[bold]Code:[/bold] {v['code']}")
-                console.print(f"[bold]Message:[/bold] {v['message']}")
-                if v.get("hint"):
-                    console.print(f"[bold]Hint:[/bold] {v['hint']}")
-                if v.get("constraint_id"):
-                    for c in engine.build_builtin_constraints():
-                        if c.id == v["constraint_id"]:
-                            console.print(f"[bold]Constraint:[/bold] {c.id} ({c.type})")
-                if v.get("instance_ids"):
-                    console.print(f"[bold]Instances:[/bold] {', '.join(v['instance_ids'])}")
-                if v.get("json_paths"):
-                    console.print(f"[bold]JSON paths:[/bold] {', '.join(v['json_paths'])}")
-                return
-    console.print(f"[yellow]No diagnostics found for code '{code}'.[/yellow]")
-
-
-def _engine() -> SemanticValidationEngine:
-    root = Path.cwd()
-    compiler = Compiler(root)
-    compiler.load_all()
-    instance_graph = InstanceGraph()
-    instance_graph.build(compiler.registry.instances)
-    return SemanticValidationEngine(compiler.registry, instance_graph)
-
-
-bronze_app = typer.Typer(help="Bronze layer: raw expression storage (append-only)")
-app.add_typer(bronze_app, name="bronze")
-
-
-@bronze_app.command("add")
-def bronze_add(
-    content: str = typer.Argument(..., help="Raw expression content"),
-    source: str = typer.Option("user", "--source", "-s"),
-    entry_type: str = typer.Option("message", "--type", "-t"),
-) -> None:
-    root = Path.cwd()
-    store = BronzeStore(root)
-    entry = BronzeEntry(
-        id=f"bronze-{uuid4().hex[:12]}",
-        created_at=datetime.now(),
-        source=source,
-        content=content,
-        entry_type=entry_type,
-    )
-    path = store.append_entry(entry)
-    console.print(f"[green]Bronze entry saved:[/green] {path.name}")
-
-    silver = SilverGraph()
-    extractor = SpacyExtractor(silver)
-    claims = extractor.extract_from_entry(entry)
-    for c in claims:
-        silver.add_claim(c)
-        console.print(f"  [cyan]Claim:[/cyan] {c.subject} {c.predicate} {c.object} ({c.status})")
-    silver.save(root)
-
-    if silver.contradictions:
-        console.print(f"[yellow]Contradictions detected: {len(silver.contradictions)}[/yellow]")
-        for c in silver.contradictions.values():
-            console.print(f"  {c.description}")
-
-
-@bronze_app.command("list")
-def bronze_list() -> None:
-    store = BronzeStore(Path.cwd())
-    entries = store.list_entries()
-    if not entries:
-        console.print("[yellow]No bronze entries.[/yellow]")
-        return
-    table = Table(title="Bronze Entries")
-    table.add_column("ID", style="cyan")
-    table.add_column("Source", style="green")
-    table.add_column("Content")
-    table.add_column("Created")
-    for e in entries:
-        table.add_row(e.id, e.source, e.content[:60], e.created_at.isoformat()[:10])
-    console.print(table)
-
-
-silver_app = typer.Typer(help="Silver layer: semantic graph (open world)")
-app.add_typer(silver_app, name="silver")
-
-
-@silver_app.command("status")
-def silver_status() -> None:
-    silver = SilverGraph.load(Path.cwd())
-    console.print("[bold]Silver Graph:[/bold]")
-    console.print(f"  Entities: {len(silver.entities)}")
-    console.print(f"  Claims: {len(silver.claims)}")
-    console.print(f"  Relations: {len(silver.relations)}")
-    console.print(f"  Contradictions: {len(silver.contradictions)}")
-    resolved = sum(1 for c in silver.contradictions.values() if c.resolved)
-    if silver.contradictions:
-        console.print(f"  Resolved: {resolved}/{len(silver.contradictions)}")
-        for c in silver.contradictions.values():
-            status = "[green]resolved[/green]" if c.resolved else "[red]unresolved[/red]"
-            console.print(f"    [{status}] {c.description}")
-
-
-@silver_app.command("claims")
-def silver_claims(
-    subject: str | None = typer.Option(None, "--subject", "-s"),
-) -> None:
-    silver = SilverGraph.load(Path.cwd())
-    claims = silver.get_claims_for_subject(subject) if subject else list(silver.claims.values())
-    if not claims:
-        console.print("[yellow]No claims.[/yellow]")
-        return
-    table = Table(title=f"Silver Claims{' for ' + subject if subject else ''}")
-    table.add_column("ID", style="cyan")
-    table.add_column("Subject", style="blue")
-    table.add_column("Predicate", style="green")
-    table.add_column("Object", style="yellow")
-    table.add_column("Status")
-    table.add_column("Confidence")
-    for c in claims:
-        sobj = str(c.object)[:28]
-        table.add_row(c.id, c.subject, c.predicate, sobj, c.status, f"{c.confidence:.2f}")
-    console.print(table)
-
-
-gold_app = typer.Typer(help="Gold layer: canonical DSL generation")
-app.add_typer(gold_app, name="gold")
-
-
-@gold_app.command("build")
-def gold_build(
-    output: str = typer.Option("instances", "--output", "-o", help="Output subdir"),
-) -> None:
-    root = Path.cwd()
-    silver = SilverGraph.load(root)
-    from lof.reasoning.integration import silver_to_gold_via_reasoning
-    paths = silver_to_gold_via_reasoning(silver, root, "fastapi-react")
-    console.print(f"[green]Gold candidates (via reasoning):[/green] {len(paths)} files")
-    for p in paths:
-        console.print(f"  - {p.relative_to(root)}")
-    from lof.reasoning import DatalogEngine, FactEncoder, get_profile
-    encoder = FactEncoder()
-    facts = encoder.encode(silver)
-    engine = DatalogEngine(get_profile("fastapi-react"))
-    result = engine.evaluate(facts)
-    console.print(f"  Inferred: {len(result.inferred)} facts in {result.iteration_count} iterations")  # noqa: E501  # noqa: E501
-    if result.contradictions:
-        console.print(f"  [red]Contradictions: {len(result.contradictions)}[/red]")
-
-
-@gold_app.command("provenance")
-def gold_provenance(
-    instance_id: str = typer.Argument(..., help="Instance ID to trace"),
-) -> None:
-    root = Path.cwd()
-    silver = SilverGraph.load(root)
-
-    spans: list[str] = []
-    bronze_ids: set[str] = set()
-    for claim in silver.claims.values():
-        for ref in claim.provenance:
-            if ref.bronze_id:
-                bronze_ids.add(ref.bronze_id)
-            if ref.span:
-                spans.append(ref.span)
-
-    store = BronzeStore(root)
-    console.print(f"[bold]Provenance for '{instance_id}':[/bold]")
-    subject_prefix = instance_id.split("-")[0].capitalize()
-    ref_count = sum(1 for c in silver.claims.values() if c.subject == subject_prefix)
-    console.print(f"  Silver claims referencing '{subject_prefix}': {ref_count}")
-    if bronze_ids:
-        console.print(f"  Bronze sources: {len(bronze_ids)}")
-        for bid in sorted(bronze_ids):
-            entry = store.get_entry(bid)
-            if entry:
-                console.print(f"    - {bid}: {entry.content[:80]}")
-    if spans:
-        console.print(f"  Extraction spans: {len(spans)}")
-        for s in spans[:5]:
-            console.print(f"    - \"{s}\"")
-
-
-reason_app = typer.Typer(help="Reasoning layer: Datalog inference engine")
-app.add_typer(reason_app, name="reason")
-
-
-@reason_app.command("status")
-def reason_status() -> None:
-    from lof.reasoning import DatalogEngine, FactEncoder, get_profile
-    from lof.silver.graph import SilverGraph
-    silver = SilverGraph.load(Path.cwd())
-    encoder = FactEncoder()
-    facts = encoder.encode(silver)
-    profile = get_profile("fastapi-react")
-    engine = DatalogEngine(profile)
-    result = engine.evaluate(facts)
-
-    console.print("[bold]Reasoning Engine Status[/bold]")
-    console.print(f"  Facts (asserted): {sum(1 for f in result.facts if f.status in ('asserted', 'inferred'))}")  # noqa: E501  # noqa: E501
-    console.print(f"  Facts (inferred): {len(result.inferred)}")
-    console.print(f"  Hypotheses: {len(result.hypotheses)}")
-    console.print(f"  Iterations: {result.iteration_count}")
-    console.print(f"  Converged: {result.converged}")
-    console.print(f"  Duration: {result.duration_ms:.1f}ms")
-    if result.contradictions:
-        console.print(f"  [red]Contradictions: {len(result.contradictions)}[/red]")
-        for c in result.contradictions:
-            console.print(f"    {c}")
-    for inf in result.inferred[:10]:
-        console.print(f"  [green]inferred:[/green] {inf.key} (via {inf.rule_id})")
-
-
-@reason_app.command("facts")
-def reason_facts(
-    predicate: str | None = typer.Option(None, "--predicate", "-p"),
-) -> None:
-    from lof.reasoning import DatalogEngine, FactEncoder, get_profile
-    from lof.silver.graph import SilverGraph
-    silver = SilverGraph.load(Path.cwd())
-    encoder = FactEncoder()
-    facts = encoder.encode(silver)
-    profile = get_profile("fastapi-react")
-    engine = DatalogEngine(profile)
-    result = engine.evaluate(facts)
-
-    filtered = result.facts
-    if predicate:
-        filtered = [f for f in filtered if f.predicate == predicate]
-
-    from rich.table import Table
-    table = Table(title=f"Reasoning Facts{' (' + predicate + ')' if predicate else ''}")
-    table.add_column("Fact", style="cyan")
-    table.add_column("Status", style="yellow")
-    table.add_column("Confidence")
-    table.add_column("Rule")
-    for f in filtered:
-        table.add_row(f.key, f.status, f"{f.confidence:.2f}", f.rule_id or "")
-    console.print(table)
-
-
-@reason_app.command("explain")
-def reason_explain(
-    fact_key: str = typer.Argument(..., help="Fact key like 'permission(worker,read,mission)'"),
-) -> None:
-    from lof.reasoning import DatalogEngine, ExplanationGenerator, FactEncoder, get_profile
-    from lof.silver.graph import SilverGraph
-    silver = SilverGraph.load(Path.cwd())
-    encoder = FactEncoder()
-    facts = encoder.encode(silver)
-    profile = get_profile("fastapi-react")
-    engine = DatalogEngine(profile)
-    result = engine.evaluate(facts)
-    gen = ExplanationGenerator(engine, profile)
-    console.print(gen.explain(fact_key, result))
-
-
-@reason_app.command("trace")
-def reason_trace(
-    fact_key: str = typer.Argument(..., help="Fact key to trace recursively"),
-) -> None:
-    from lof.reasoning import DatalogEngine, ExplanationGenerator, FactEncoder, get_profile
-    from lof.silver.graph import SilverGraph
-    silver = SilverGraph.load(Path.cwd())
-    encoder = FactEncoder()
-    facts = encoder.encode(silver)
-    profile = get_profile("fastapi-react")
-    engine = DatalogEngine(profile)
-    result = engine.evaluate(facts)
-    gen = ExplanationGenerator(engine, profile)
-    console.print(gen.trace_path(fact_key, result))
-
-
 bench_app = typer.Typer(help="LOP-Bench benchmark framework")
 app.add_typer(bench_app, name="bench")
 
 
 @bench_app.command("list")
 def bench_list() -> None:
-    from lof.bench.scenario_loader import ScenarioLoader
-    loader = ScenarioLoader(Path.cwd())
-    scenarios = loader.list_scenarios()
+    scenarios = ScenarioLoader(Path.cwd()).list_scenarios()
     if not scenarios:
         console.print("[yellow]No benchmarks found.[/yellow]")
         return
@@ -592,28 +229,23 @@ def bench_list() -> None:
     table.add_column("Title")
     for s in scenarios:
         exp = s.metadata.expected_outcome[:8]
-        row = (s.metadata.id, str(s.metadata.level), s.metadata.category, exp, s.metadata.title)
-        table.add_row(*row)
+        table.add_row(s.metadata.id, str(s.metadata.level), s.metadata.category, exp, s.metadata.title)  # noqa: E501
     console.print(table)
 
 
 @bench_app.command("run")
 def bench_run(
-    level: int = typer.Option(-1, "--level", "-l", help="Max difficulty level"),
-    category: str | None = typer.Option(None, "--category", "-c", help="Category filter"),
-    scenario_id: str | None = typer.Option(None, "--scenario", "-s", help="Single scenario"),
+    level: int = typer.Option(-1, "--level", "-l"),
+    category: str | None = typer.Option(None, "--category", "-c"),
+    scenario_id: str | None = typer.Option(None, "--scenario", "-s"),
 ) -> None:
-    from lof.bench.runner import BenchmarkRunner
+    from lof.bench.models import BenchmarkReport
     runner = BenchmarkRunner(Path.cwd())
-
     if scenario_id:
-        from lof.bench.scenario_loader import ScenarioLoader
-        sc_loader = ScenarioLoader(Path.cwd())
-        sc = sc_loader.get_scenario(scenario_id)
+        sc = ScenarioLoader(Path.cwd()).get_scenario(scenario_id)
         if sc is None:
             console.print(f"[red]Scenario '{scenario_id}' not found.[/red]")
             raise typer.Exit(1)
-        from lof.bench.models import BenchmarkReport
         report = BenchmarkReport()
         report.results = [runner._run_scenario(sc)]
         report.total_scenarios = 1
@@ -623,37 +255,18 @@ def bench_run(
         report = runner.run_all(level=level, category=category)
 
     console.print("\n[bold]LOP-Bench Results[/bold]")
-    console.print(f"  Scenarios: {report.total_scenarios}")
-    console.print(f"  Passed:    [green]{report.passed}[/green]")
-    console.print(f"  Failed:    [red]{report.failed}[/red]")
-    console.print(f"  Pass rate: {report.pass_rate:.1%}")
-    if report.composite_score:
-        console.print(f"  Composite: {report.composite_score:.3f}")
-
+    console.print(f"  Scenarios: {report.total_scenarios}, Passed: [green]{report.passed}[/green], "
+                  f"Failed: [red]{report.failed}[/red], Rate: {report.pass_rate:.1%}")
     for r in report.results:
-        status = "[green]PASS[/green]" if r.passed else "[red]FAIL[/red]"
-        console.print(f"  {status} {r.scenario_id} ({r.duration_ms:.0f}ms)")
+        s = "[green]PASS[/green]" if r.passed else "[red]FAIL[/red]"
+        console.print(f"  {s} {r.scenario_id} ({r.duration_ms:.0f}ms)")
         for e in r.errors[:3]:
             console.print(f"         {e}")
 
     report_dir = Path.cwd() / "reports"
     report_dir.mkdir(exist_ok=True)
-    import json
-    report_path = report_dir / "latest.json"
-    report_path.write_text(json.dumps(report.model_dump(), indent=2, default=str))
-    console.print(f"\n[blue]Report saved:[/blue] {report_path}")
-
-
-@bench_app.command("mutate")
-def bench_mutate(
-    scenario_id: str = typer.Argument(..., help="Base scenario ID to mutate"),
-) -> None:
-    from lof.bench.mutation_engine import MutationEngine
-    engine = MutationEngine(Path.cwd())
-    mutants = engine.mutate(scenario_id)
-    console.print(f"Generated {len(mutants)} mutant scenarios from '{scenario_id}'")
-    for m in mutants:
-        console.print(f"  - {m.metadata.id} ({m.metadata.expected_outcome})")
+    (report_dir / "latest.json").write_text(json.dumps(report.model_dump(), indent=2, default=str))
+    console.print("\n[blue]Report:[/blue] reports/latest.json")
 
 
 def main() -> None:
