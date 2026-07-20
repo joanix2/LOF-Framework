@@ -1,74 +1,145 @@
-import re
 from uuid import uuid4
+
+import spacy
+from spacy.tokens import Doc
 
 from lof.bronze.models import BronzeEntry
 from lof.silver.graph import SilverGraph
 from lof.silver.models import ProvenanceRef, SilverClaim, SilverEntity
 
 
-class IntentExtractor:
-    def __init__(self, silver: SilverGraph):
+class SpacyExtractor:
+    def __init__(self, silver: SilverGraph, model: str = "fr_core_news_sm"):
         self.silver = silver
+        self.nlp = spacy.load(model)
 
     def extract_from_entry(self, entry: BronzeEntry) -> list[SilverClaim]:
         claims: list[SilverClaim] = []
-        text = entry.content.lower()
+        doc = self.nlp(entry.content)
 
-        entity_patterns = [
-            (r"(?:entité|entity|resource|module)\s+(\w+)", "entity"),
-            (r"(?:un|une|des)\s+(\w+)\s+(?:a|possède|doit|peut)", "entity"),
-            (r"les\s+(\w+)\s+(?:puissent|peuvent|doivent)", "entity"),
-            (r"(?:voir|commenter|valider|créer|modifier)\s+(?:un|une|des|leur)?\s*(\w+)", "entity"),
-        ]
+        self._extract_entities_from_noun_chunks(doc, entry)
+        claims.extend(self._extract_verb_chain_triples(doc, entry))
+        claims.extend(self._extract_prepositional_relations(doc, entry))
 
-        field_patterns = [
-            (r"(\w+)\s+(\w+)\s*(?:obligatoire|requis|required)", "field_required"),
-            (r"(\w+)\s+(\w+)\s*(?:optionnel|optional)", "field_optional"),
-            (r"(\w+)\s+(?:a|possède)\s+(?:un|une|des)\s+(\w+)", "field"),
-        ]
+        return claims
 
-        operation_patterns = [
-            (r"(?:puissent|peuvent|pouvoir|peut|can)\s+(\w+)", "operation"),
-            (r"(?:pour|to)\s+(\w+)\s+(?:un|une|des|les)?\s*(\w+)", "operation"),
-            (r"(?:CRUD|crud|list|create|read|update|delete|search)\s+(\w+)", "operation"),
-        ]
+    def _add_entity(self, name: str, entry: BronzeEntry, span: str | None = None) -> str:
+        name = name.strip().capitalize().rstrip(".,;:!?")
+        if len(name) <= 2:
+            return ""
+        existing = [e for e in self.silver.entities.values() if e.name == name]
+        if existing:
+            return name
+        eid = f"ent_{name.lower()}_{uuid4().hex[:6]}"
+        self.silver.entities[eid] = SilverEntity(
+            id=eid, name=name, type="concept",
+            status="candidate",
+            provenance=[ProvenanceRef(bronze_id=entry.id, span=span or name)],
+        )
+        return name
 
-        for pattern, kind in entity_patterns:
-            for m in re.finditer(pattern, text):
-                name = m.group(1).capitalize().rstrip(".,;:!?")
-                if len(name) > 2 and name not in ("Les", "Des", "Un", "Une", "Le", "La"):
+    def _extract_entities_from_noun_chunks(self, doc: Doc, entry: BronzeEntry) -> None:
+        for chunk in doc.noun_chunks:
+            name = chunk.root.text.strip().capitalize().rstrip(".,;:!?")
+            if len(name) > 2 and chunk.root.pos_ in ("NOUN", "PROPN"):
+                self._add_entity(name, entry, chunk.text)
+        for ent in doc.ents:
+            name = ent.text.strip().capitalize()
+            if len(name) > 2:
+                existing = [e for e in self.silver.entities.values() if e.name == name]
+                if not existing:
                     eid = f"ent_{name.lower()}_{uuid4().hex[:6]}"
-                    if eid not in self.silver.entities:
-                        self.silver.entities[eid] = SilverEntity(
-                            id=eid, name=name, type=kind, status="candidate",
-                            provenance=[ProvenanceRef(bronze_id=entry.id, span=m.group(0))],
-                        )
+                    self.silver.entities[eid] = SilverEntity(
+                        id=eid, name=name, type=f"ner_{ent.label_}",
+                        status="candidate",
+                        provenance=[ProvenanceRef(bronze_id=entry.id, span=ent.text)],
+                    )
 
-        for pattern, kind in field_patterns:
-            for m in re.finditer(pattern, text):
-                fname = m.group(2).rstrip(".,;:!?")
-                claims.append(SilverClaim(
-                    id=f"claim_{uuid4().hex[:8]}",
-                    subject=m.group(1).capitalize(),
-                    predicate="field_type",
-                    object=fname,
-                    status="candidate",
-                    metadata={"required": kind == "field_required"},
-                    provenance=[ProvenanceRef(bronze_id=entry.id, span=m.group(0))],
-                ))
+    def _extract_verb_chain_triples(self, doc: Doc, entry: BronzeEntry) -> list[SilverClaim]:
+        claims: list[SilverClaim] = []
 
-        for pattern, kind in operation_patterns:
-            for m in re.finditer(pattern, text):
-                verb = m.group(1).rstrip(".,;:!?")
-                obj = (m.group(2).capitalize().rstrip(".,;:!?") if m.lastindex and m.lastindex >= 2 else "")  # noqa: E501
-                sub = obj if obj else ""
-                claims.append(SilverClaim(
-                    id=f"claim_{uuid4().hex[:8]}",
-                    subject=sub,
-                    predicate="has_operation",
-                    object=verb,
-                    status="candidate",
-                    provenance=[ProvenanceRef(bronze_id=entry.id, span=m.group(0))],
-                ))
+        def walk_verbs(token, context_subject: str = "", context_verb: str = ""):
+            if token.pos_ != "VERB" and token.dep_ != "ROOT":
+                return
 
+            subjects = [c for c in token.children if c.dep_ in ("nsubj", "nsubj:pass")]
+            subj = subjects[0].text.strip().capitalize().rstrip(".,;:!?") if subjects else context_subject  # noqa: E501
+
+            if subj and len(subj) > 2:
+                self._add_entity(subj, entry)
+
+            objects = [c for c in token.children if c.dep_ in ("obj", "dobj", "attr")]
+            obliques = [c for c in token.children if c.dep_ in ("obl", "obl:arg")]
+            obj_text = objects[0].text.strip().capitalize().rstrip(".,;:!?") if objects else ""
+            obl_text = obliques[0].text.strip().capitalize().rstrip(".,;:!?") if obliques else ""
+
+            full_obj = obj_text or obl_text or ""
+            if full_obj and len(full_obj) > 2:
+                self._add_entity(full_obj, entry)
+
+            xcomps = [c for c in token.children if c.dep_ == "xcomp" and c.pos_ == "VERB"]
+            conj_verbs = [c for c in token.children if c.dep_ in ("conj", "ccomp") and c.pos_ == "VERB"]  # noqa: E501
+            sub_verbs = xcomps + conj_verbs
+
+            if sub_verbs:
+                for sv in sub_verbs:
+                    walk_verbs(sv, subj, token.lemma_)
+            else:
+                verb = token.lemma_
+                if subj and full_obj:
+                    claims.append(SilverClaim(
+                        id=f"claim_{uuid4().hex[:8]}",
+                        subject=subj,
+                        predicate=verb,
+                        object=full_obj,
+                        status="candidate",
+                        provenance=[ProvenanceRef(bronze_id=entry.id, span=token.text)],
+                    ))
+                elif subj and not full_obj:
+                    obj_from_prep = self._find_prepositional_object(token)
+                    if obj_from_prep:
+                        claims.append(SilverClaim(
+                            id=f"claim_{uuid4().hex[:8]}",
+                            subject=subj,
+                            predicate=verb,
+                            object=obj_from_prep,
+                            status="candidate",
+                            provenance=[ProvenanceRef(bronze_id=entry.id, span=token.text)],
+                        ))
+
+        for token in doc:
+            if token.dep_ == "ROOT":
+                walk_verbs(token)
+                break
+
+        return claims
+
+    def _find_prepositional_object(self, token) -> str:
+        for child in token.children:
+            if child.dep_ == "obl" or child.dep_ == "obl:arg":
+                for grandchild in child.children:
+                    if grandchild.dep_ in ("obj", "pobj") or grandchild.pos_ == "NOUN":
+                        return grandchild.text.strip().capitalize()
+        return ""
+
+    def _extract_prepositional_relations(self, doc: Doc, entry: BronzeEntry) -> list[SilverClaim]:
+        claims: list[SilverClaim] = []
+        for token in doc:
+            if token.dep_ in ("obl", "obl:arg") and token.pos_ == "NOUN":
+                head = token.head
+                if head.pos_ == "VERB":
+                    subjects = [c for c in head.children if c.dep_ in ("nsubj", "nsubj:pass")]
+                    subj = subjects[0].text.strip().capitalize() if subjects else ""
+                    obj = token.text.strip().capitalize()
+                    if subj and obj and len(obj) > 2:
+                        self._add_entity(subj, entry)
+                        self._add_entity(obj, entry)
+                        claims.append(SilverClaim(
+                            id=f"claim_{uuid4().hex[:8]}",
+                            subject=subj,
+                            predicate=head.lemma_,
+                            object=obj,
+                            status="candidate",
+                            provenance=[ProvenanceRef(bronze_id=entry.id, span=token.text)],
+                        ))
         return claims

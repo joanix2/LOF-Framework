@@ -1,0 +1,18 @@
+{
+  "id": "claim_885c2044",
+  "subject": "Ouvriers",
+  "predicate": "valider",
+  "object": "La",
+  "status": "candidate",
+  "confidence": 0.5,
+  "provenance": [
+    {
+      "bronze_id": "bronze-aa2c82e29792",
+      "span": "valider",
+      "silver_id": null,
+      "explanation": null
+    }
+  ],
+  "metadata": {},
+  "created_at": "2026-07-20 22:20:14.426867"
+}

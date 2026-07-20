@@ -16,7 +16,7 @@ from lof.graph.builder import GraphBuilder
 from lof.graph.instance_graph import InstanceGraph
 from lof.graph.validator import GraphValidator
 from lof.loading.loader import Loader
-from lof.silver.extractor import IntentExtractor
+from lof.silver.extractor import SpacyExtractor
 from lof.silver.gold_builder import GoldCandidateBuilder
 from lof.silver.graph import SilverGraph
 from lof.validation.smt.validation_engine import SemanticValidationEngine
@@ -353,7 +353,7 @@ def bronze_add(
     console.print(f"[green]Bronze entry saved:[/green] {path.name}")
 
     silver = SilverGraph()
-    extractor = IntentExtractor(silver)
+    extractor = SpacyExtractor(silver)
     claims = extractor.extract_from_entry(entry)
     for c in claims:
         silver.add_claim(c)

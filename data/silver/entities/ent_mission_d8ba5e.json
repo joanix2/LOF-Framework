@@ -1,0 +1,16 @@
+{
+  "id": "ent_mission_d8ba5e",
+  "name": "Mission",
+  "type": "concept",
+  "status": "candidate",
+  "attributes": {},
+  "provenance": [
+    {
+      "bronze_id": "bronze-aa2c82e29792",
+      "span": "une mission",
+      "silver_id": null,
+      "explanation": null
+    }
+  ],
+  "created_at": "2026-07-20 22:20:14.426737"
+}
