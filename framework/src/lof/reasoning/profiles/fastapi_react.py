@@ -1,0 +1,210 @@
+from lof.reasoning.models import Conclusion, Condition, Rule
+
+FASTAPI_REACT_RULES: list[Rule] = [
+    # -- Permission inference --
+    Rule(
+        id="comment-implies-read",
+        description="Being able to comment implies being able to read",
+        mode="certain",
+        category="permission",
+        when=[Condition(predicate="permission", vars=["Role", "comment", "Resource"])],
+        then=[Conclusion(predicate="permission", vars=["Role", "read", "Resource"])],
+    ),
+    Rule(
+        id="create-implies-read",
+        description="Being able to create implies being able to read",
+        mode="certain",
+        category="permission",
+        when=[Condition(predicate="permission", vars=["Role", "create", "Resource"])],
+        then=[Conclusion(predicate="permission", vars=["Role", "read", "Resource"])],
+    ),
+    Rule(
+        id="update-implies-read",
+        description="Being able to update implies being able to read",
+        mode="certain",
+        category="permission",
+        when=[Condition(predicate="permission", vars=["Role", "update", "Resource"])],
+        then=[Conclusion(predicate="permission", vars=["Role", "read", "Resource"])],
+    ),
+    Rule(
+        id="validate-implies-read",
+        description="Being able to validate implies being able to read and update",
+        mode="certain",
+        category="permission",
+        when=[Condition(predicate="permission", vars=["Role", "validate", "Resource"])],
+        then=[
+            Conclusion(predicate="permission", vars=["Role", "read", "Resource"]),
+            Conclusion(predicate="permission", vars=["Role", "update", "Resource"]),
+        ],
+    ),
+
+    # -- Operation inference --
+    Rule(
+        id="permission-implies-operation",
+        description="A permission on a resource implies the corresponding operation",
+        mode="certain",
+        category="operation",
+        when=[Condition(predicate="permission", vars=["_", "Action", "Resource"])],
+        then=[Conclusion(predicate="has_operation", vars=["Resource", "Action"])],
+    ),
+    Rule(
+        id="entity-implies-crud",
+        description="Every entity should have basic CRUD operations",
+        mode="default",
+        category="operation",
+        when=[Condition(predicate="entity", vars=["E"])],
+        then=[
+            Conclusion(predicate="has_operation", vars=["E", "create"]),
+            Conclusion(predicate="has_operation", vars=["E", "read"]),
+            Conclusion(predicate="has_operation", vars=["E", "update"]),
+            Conclusion(predicate="has_operation", vars=["E", "list"]),
+        ],
+    ),
+    Rule(
+        id="list-implies-search",
+        description="Having list operation implies search capability",
+        mode="default",
+        category="operation",
+        when=[Condition(predicate="has_operation", vars=["E", "list"])],
+        then=[Conclusion(predicate="has_operation", vars=["E", "search"])],
+    ),
+
+    # -- Relation inference --
+    Rule(
+        id="many-to-one-inverse",
+        description="many-to-one implies inverse one-to-many",
+        mode="certain",
+        category="relation",
+        when=[Condition(predicate="many_to_one", vars=["Source", "Target"])],
+        then=[Conclusion(predicate="one_to_many", vars=["Target", "Source"])],
+    ),
+    Rule(
+        id="relation-transitive",
+        description="Relations can be transitive through depends_on",
+        mode="hypothesis",
+        category="relation",
+        when=[
+            Condition(predicate="depends_on", vars=["A", "B"]),
+            Condition(predicate="depends_on", vars=["B", "C"]),
+        ],
+        then=[Conclusion(predicate="depends_on", vars=["A", "C"])],
+    ),
+
+    # -- Projection inference --
+    Rule(
+        id="entity-requires-model",
+        description="Every entity needs a SQLAlchemy model",
+        mode="certain",
+        category="projection",
+        when=[Condition(predicate="entity", vars=["E"])],
+        then=[Conclusion(predicate="requires_projection", vars=["E", "sqlalchemy_model"])],
+    ),
+    Rule(
+        id="entity-requires-schemas",
+        description="Every entity needs Pydantic schemas",
+        mode="certain",
+        category="projection",
+        when=[Condition(predicate="entity", vars=["E"])],
+        then=[Conclusion(predicate="requires_projection", vars=["E", "pydantic_schemas"])],
+    ),
+    Rule(
+        id="operation-requires-router",
+        description="An entity with operations needs a FastAPI router",
+        mode="certain",
+        category="projection",
+        when=[Condition(predicate="has_operation", vars=["E", "_"])],
+        then=[Conclusion(predicate="requires_projection", vars=["E", "fastapi_router"])],
+    ),
+    Rule(
+        id="list-requires-list-page",
+        description="Having list implies a React list page",
+        mode="certain",
+        category="projection",
+        when=[Condition(predicate="has_operation", vars=["E", "list"])],
+        then=[Conclusion(predicate="requires_projection", vars=["E", "react_list_page"])],
+    ),
+    Rule(
+        id="create-requires-form",
+        description="Having create implies a React form",
+        mode="certain",
+        category="projection",
+        when=[Condition(predicate="has_operation", vars=["E", "create"])],
+        then=[Conclusion(predicate="requires_projection", vars=["E", "react_form"])],
+    ),
+    Rule(
+        id="read-requires-detail-page",
+        description="Having read implies a React detail page",
+        mode="certain",
+        category="projection",
+        when=[Condition(predicate="has_operation", vars=["E", "read"])],
+        then=[Conclusion(predicate="requires_projection", vars=["E", "react_detail_page"])],
+    ),
+    Rule(
+        id="entity-requires-typescript-types",
+        description="Every entity needs TypeScript types",
+        mode="certain",
+        category="projection",
+        when=[Condition(predicate="entity", vars=["E"])],
+        then=[Conclusion(predicate="requires_projection", vars=["E", "typescript_types"])],
+    ),
+
+    # -- UI widget inference --
+    Rule(
+        id="enum-uses-select",
+        description="Enum fields use a select widget",
+        mode="certain",
+        category="ui",
+        when=[Condition(predicate="field_type", vars=["F", "enum"])],
+        then=[Conclusion(predicate="form_widget", vars=["F", "select"])],
+    ),
+    Rule(
+        id="boolean-uses-checkbox",
+        description="Boolean fields use a checkbox",
+        mode="certain",
+        category="ui",
+        when=[Condition(predicate="field_type", vars=["F", "boolean"])],
+        then=[Conclusion(predicate="form_widget", vars=["F", "checkbox"])],
+    ),
+    Rule(
+        id="text-uses-textarea",
+        description="Text fields use a textarea",
+        mode="certain",
+        category="ui",
+        when=[Condition(predicate="field_type", vars=["F", "text"])],
+        then=[Conclusion(predicate="form_widget", vars=["F", "textarea"])],
+    ),
+    Rule(
+        id="date-uses-date-picker",
+        description="Date fields use a date picker",
+        mode="certain",
+        category="ui",
+        when=[Condition(predicate="field_type", vars=["F", "datetime"])],
+        then=[Conclusion(predicate="form_widget", vars=["F", "datepicker"])],
+    ),
+    Rule(
+        id="email-uses-email-input",
+        description="Email fields use an email input",
+        mode="certain",
+        category="ui",
+        when=[Condition(predicate="field_type", vars=["F", "email"])],
+        then=[Conclusion(predicate="form_widget", vars=["F", "email_input"])],
+    ),
+
+    # -- Technical inference --
+    Rule(
+        id="relation-requires-foreign-key",
+        description="A many-to-one relation implies a foreign key",
+        mode="certain",
+        category="technical",
+        when=[Condition(predicate="many_to_one", vars=["Source", "Target"])],
+        then=[Conclusion(predicate="requires_foreign_key", vars=["Source", "Target"])],
+    ),
+    Rule(
+        id="depends_on-instance",
+        description="depends_on between entities implies relation",
+        mode="hypothesis",
+        category="relation",
+        when=[Condition(predicate="depends_on", vars=["A", "B"])],
+        then=[Conclusion(predicate="many_to_one", vars=["A", "B"])],
+    ),
+]

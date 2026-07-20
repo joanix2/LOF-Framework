@@ -17,7 +17,6 @@ from lof.graph.instance_graph import InstanceGraph
 from lof.graph.validator import GraphValidator
 from lof.loading.loader import Loader
 from lof.silver.extractor import SpacyExtractor
-from lof.silver.gold_builder import GoldCandidateBuilder
 from lof.silver.graph import SilverGraph
 from lof.validation.smt.validation_engine import SemanticValidationEngine
 
@@ -435,16 +434,19 @@ def gold_build(
 ) -> None:
     root = Path.cwd()
     silver = SilverGraph.load(root)
-    builder = GoldCandidateBuilder(silver)
-    paths = builder.write_gold_candidate(root)
-    console.print(f"[green]Gold candidates generated:[/green] {len(paths)} files")
+    from lof.reasoning.integration import silver_to_gold_via_reasoning
+    paths = silver_to_gold_via_reasoning(silver, root, "fastapi-react")
+    console.print(f"[green]Gold candidates (via reasoning):[/green] {len(paths)} files")
     for p in paths:
         console.print(f"  - {p.relative_to(root)}")
-
-    if silver.contradictions:
-        unresolved = [c for c in silver.contradictions.values() if not c.resolved]
-        if unresolved:
-            console.print(f"[yellow]{len(unresolved)} unresolved contradiction(s).[/yellow]")
+    from lof.reasoning import DatalogEngine, FactEncoder, get_profile
+    encoder = FactEncoder()
+    facts = encoder.encode(silver)
+    engine = DatalogEngine(get_profile("fastapi-react"))
+    result = engine.evaluate(facts)
+    console.print(f"  Inferred: {len(result.inferred)} facts in {result.iteration_count} iterations")  # noqa: E501  # noqa: E501
+    if result.contradictions:
+        console.print(f"  [red]Contradictions: {len(result.contradictions)}[/red]")
 
 
 @gold_app.command("provenance")
@@ -478,6 +480,96 @@ def gold_provenance(
         console.print(f"  Extraction spans: {len(spans)}")
         for s in spans[:5]:
             console.print(f"    - \"{s}\"")
+
+
+reason_app = typer.Typer(help="Reasoning layer: Datalog inference engine")
+app.add_typer(reason_app, name="reason")
+
+
+@reason_app.command("status")
+def reason_status() -> None:
+    from lof.reasoning import DatalogEngine, FactEncoder, get_profile
+    from lof.silver.graph import SilverGraph
+    silver = SilverGraph.load(Path.cwd())
+    encoder = FactEncoder()
+    facts = encoder.encode(silver)
+    profile = get_profile("fastapi-react")
+    engine = DatalogEngine(profile)
+    result = engine.evaluate(facts)
+
+    console.print("[bold]Reasoning Engine Status[/bold]")
+    console.print(f"  Facts (asserted): {sum(1 for f in result.facts if f.status in ('asserted', 'inferred'))}")  # noqa: E501  # noqa: E501
+    console.print(f"  Facts (inferred): {len(result.inferred)}")
+    console.print(f"  Hypotheses: {len(result.hypotheses)}")
+    console.print(f"  Iterations: {result.iteration_count}")
+    console.print(f"  Converged: {result.converged}")
+    console.print(f"  Duration: {result.duration_ms:.1f}ms")
+    if result.contradictions:
+        console.print(f"  [red]Contradictions: {len(result.contradictions)}[/red]")
+        for c in result.contradictions:
+            console.print(f"    {c}")
+    for inf in result.inferred[:10]:
+        console.print(f"  [green]inferred:[/green] {inf.key} (via {inf.rule_id})")
+
+
+@reason_app.command("facts")
+def reason_facts(
+    predicate: str | None = typer.Option(None, "--predicate", "-p"),
+) -> None:
+    from lof.reasoning import DatalogEngine, FactEncoder, get_profile
+    from lof.silver.graph import SilverGraph
+    silver = SilverGraph.load(Path.cwd())
+    encoder = FactEncoder()
+    facts = encoder.encode(silver)
+    profile = get_profile("fastapi-react")
+    engine = DatalogEngine(profile)
+    result = engine.evaluate(facts)
+
+    filtered = result.facts
+    if predicate:
+        filtered = [f for f in filtered if f.predicate == predicate]
+
+    from rich.table import Table
+    table = Table(title=f"Reasoning Facts{' (' + predicate + ')' if predicate else ''}")
+    table.add_column("Fact", style="cyan")
+    table.add_column("Status", style="yellow")
+    table.add_column("Confidence")
+    table.add_column("Rule")
+    for f in filtered:
+        table.add_row(f.key, f.status, f"{f.confidence:.2f}", f.rule_id or "")
+    console.print(table)
+
+
+@reason_app.command("explain")
+def reason_explain(
+    fact_key: str = typer.Argument(..., help="Fact key like 'permission(worker,read,mission)'"),
+) -> None:
+    from lof.reasoning import DatalogEngine, ExplanationGenerator, FactEncoder, get_profile
+    from lof.silver.graph import SilverGraph
+    silver = SilverGraph.load(Path.cwd())
+    encoder = FactEncoder()
+    facts = encoder.encode(silver)
+    profile = get_profile("fastapi-react")
+    engine = DatalogEngine(profile)
+    result = engine.evaluate(facts)
+    gen = ExplanationGenerator(engine, profile)
+    console.print(gen.explain(fact_key, result))
+
+
+@reason_app.command("trace")
+def reason_trace(
+    fact_key: str = typer.Argument(..., help="Fact key to trace recursively"),
+) -> None:
+    from lof.reasoning import DatalogEngine, ExplanationGenerator, FactEncoder, get_profile
+    from lof.silver.graph import SilverGraph
+    silver = SilverGraph.load(Path.cwd())
+    encoder = FactEncoder()
+    facts = encoder.encode(silver)
+    profile = get_profile("fastapi-react")
+    engine = DatalogEngine(profile)
+    result = engine.evaluate(facts)
+    gen = ExplanationGenerator(engine, profile)
+    console.print(gen.trace_path(fact_key, result))
 
 
 bench_app = typer.Typer(help="LOP-Bench benchmark framework")
