@@ -1,7 +1,10 @@
 """Characterization tests for centralized settings."""
 
 from lof.domain.settings import (
-    BronzeSettings, CompilationSettings, LofSettings, SolverSettings,
+    BronzeSettings,
+    CompilationSettings,
+    LofSettings,
+    SolverSettings,
 )
 
 

@@ -1,66 +1,59 @@
+"""Tests for context resolution (parameter inheritance + graph context)."""
+
+from lof.compilation.pipeline import Pipeline
 from lof.loading.registry import Registry
 from lof.models.instance_definition import InstanceDefinition
 from lof.models.type_definition import ParameterDefinition, TypeDefinition
-from lof.rendering.context_resolver import ContextResolver
 
 
-def test_context_resolution():
-    registry = Registry()
-    registry.register_type(
-        TypeDefinition(
-            id="entity",
-            parameters={
-                "name": ParameterDefinition(type="string", required=True),
-                "count": ParameterDefinition(type="integer", default=1),
-            },
-        )
-    )
-    inst = InstanceDefinition(id="test", type="entity", values={"name": "TestEntity"})
-    resolver = ContextResolver(registry)
-    context, diag = resolver.resolve(inst)
-    assert context["name"] == "TestEntity"
-    assert context["count"] == 1
-    assert not diag.has_errors
+def _make_registry() -> Registry:
+    r = Registry()
+    r.register_type(TypeDefinition(
+        id="entity",
+        parameters={
+            "name": ParameterDefinition(type="string", required=True),
+            "count": ParameterDefinition(type="integer", default=1),
+        },
+    ))
+    return r
 
 
-def test_context_missing_required():
-    registry = Registry()
-    registry.register_type(
-        TypeDefinition(
-            id="entity",
-            parameters={
-                "name": ParameterDefinition(type="string", required=True),
-            },
-        )
-    )
-    inst = InstanceDefinition(id="test", type="entity", values={})
-    resolver = ContextResolver(registry)
-    context, diag = resolver.resolve(inst)
-    assert diag.has_errors
+def test_context_includes_instance_values():
+    reg = _make_registry()
+    reg.register_instance(InstanceDefinition(id="test", type="entity", values={"name": "Test"}))
+    pipeline = Pipeline(reg)
+    ctx = pipeline._build_context(reg.get_instance("test"))
+    assert ctx["name"] == "Test"
+    assert ctx["instance_id"] == "test"
 
 
-def test_context_inherited():
-    registry = Registry()
-    registry.register_type(
-        TypeDefinition(
-            id="base",
-            parameters={
-                "base_param": ParameterDefinition(type="string", default="base_val"),
-            },
-        )
-    )
-    registry.register_type(
-        TypeDefinition(
-            id="derived",
-            depends_on=["base"],
-            parameters={
-                "derived_param": ParameterDefinition(type="string", required=True),
-            },
-        )
-    )
-    inst = InstanceDefinition(id="test", type="derived", values={"derived_param": "derived_val"})
-    resolver = ContextResolver(registry)
-    context, diag = resolver.resolve(inst)
-    assert context["base_param"] == "base_val"
-    assert context["derived_param"] == "derived_val"
-    assert not diag.has_errors
+def test_context_includes_defaults():
+    reg = _make_registry()
+    reg.register_instance(InstanceDefinition(id="test", type="entity", values={"name": "X"}))
+    pipeline = Pipeline(reg)
+    ctx = pipeline._build_context(reg.get_instance("test"))
+    assert ctx["count"] == 1
+
+
+def test_context_instance_overrides_default():
+    reg = _make_registry()
+    reg.register_instance(InstanceDefinition(id="test", type="entity", values={"name": "X", "count": 5}))
+    pipeline = Pipeline(reg)
+    ctx = pipeline._build_context(reg.get_instance("test"))
+    assert ctx["count"] == 5
+
+
+def test_context_inherited_parameters():
+    reg = Registry()
+    reg.register_type(TypeDefinition(
+        id="base", parameters={"base_p": ParameterDefinition(type="string", default="base_val")},
+    ))
+    reg.register_type(TypeDefinition(
+        id="derived", depends_on=["base"],
+        parameters={"derived_p": ParameterDefinition(type="string", required=True)},
+    ))
+    reg.register_instance(InstanceDefinition(id="test", type="derived", values={"derived_p": "v"}))
+    pipeline = Pipeline(reg)
+    ctx = pipeline._build_context(reg.get_instance("test"))
+    assert ctx["base_p"] == "base_val"
+    assert ctx["derived_p"] == "v"

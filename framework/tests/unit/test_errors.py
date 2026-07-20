@@ -1,8 +1,12 @@
 """Characterization tests for error hierarchy."""
 
 from lof.domain.errors import (
-    BronzeError, CompilationError, ConfigError, LofError,
-    SMTError, TemplateError,
+    BronzeError,
+    CompilationError,
+    ConfigError,
+    LofError,
+    SMTError,
+    TemplateError,
 )
 
 
