@@ -50,6 +50,13 @@ jobs:
       - run: uv sync --frozen --all-extras
       - run: uv run python -m lof.cli compile
 
-  # security temporarily disabled — pip-audit on runner system packages
-  # produces false positives unrelated to project dependencies.
-  # Project dependencies are validated by uv sync resolution.
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "3.12" }
+      - run: uv sync --frozen --all-extras
+      - run: uv export --frozen --no-dev --no-hashes -o /tmp/requirements.txt
+      - run: pip install pip-audit
+      - run: pip-audit -r /tmp/requirements.txt
