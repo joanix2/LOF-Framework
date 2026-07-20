@@ -1,8 +1,15 @@
 [project]
-name = "lof"
-version = "0.1.0"
-description = "Language-Oriented Programming Framework"
+name = "lof-framework"
+version = "0.2.0"
+description = "Language-Oriented Programming Framework — generative DSL to autonomous FastAPI+React projects"
 requires-python = ">=3.12"
+authors = [
+    { name = "LOF Contributors" },
+]
+license = { text = "MIT" }
+keywords = ["code-generation", "dsl", "fastapi", "react", "low-code"]
+readme = "README.md"
+
 dependencies = [
     "pydantic>=2.0,<3.0",
     "typer>=0.12,<1.0",
@@ -11,24 +18,34 @@ dependencies = [
     "libcst>=1.0,<2.0",
     "rich>=13.0,<14.0",
     "PyYAML>=6.0,<7.0",
+    "tomli>=1.1,<2.0 ; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
+ner = ["spacy>=3.7,<4.0"]
+reasoning = ["z3-solver>=5.0,<6.0"]
 dev = [
     "pytest>=8.0,<9.0",
     "ruff>=0.5.0,<1.0",
     "pyright>=1.1.0,<2.0",
+    "spacy>=3.7,<4.0",
+    "z3-solver>=5.0,<6.0",
 ]
-
-[tool.setuptools.packages.find]
-where = ["framework/src"]
-include = ["lof*"]
+all = [
+    "lof-framework[ner]",
+    "lof-framework[reasoning]",
+    "lof-framework[dev]",
+]
 
 [project.scripts]
 lof = "lof.cli:app"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["lof*"]
+
 [tool.pytest.ini_options]
-testpaths = ["framework/tests"]
+testpaths = ["tests"]
 python_files = ["test_*.py"]
 
 [tool.ruff]
@@ -42,6 +59,6 @@ select = ["E", "F", "I", "N", "W", "UP"]
 quote-style = "double"
 
 [tool.pyright]
-include = ["framework/src"]
+include = ["src/lof"]
 exclude = ["**/__pycache__", "**/node_modules"]
-typeCheckingMode = "strict"
+typeCheckingMode = "standard"

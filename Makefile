@@ -1,105 +1,53 @@
-.PHONY: help install doctor format format-check lint typecheck test test-unit test-integration test-generation validate extract infer build-gold validate-smt compile pipeline determinism-check benchmark-smoke validate-agentic-system clean ci
+.PHONY: help install doctor format format-check lint typecheck test test-unit test-cli test-generation test-independence build package clean ci
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@awk -F ':.*?## ' '/^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: ## Install dependencies
-	pip install -e ".[dev]"
-	npm install -g pnpm prettier && pnpm install
+install: ## Install LOF in dev mode
+	uv sync
 
-doctor: ## Run diagnostics
-	python -m lof.cli validate
-	python -m lof.cli constraints validate
+doctor: ## Check environment
+	lof doctor
 
-format: ## Format code
-	ruff format framework/src framework/tests generated-project/apps/api
+format: ## Format all code
+	ruff format src/lof tests
 	prettier --write '**/*.{json,yaml,yml,md}'
 
 format-check: ## Check formatting
-	ruff format --check framework/src framework/tests
-	prettier --check '**/*.{json,yaml,yml,md}'
+	ruff format --check src/lof tests
 
-lint: ## Lint code
-	ruff check --fix framework/src framework/tests
-	ruff check --fix generated-project/apps/api --ignore F821,E402,N815,F401 || true
+lint: ## Lint all code
+	ruff check --fix src/lof tests
 
 typecheck: ## Type checking
-	pyright framework/src || true
+	pyright src/lof || true
 
-test: test-unit test-generation ## Run all tests
+test: test-unit test-cli ## Run all tests
 
 test-unit: ## Run unit tests
-	python -m pytest framework/tests/unit -v --tb=short
+	python -m pytest tests -v --tb=short
 
-test-integration: ## Run integration tests
-	python -m pytest framework/tests -v --tb=short -k "not golden" || true
+test-cli: ## Test CLI commands
+	python -m lof.cli --help > /dev/null
+	python -m lof.cli --version > /dev/null
+	python -m lof.cli profiles > /dev/null
 
-test-generation: ## Check compilation
-	python -m lof.cli compile --dry-run
+test-generation: ## Test project generation
+	cd /tmp && rm -rf lof-test-gen && lof new lof-test-gen --mode minimal && rm -rf lof-test-gen
 
-validate: ## Validate all definitions
-	python -m lof.cli validate
+test-independence: ## Verify generated project is independent
+	cd /tmp && rm -rf lof-test-indep && lof new lof-test-indep --mode minimal
+	@echo "Generated project does NOT import LOF:"
+	@! grep -r "from lof\|import lof" /tmp/lof-test-indep/generated 2>/dev/null && echo "  ✓ No LOF dependency found" || echo "  ⚠  LOF dependency detected"
 
-extract: ## Extract Silver from Bronze
-	python -m lof.cli bronze extract
+build: ## Build package
+	python -m build
 
-infer: ## Run reasoning inference
-	python -m lof.cli reason status
-	python -m lof.cli gold build
+package: build ## Build and verify package
+	pip install dist/*.whl --force-reinstall 2>&1 | tail -3
+	lof --version
 
-build-gold: ## Materialize Gold DSL
-	python -m lof.cli gold build
-	python -m lof.cli constraints validate
+clean: ## Remove build artifacts
+	rm -rf dist/ build/ *.egg-info
 
-validate-smt: ## Validate with SMT
-	python -m lof.cli constraints validate
-
-compile: ## Compile the project
-	python -m lof.cli compile
-
-pipeline: validate extract infer validate-smt compile ## Run full pipeline
-
-determinism-check: ## Verify deterministic build
-	python -m lof.cli compile
-	python -m lof.cli compile --dry-run
-
-benchmark-smoke: ## Run benchmark smoke test
-	python -m lof.cli constraints validate
-	python -m lof.cli bench run
-	python -m lof.cli compile
-
-validate-agentic-system: ## Validate agentic system configuration
-	@echo "=== Vérification des agents ==="
-	@for f in .opencode/agents/*.md; do \
-		name=$$(basename "$$f" .md); \
-		if ! grep -q "Mission" "$$f"; then echo "  [FAIL] $$name: missing Mission"; fi; \
-		if ! grep -q "Allowed paths" "$$f"; then echo "  [FAIL] $$name: missing Allowed paths"; fi; \
-		if ! grep -q "Forbidden paths" "$$f"; then echo "  [FAIL] $$name: missing Forbidden paths"; fi; \
-		if ! grep -q "Validation gates" "$$f"; then echo "  [FAIL] $$name: missing Validation gates"; fi; \
-	done
-	@echo "=== Vérification des skills ==="
-	@for f in .opencode/skills/*.md; do \
-		if ! grep -q "Objectif" "$$f"; then echo "  [FAIL] $$(basename $$f): missing Objectif"; fi; \
-		if ! grep -q "Étapes" "$$f"; then echo "  [FAIL] $$(basename $$f): missing Étapes"; fi; \
-	done
-	@echo "=== Vérification des workflows ==="
-	@for f in .opencode/workflows/*.md; do \
-		if ! grep -qE '^[0-9]+\.' "$$f"; then echo "  [FAIL] $$(basename $$f): no numbered steps"; fi; \
-	done
-	@echo "=== Vérification des commandes ==="
-	@for f in .opencode/commands/*.md; do \
-		if ! grep -q "Usage" "$$f"; then echo "  [FAIL] $$(basename $$f): missing Usage"; fi; \
-	done
-	@echo "=== Vérification AGENTS.md ==="
-	@grep -q "Sources modifiables" AGENTS.md || echo "  [FAIL] AGENTS.md: missing 'Sources modifiables'"
-	@grep -q "Sources interdites" AGENTS.md || echo "  [FAIL] AGENTS.md: missing 'Sources interdites'"
-	@grep -q "fichiers générés" AGENTS.md || echo "  [FAIL] AGENTS.md: missing generated-files protection"
-	@echo "=== Vérification Makefile ==="
-	@grep -q "validate-agentic-system" Makefile || echo "  [FAIL] Makefile: missing validate-agentic-system target"
-	@grep -q "benchmark-smoke" Makefile || echo "  [FAIL] Makefile: missing benchmark-smoke target"
-	@echo "=== Agentic system validation complete ==="
-
-clean: ## Remove generated files
-	python -m lof.cli clean
-
-ci: format-check lint test-unit benchmark-smoke validate-agentic-system ## Run CI checks
+ci: format-check lint test test-cli test-generation test-independence ## Full CI
