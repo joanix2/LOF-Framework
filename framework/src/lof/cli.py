@@ -1,17 +1,24 @@
 import json
+from datetime import datetime
 from pathlib import Path
+from uuid import uuid4
 
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.tree import Tree
 
+from lof.bronze.models import BronzeEntry
+from lof.bronze.store import BronzeStore
 from lof.compilation.compiler import Compiler
 from lof.compilation.manifest import ManifestManager
 from lof.graph.builder import GraphBuilder
 from lof.graph.instance_graph import InstanceGraph
 from lof.graph.validator import GraphValidator
 from lof.loading.loader import Loader
+from lof.silver.extractor import IntentExtractor
+from lof.silver.gold_builder import GoldCandidateBuilder
+from lof.silver.graph import SilverGraph
 from lof.validation.smt.validation_engine import SemanticValidationEngine
 
 app = typer.Typer(
@@ -321,6 +328,156 @@ def _engine() -> SemanticValidationEngine:
     instance_graph = InstanceGraph()
     instance_graph.build(compiler.registry.instances)
     return SemanticValidationEngine(compiler.registry, instance_graph)
+
+
+bronze_app = typer.Typer(help="Bronze layer: raw expression storage (append-only)")
+app.add_typer(bronze_app, name="bronze")
+
+
+@bronze_app.command("add")
+def bronze_add(
+    content: str = typer.Argument(..., help="Raw expression content"),
+    source: str = typer.Option("user", "--source", "-s"),
+    entry_type: str = typer.Option("message", "--type", "-t"),
+) -> None:
+    root = Path.cwd()
+    store = BronzeStore(root)
+    entry = BronzeEntry(
+        id=f"bronze-{uuid4().hex[:12]}",
+        created_at=datetime.now(),
+        source=source,
+        content=content,
+        entry_type=entry_type,
+    )
+    path = store.append_entry(entry)
+    console.print(f"[green]Bronze entry saved:[/green] {path.name}")
+
+    silver = SilverGraph()
+    extractor = IntentExtractor(silver)
+    claims = extractor.extract_from_entry(entry)
+    for c in claims:
+        silver.add_claim(c)
+        console.print(f"  [cyan]Claim:[/cyan] {c.subject} {c.predicate} {c.object} ({c.status})")
+    silver.save(root)
+
+    if silver.contradictions:
+        console.print(f"[yellow]Contradictions detected: {len(silver.contradictions)}[/yellow]")
+        for c in silver.contradictions.values():
+            console.print(f"  {c.description}")
+
+
+@bronze_app.command("list")
+def bronze_list() -> None:
+    store = BronzeStore(Path.cwd())
+    entries = store.list_entries()
+    if not entries:
+        console.print("[yellow]No bronze entries.[/yellow]")
+        return
+    table = Table(title="Bronze Entries")
+    table.add_column("ID", style="cyan")
+    table.add_column("Source", style="green")
+    table.add_column("Content")
+    table.add_column("Created")
+    for e in entries:
+        table.add_row(e.id, e.source, e.content[:60], e.created_at.isoformat()[:10])
+    console.print(table)
+
+
+silver_app = typer.Typer(help="Silver layer: semantic graph (open world)")
+app.add_typer(silver_app, name="silver")
+
+
+@silver_app.command("status")
+def silver_status() -> None:
+    silver = SilverGraph.load(Path.cwd())
+    console.print("[bold]Silver Graph:[/bold]")
+    console.print(f"  Entities: {len(silver.entities)}")
+    console.print(f"  Claims: {len(silver.claims)}")
+    console.print(f"  Relations: {len(silver.relations)}")
+    console.print(f"  Contradictions: {len(silver.contradictions)}")
+    resolved = sum(1 for c in silver.contradictions.values() if c.resolved)
+    if silver.contradictions:
+        console.print(f"  Resolved: {resolved}/{len(silver.contradictions)}")
+        for c in silver.contradictions.values():
+            status = "[green]resolved[/green]" if c.resolved else "[red]unresolved[/red]"
+            console.print(f"    [{status}] {c.description}")
+
+
+@silver_app.command("claims")
+def silver_claims(
+    subject: str | None = typer.Option(None, "--subject", "-s"),
+) -> None:
+    silver = SilverGraph.load(Path.cwd())
+    claims = silver.get_claims_for_subject(subject) if subject else list(silver.claims.values())
+    if not claims:
+        console.print("[yellow]No claims.[/yellow]")
+        return
+    table = Table(title=f"Silver Claims{' for ' + subject if subject else ''}")
+    table.add_column("ID", style="cyan")
+    table.add_column("Subject", style="blue")
+    table.add_column("Predicate", style="green")
+    table.add_column("Object", style="yellow")
+    table.add_column("Status")
+    table.add_column("Confidence")
+    for c in claims:
+        sobj = str(c.object)[:28]
+        table.add_row(c.id, c.subject, c.predicate, sobj, c.status, f"{c.confidence:.2f}")
+    console.print(table)
+
+
+gold_app = typer.Typer(help="Gold layer: canonical DSL generation")
+app.add_typer(gold_app, name="gold")
+
+
+@gold_app.command("build")
+def gold_build(
+    output: str = typer.Option("instances", "--output", "-o", help="Output subdir"),
+) -> None:
+    root = Path.cwd()
+    silver = SilverGraph.load(root)
+    builder = GoldCandidateBuilder(silver)
+    paths = builder.write_gold_candidate(root)
+    console.print(f"[green]Gold candidates generated:[/green] {len(paths)} files")
+    for p in paths:
+        console.print(f"  - {p.relative_to(root)}")
+
+    if silver.contradictions:
+        unresolved = [c for c in silver.contradictions.values() if not c.resolved]
+        if unresolved:
+            console.print(f"[yellow]{len(unresolved)} unresolved contradiction(s).[/yellow]")
+
+
+@gold_app.command("provenance")
+def gold_provenance(
+    instance_id: str = typer.Argument(..., help="Instance ID to trace"),
+) -> None:
+    root = Path.cwd()
+    silver = SilverGraph.load(root)
+
+    spans: list[str] = []
+    bronze_ids: set[str] = set()
+    for claim in silver.claims.values():
+        for ref in claim.provenance:
+            if ref.bronze_id:
+                bronze_ids.add(ref.bronze_id)
+            if ref.span:
+                spans.append(ref.span)
+
+    store = BronzeStore(root)
+    console.print(f"[bold]Provenance for '{instance_id}':[/bold]")
+    subject_prefix = instance_id.split("-")[0].capitalize()
+    ref_count = sum(1 for c in silver.claims.values() if c.subject == subject_prefix)
+    console.print(f"  Silver claims referencing '{subject_prefix}': {ref_count}")
+    if bronze_ids:
+        console.print(f"  Bronze sources: {len(bronze_ids)}")
+        for bid in sorted(bronze_ids):
+            entry = store.get_entry(bid)
+            if entry:
+                console.print(f"    - {bid}: {entry.content[:80]}")
+    if spans:
+        console.print(f"  Extraction spans: {len(spans)}")
+        for s in spans[:5]:
+            console.print(f"    - \"{s}\"")
 
 
 def main() -> None:
