@@ -1,14 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "lof-framework"
 version = "0.2.0"
 description = "Language-Oriented Programming Framework — generative DSL to autonomous FastAPI+React projects"
 requires-python = ">=3.12"
-authors = [
-    { name = "LOF Contributors" },
-]
+authors = [{ name = "LOF Contributors" }]
 license = { text = "MIT" }
 keywords = ["code-generation", "dsl", "fastapi", "react", "low-code"]
 readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+]
 
 dependencies = [
     "pydantic>=2.0,<3.0",
@@ -19,6 +28,7 @@ dependencies = [
     "rich>=13.0,<14.0",
     "PyYAML>=6.0,<7.0",
     "tomli>=1.1,<2.0 ; python_version < '3.11'",
+    "tomli-w>=1.2,<2.0",
 ]
 
 [project.optional-dependencies]
@@ -31,18 +41,17 @@ dev = [
     "spacy>=3.7,<4.0",
     "z3-solver>=5.0,<6.0",
 ]
-all = [
-    "lof-framework[ner]",
-    "lof-framework[reasoning]",
-    "lof-framework[dev]",
-]
+all = ["lof-framework[ner]", "lof-framework[reasoning]", "lof-framework[dev]"]
+
+[project.urls]
+Homepage = "https://github.com/graphify-labs/lof"
+Repository = "https://github.com/graphify-labs/lof"
 
 [project.scripts]
 lof = "lof.cli:app"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["lof*"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/lof"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

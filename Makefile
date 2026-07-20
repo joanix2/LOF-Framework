@@ -40,12 +40,21 @@ test-independence: ## Verify generated project is independent
 	@echo "Generated project does NOT import LOF:"
 	@! grep -r "from lof\|import lof" /tmp/lof-test-indep/generated 2>/dev/null && echo "  ✓ No LOF dependency found" || echo "  ⚠  LOF dependency detected"
 
-build: ## Build package
-	python -m build
+build: ## Build package (wheel + sdist)
+	uv build
 
 package: build ## Build and verify package
-	pip install dist/*.whl --force-reinstall 2>&1 | tail -3
+	uv tool install dist/*.whl --force-reinstall 2>&1 | tail -3
 	lof --version
+
+publish-test: ## Publish to TestPyPI
+	uv publish --publish-url https://test.pypi.org/legacy/
+
+publish: ## Publish to PyPI (manual, prefer CI release workflow)
+	uv publish
+
+distclean: clean ## Remove everything except source
+	rm -rf .venv/ uv.lock
 
 clean: ## Remove build artifacts
 	rm -rf dist/ build/ *.egg-info
