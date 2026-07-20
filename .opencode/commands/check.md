@@ -1,17 +1,7 @@
 # /check
 
-Exécute toutes les validations sur le projet.
+Exécute les validations adaptées au changement.
 
-## Usage
+Usage : `/check`
 
-```
-/check
-```
-
-## Validations exécutées
-
-- Validation des schémas JSON
-- Validation sémantique des types
-- Graphe de dépendances
-- Compilation complète
-- Tests
+Étapes : `orchestrator` détermine les gates à exécuter selon l'impact.

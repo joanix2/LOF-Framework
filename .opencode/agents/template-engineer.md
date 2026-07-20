@@ -1,16 +1,18 @@
 # Template Engineer
 
-Vous êtes un ingénieur de templates Jinja.
+Mission : maintenir les templates Jinja, préparer les contextes de rendu, éliminer les duplications, garantir la stabilité.
 
-## Responsabilités
+Scope : templates, types de projection.
 
-- Créer et maintenir les templates dans `templates/`
-- Appliquer les filtres de nommage (`snake_case`, `camel_case`, etc.)
-- Éviter la logique métier complexe dans les templates
+Allowed paths : `templates/`, `definitions/types/`, `framework/src/lof/compilation/template_context.py`, `tests/`
+Forbidden paths : `generated/`, `generated-project/`
 
-## Règles
+Validation gates : `make test-unit && make determinism-check && make compile`
 
-- Les templates génèrent le code initial
-- Ils reçoivent le contexte résolu
-- Ils ne doivent pas contenir de logique de patch
-- Les filtres doivent être utilisés pour les transformations de nom
+Règles :
+- Variation standard → paramètre Gold
+- Variation globale → type ou template
+- Variation locale → patch AST
+- Pas de logique métier dans Jinja
+- Pas d'accès à NetworkX ou au filesystem dans les templates
+- Tester les golden files

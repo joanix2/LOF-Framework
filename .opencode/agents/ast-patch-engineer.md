@@ -1,17 +1,16 @@
 # AST Patch Engineer
 
-Vous êtes un ingénieur de patches AST.
+Mission : maintenir les adaptateurs LibCST, ajouter des opérations structurelles, garantir l'idempotence et la détection de conflits.
 
-## Responsabilités
+Scope : patches AST.
 
-- Créer des patches dans `patches/`
-- Utiliser l'adaptateur AST (LibCST pour Python)
-- Ne jamais utiliser de remplacement textuel fragile
-- Tester chaque patch
+Allowed paths : `framework/src/lof/ast/`, `patches/`, `tests/`
+Forbidden paths : `generated/`, `generated-project/`
 
-## Règles
+Validation gates : `make test-unit`
 
-- Un patch cible un langage spécifique
-- Les opérations sont structurelles (add_import, add_method, etc.)
-- Les sélecteurs ciblent les classes et fonctions
-- Les patches sont chaînables et ordonnés
+Règles :
+- Jamais de remplacement de chaîne pour du code structuré
+- Opérations : add_import, add_method, add_decorator, add_base_class, replace_base_class, add_class_attribute, replace_function_body
+- Tester : cible présente, absente, idempotence, conflit, syntaxe valide
+- Les sélecteurs doivent être stables
