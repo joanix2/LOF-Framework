@@ -1,9 +1,7 @@
 from uuid import UUID
-from typing import Any, Optional
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_session
 from app.modules.{{ name | snake_case }}.model import {{ name | pascal_case }}
 from app.modules.{{ name | snake_case }}.schemas import (
     {{ name | pascal_case }}Create,
@@ -25,7 +23,7 @@ class {{ name | pascal_case }}Repository:
         await self.session.refresh(entity)
         return entity
 
-    async def get(self, entity_id: UUID) -> Optional[{{ name | pascal_case }}]:
+    async def get(self, entity_id: str) -> {{ name | pascal_case }} | None:
         stmt = select({{ name | pascal_case }}).where({{ name | pascal_case }}.id == entity_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -34,7 +32,7 @@ class {{ name | pascal_case }}Repository:
         self,
         page: int = 1,
         page_size: int = 20,
-        sort_by: Optional[str] = None,
+        sort_by: str | None = None,
         sort_desc: bool = False,
     ) -> {{ name | pascal_case }}Page:
         stmt = select({{ name | pascal_case }})
@@ -62,7 +60,7 @@ class {{ name | pascal_case }}Repository:
             total_pages=max(1, -(-total // page_size)),
         )
 
-    async def update(self, entity_id: UUID, data: {{ name | pascal_case }}Update) -> Optional[{{ name | pascal_case }}]:
+    async def update(self, entity_id: str, data: {{ name | pascal_case }}Update) -> {{ name | pascal_case }} | None:
         entity = await self.get(entity_id)
         if entity is None:
             return None
@@ -73,7 +71,7 @@ class {{ name | pascal_case }}Repository:
         await self.session.refresh(entity)
         return entity
 
-    async def delete(self, entity_id: UUID) -> bool:
+    async def delete(self, entity_id: str) -> bool:
         entity = await self.get(entity_id)
         if entity is None:
             return False

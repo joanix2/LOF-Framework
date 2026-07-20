@@ -1,8 +1,14 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base
+{% for module in modules %}
+from app.modules.{{ module | snake_case }}.router import router as {{ module | snake_case }}_router
+{% endfor %}
+{% for module in modules %}
+{% endfor %}
 
 
 @asynccontextmanager
@@ -33,6 +39,5 @@ async def health():
 
 
 {% for module in modules %}
-from app.modules.{{ module | snake_case }}.router import router as {{ module | snake_case }}_router
 app.include_router({{ module | snake_case }}_router, prefix="{{ apiPrefix }}")
 {% endfor %}

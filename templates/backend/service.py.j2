@@ -1,5 +1,4 @@
 from uuid import UUID
-from typing import Optional
 
 from app.modules.{{ name | snake_case }}.repository import {{ name | pascal_case }}Repository
 from app.modules.{{ name | snake_case }}.schemas import (
@@ -21,7 +20,7 @@ class {{ name | pascal_case }}Service:
 {% endif %}
 
 {% if "read" in operations %}
-    async def get(self, entity_id: UUID) -> Optional[{{ name | pascal_case }}Read]:
+    async def get(self, entity_id: str) -> {{ name | pascal_case }}Read | None:
         entity = await self.repository.get(entity_id)
         if entity is None:
             return None
@@ -31,7 +30,7 @@ class {{ name | pascal_case }}Service:
 {% if "list" in operations %}
     async def list(
         self, page: int = 1, page_size: int = 20,
-        sort_by: Optional[str] = None, sort_desc: bool = False,
+        sort_by: str | None = None, sort_desc: bool = False,
     ) -> {{ name | pascal_case }}Page:
         return await self.repository.list(
             page=page, page_size=page_size,
@@ -40,7 +39,7 @@ class {{ name | pascal_case }}Service:
 {% endif %}
 
 {% if "update" in operations %}
-    async def update(self, entity_id: UUID, data: {{ name | pascal_case }}Update) -> Optional[{{ name | pascal_case }}Read]:
+    async def update(self, entity_id: str, data: {{ name | pascal_case }}Update) -> {{ name | pascal_case }}Read | None:
         entity = await self.repository.update(entity_id, data)
         if entity is None:
             return None
@@ -48,7 +47,7 @@ class {{ name | pascal_case }}Service:
 {% endif %}
 
 {% if "delete" in operations %}
-    async def delete(self, entity_id: UUID) -> bool:
+    async def delete(self, entity_id: str) -> bool:
         return await self.repository.delete(entity_id)
 {% endif %}
 
