@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "database-config-instance",
+  "type": "database-config",
+  "values": {
+    "databaseUrl": "sqlite+aiosqlite:///./app.db",
+    "echo": false
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "task-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "Task",
+    "route": "tasks",
+    "pluralName": "Tasks"
+  }
+}

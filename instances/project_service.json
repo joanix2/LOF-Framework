@@ -1,9 +1,16 @@
 {
   "$schema": "../schemas/instance.schema.json",
   "id": "project-service",
-  "type": "python-service",
+  "type": "entity-service",
   "values": {
     "name": "Project",
-    "entity_name": "Project"
+    "operations": [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "list",
+      "search"
+    ]
   }
 }

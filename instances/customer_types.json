@@ -1,0 +1,62 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "customer-types",
+  "type": "entity-types",
+  "values": {
+    "name": "Customer",
+    "fields": [
+      {
+        "name": "id",
+        "type": "uuid",
+        "primary": true,
+        "generated": true,
+        "visibleInForm": false,
+        "visibleInList": false
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "searchable": true,
+        "sortable": true,
+        "visibleInList": true,
+        "visibleInForm": true,
+        "nullable": false
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": true,
+        "unique": true,
+        "searchable": true,
+        "visibleInList": true,
+        "visibleInForm": true,
+        "nullable": false
+      },
+      {
+        "name": "active",
+        "type": "boolean",
+        "default": true,
+        "visibleInForm": true,
+        "visibleInList": true,
+        "nullable": false
+      },
+      {
+        "name": "createdAt",
+        "type": "datetime",
+        "generated": true,
+        "visibleInForm": false,
+        "visibleInList": true,
+        "nullable": false
+      },
+      {
+        "name": "updatedAt",
+        "type": "datetime",
+        "generated": true,
+        "visibleInForm": false,
+        "visibleInList": false,
+        "nullable": true
+      }
+    ]
+  }
+}

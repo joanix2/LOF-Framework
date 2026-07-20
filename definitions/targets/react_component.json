@@ -1,8 +1,8 @@
 {
   "$schema": "../../schemas/target.schema.json",
-  "id": "typescript-module",
+  "id": "react-component",
   "language": "typescript",
-  "extension": ".ts",
+  "extension": ".tsx",
   "formatter": null,
   "astAdapter": null
 }

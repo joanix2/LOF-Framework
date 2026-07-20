@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "entity-service",
+  "description": "Service for an entity",
+  "dependsOn": ["entity-repository", "entity-schemas"],
+  "parameters": {
+    "name": { "type": "string", "required": true },
+    "operations": { "type": "array", "default": ["create","read","update","delete","list","search"] }
+  },
+  "template": "templates/backend/service.py.j2",
+  "targetType": "python-module",
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/service.py"
+}

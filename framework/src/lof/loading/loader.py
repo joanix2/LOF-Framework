@@ -66,7 +66,7 @@ class Loader:
     ) -> list[TypeDefinition]:
         dir_path = Path(directory) if Path(directory).is_absolute() else self.root / directory
         types = []
-        for f in sorted(dir_path.glob("*.json")):
+        for f in sorted(dir_path.rglob("*.json")):
             types.append(self.load_type(f))
         return types
 
@@ -74,7 +74,7 @@ class Loader:
         self, directory: str | Path = "instances"
     ) -> list[InstanceDefinition]:
         dir_path = Path(directory) if Path(directory).is_absolute() else self.root / directory
-        return [self.load_instance(f) for f in sorted(dir_path.glob("*.json"))]
+        return [self.load_instance(f) for f in sorted(dir_path.rglob("*.json"))]
 
     def load_patches_from_dir(self, directory: str | Path = "patches") -> list[PatchDefinition]:
         dir_path = Path(directory) if Path(directory).is_absolute() else self.root / directory

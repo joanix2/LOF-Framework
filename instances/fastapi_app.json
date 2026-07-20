@@ -1,0 +1,16 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "fastapi-app-instance",
+  "type": "fastapi-app",
+  "values": {
+    "title": "FastAPI React Template",
+    "version": "0.1.0",
+    "apiPrefix": "/api/v1",
+    "modules": [
+      "customer",
+      "project",
+      "task"
+    ],
+    "databaseUrl": "sqlite+aiosqlite:///./app.db"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "entity-detail-page",
+  "description": "React detail page for an entity",
+  "dependsOn": ["entity-hooks", "entity-types"],
+  "parameters": {
+    "name": { "type": "string", "required": true },
+    "pluralName": { "type": "string", "required": true },
+    "route": { "type": "string", "required": true },
+    "fields": { "type": "array", "required": true }
+  },
+  "template": "templates/frontend/detail_page.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/pages/{{ name | pascal_case }}DetailPage.tsx"
+}

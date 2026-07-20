@@ -1,0 +1,74 @@
+from datetime import datetime
+from typing import Any, Optional
+from uuid import UUID
+from pydantic import BaseModel, EmailStr, Field
+
+
+class {{ name | pascal_case }}Base(BaseModel):
+{% for field in fields %}
+{% set f_name = field.get('name', '') %}
+{% set f_type = field.get('type', 'string') %}
+{% set f_required = field.get('required', False) %}
+{% if f_name not in ("id", "createdAt", "created_at", "updatedAt", "updated_at") %}
+{% set py_type = "UUID" if f_type == "uuid" else "EmailStr" if f_type == "email" else "str" if f_type in ("string", "text", "enum") else "int" if f_type in ("integer", "int") else "float" if f_type in ("float", "decimal") else "bool" if f_type in ("boolean", "bool") else "datetime" if f_type in ("datetime", "date") else "str" %}
+    {{ f_name }}: {% if not f_required %}Optional[{{ py_type }}] = None{% else %}{{ py_type }}{% endif %}
+
+{% endif %}
+{% endfor %}
+
+
+class {{ name | pascal_case }}Create({{ name | pascal_case }}Base):
+{% for field in fields %}
+{% set f_required = field.get('required', False) %}
+{% set f_generated = field.get('generated', False) %}
+{% set f_name = field.get('name', '') %}
+{% if f_name not in ("id", "createdAt", "created_at", "updatedAt", "updated_at") and f_required and not f_generated %}
+{% set f_type = field.get('type', 'string') %}
+{% set py_type = "UUID" if f_type == "uuid" else "EmailStr" if f_type == "email" else "str" if f_type in ("string", "text", "enum") else "int" if f_type in ("integer", "int") else "float" if f_type in ("float", "decimal") else "bool" if f_type in ("boolean", "bool") else "datetime" if f_type in ("datetime", "date") else "str" %}
+    {{ f_name }}: {{ py_type }}
+
+{% endif %}
+{% endfor %}
+
+
+class {{ name | pascal_case }}Read({{ name | pascal_case }}Base):
+    id: UUID
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
+
+
+class {{ name | pascal_case }}Update(BaseModel):
+{% for field in fields %}
+{% set f_name = field.get('name', '') %}
+{% if f_name not in ("id", "createdAt", "created_at", "updatedAt", "updated_at") %}
+{% set f_type = field.get('type', 'string') %}
+{% set py_type = "UUID" if f_type == "uuid" else "EmailStr" if f_type == "email" else "str" if f_type in ("string", "text", "enum") else "int" if f_type in ("integer", "int") else "float" if f_type in ("float", "decimal") else "bool" if f_type in ("boolean", "bool") else "datetime" if f_type in ("datetime", "date") else "str" %}
+    {{ f_name }}: Optional[{{ py_type }}] = None
+
+{% endif %}
+{% endfor %}
+
+
+class {{ name | pascal_case }}List(BaseModel):
+    id: UUID
+{% for field in fields %}
+{% set f_visible = field.get('visibleInList', True) %}
+{% if f_visible and field.get('name') != "id" %}
+{% set f_name = field.get('name') %}
+{% set f_type = field.get('type', 'string') %}
+{% set py_type = "UUID" if f_type == "uuid" else "EmailStr" if f_type == "email" else "str" if f_type in ("string", "text", "enum") else "int" if f_type in ("integer", "int") else "float" if f_type in ("float", "decimal") else "bool" if f_type in ("boolean", "bool") else "datetime" if f_type in ("datetime", "date") else "str" %}
+    {{ f_name }}: {{ py_type }}
+
+{% endif %}
+{% endfor %}
+    model_config = {"from_attributes": True}
+
+
+class {{ name | pascal_case }}Page(BaseModel):
+    items: list[{{ name | pascal_case }}List]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int

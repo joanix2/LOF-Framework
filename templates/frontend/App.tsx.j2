@@ -1,0 +1,75 @@
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+{% for module in modules %}
+import {{ module | pascal_case }}ListPage from './pages/{{ module | pascal_case }}ListPage';
+import {{ module | pascal_case }}DetailPage from './pages/{{ module | pascal_case }}DetailPage';
+import {{ module | pascal_case }}Form from './components/{{ module | pascal_case }}Form';
+import { useCreate{{ module | pascal_case }}, useUpdate{{ module | pascal_case }}, use{{ module | pascal_case }} } from './hooks/use{{ module | pascal_case }}';
+{% endfor %}
+
+{% for module in modules %}
+function {{ module | pascal_case }}CreateWrapper() {
+  const createMutation = useCreate{{ module | pascal_case }}();
+  return (
+    <{{ module | pascal_case }}Form
+      onSubmit={(data) => createMutation.mutate(data)}
+      isSubmitting={createMutation.isPending}
+    />
+  );
+}
+
+function {{ module | pascal_case }}EditWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const { data } = use{{ module | pascal_case }}(id || '');
+  const updateMutation = useUpdate{{ module | pascal_case }}();
+  if (!data) return <div>Loading...</div>;
+  return (
+    <{{ module | pascal_case }}Form
+      initialData={data}
+      onSubmit={(data) => updateMutation.mutate({ id: id!, data })}
+      isSubmitting={updateMutation.isPending}
+    />
+  );
+}
+{% endfor %}
+
+function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex space-x-4 py-3">
+            <Link to="/" className="font-bold text-lg mr-8">{{ title }}</Link>
+{% for module in modules %}
+            <Link to="/{{ module | snake_case }}" className="text-gray-600 hover:text-gray-900">{{ module | pascal_case | pluralize }}</Link>
+{% endfor %}
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-7xl mx-auto">{children}</main>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+{% for module in modules %}
+            <Route path="/{{ module | snake_case }}" element={<{{ module | pascal_case }}ListPage />} />
+            <Route path="/{{ module | snake_case }}/new" element={<{{ module | pascal_case }}CreateWrapper />} />
+            <Route path="/{{ module | snake_case }}/:id" element={<{{ module | pascal_case }}DetailPage />} />
+            <Route path="/{{ module | snake_case }}/:id/edit" element={<{{ module | pascal_case }}EditWrapper />} />
+{% endfor %}
+            <Route path="*" element={<Navigate to="/{{ modules[0] | snake_case }}" replace />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}

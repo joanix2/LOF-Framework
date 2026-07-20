@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "entity-form",
+  "description": "React form for an entity",
+  "dependsOn": ["entity-types"],
+  "parameters": {
+    "name": { "type": "string", "required": true },
+    "fields": { "type": "array", "required": true }
+  },
+  "template": "templates/frontend/form.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/components/{{ name | pascal_case }}Form.tsx"
+}

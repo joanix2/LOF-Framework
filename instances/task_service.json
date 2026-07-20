@@ -1,9 +1,9 @@
 {
   "$schema": "../schemas/instance.schema.json",
-  "id": "customer-service",
+  "id": "task-service",
   "type": "entity-service",
   "values": {
-    "name": "Customer",
+    "name": "Task",
     "operations": [
       "create",
       "read",

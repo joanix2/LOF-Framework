@@ -1,8 +1,8 @@
 {
   "$schema": "../../schemas/target.schema.json",
-  "id": "typescript-module",
-  "language": "typescript",
-  "extension": ".ts",
+  "id": "yaml-file",
+  "language": "yaml",
+  "extension": ".yml",
   "formatter": null,
   "astAdapter": null
 }

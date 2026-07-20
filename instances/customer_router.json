@@ -1,9 +1,11 @@
 {
   "$schema": "../schemas/instance.schema.json",
-  "id": "customer-service",
-  "type": "entity-service",
+  "id": "customer-router",
+  "type": "entity-router",
   "values": {
     "name": "Customer",
+    "route": "customers",
+    "pluralName": "Customers",
     "operations": [
       "create",
       "read",

@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "react-app-instance",
+  "type": "react-app",
+  "values": {
+    "title": "Application",
+    "modules": [
+      "customer",
+      "project",
+      "task"
+    ]
+  }
+}

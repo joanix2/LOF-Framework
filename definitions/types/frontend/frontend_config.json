@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "frontend-config",
+  "description": "Frontend project configuration (package.json, vite config, etc.)",
+  "parameters": {
+    "title": { "type": "string", "default": "Application" },
+    "apiBaseUrl": { "type": "string", "default": "http://localhost:8000/api/v1" }
+  },
+  "template": "templates/frontend/package.json.j2",
+  "targetType": "python-module",
+  "outputPattern": "generated-project/apps/web/package.json"
+}

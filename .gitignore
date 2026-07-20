@@ -18,6 +18,8 @@ build/
 # Generated
 generated/
 !generated/.gitkeep
+generated-project/
+!.gitkeep
 
 # IDE
 .vscode/

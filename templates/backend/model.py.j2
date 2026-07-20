@@ -1,0 +1,66 @@
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, String, Boolean, DateTime, Text, Integer, Float, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import declarative_base
+from app.database import Base
+
+
+class {{ name | pascal_case }}(Base):
+    __tablename__ = "{{ tableName }}"
+
+{% for field in fields %}
+{% set f_name = field.get('name', '') %}
+{% set f_type = field.get('type', 'string') %}
+{% set f_primary = field.get('primary', False) %}
+{% set f_generated = field.get('generated', False) %}
+{% set f_relation = field.get('relation', None) %}
+{% set f_nullable = field.get('nullable', True) %}
+
+{% if f_name == "id" and f_primary %}
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+{% elif f_name in ("createdAt", "created_at") %}
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+{% elif f_name in ("updatedAt", "updated_at") %}
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+{% elif f_relation == "foreign_key" %}
+    {{ f_name | snake_case }}_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("{{ field.get('foreignTable', 'unknown') }}.id"),
+        nullable={{ "false" if not f_nullable else "true" }},
+    )
+
+{% elif f_type == "string" or f_type == "email" or f_type == "url" %}
+    {{ f_name }} = Column(
+        String,
+        nullable={{ "false" if not f_nullable else "true" }},
+        {% if field.get('unique', False) %}unique=True,{% endif %}
+        {% if field.get('index', False) %}index=True,{% endif %}
+    )
+
+{% elif f_type == "text" %}
+    {{ f_name }} = Column(Text, nullable={{ "false" if not f_nullable else "true" }})
+
+{% elif f_type == "boolean" or f_type == "bool" %}
+    {{ f_name }} = Column(Boolean, default={{ field.get('default', False) | lower }}, nullable=False)
+
+{% elif f_type == "datetime" or f_type == "date" %}
+    {{ f_name }} = Column(DateTime, default=datetime.utcnow{% if not f_nullable %}, nullable=False{% endif %})
+
+{% elif f_type == "integer" or f_type == "int" %}
+    {{ f_name }} = Column(Integer, default={{ field.get('default', 0) }}, nullable=False)
+
+{% elif f_type == "float" or f_type == "decimal" %}
+    {{ f_name }} = Column(Float, default={{ field.get('default', 0.0) }}, nullable=False)
+
+{% elif f_type == "enum" %}
+    {{ f_name }} = Column(String, nullable={{ "false" if not f_nullable else "true" }})
+
+{% endif %}
+{% endfor %}
+
+    def __repr__(self) -> str:
+        return f"<{{ name | pascal_case }}(id={self.id})>"

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "entity-schemas",
+  "description": "Pydantic schemas for an entity",
+  "dependsOn": ["entity-model"],
+  "parameters": {
+    "name": { "type": "string", "required": true },
+    "fields": { "type": "array", "required": true }
+  },
+  "template": "templates/backend/schemas.py.j2",
+  "targetType": "python-module",
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/schemas.py"
+}

@@ -1,0 +1,87 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "task-list-page",
+  "type": "entity-list-page",
+  "values": {
+    "name": "Task",
+    "pluralName": "Tasks",
+    "route": "tasks",
+    "fields": [
+      {
+        "name": "id",
+        "type": "uuid",
+        "primary": true,
+        "generated": true,
+        "visibleInForm": false,
+        "visibleInList": false
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "searchable": true,
+        "sortable": true,
+        "visibleInList": true,
+        "visibleInForm": true,
+        "nullable": false
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "visibleInForm": true,
+        "visibleInList": false
+      },
+      {
+        "name": "status",
+        "type": "enum",
+        "default": "todo",
+        "visibleInForm": true,
+        "visibleInList": true,
+        "nullable": false
+      },
+      {
+        "name": "priority",
+        "type": "enum",
+        "default": "medium",
+        "visibleInForm": true,
+        "visibleInList": true,
+        "nullable": false
+      },
+      {
+        "name": "projectId",
+        "type": "uuid",
+        "required": true,
+        "visibleInForm": true,
+        "visibleInList": true,
+        "nullable": false,
+        "relation": "foreign_key",
+        "foreignTable": "projects"
+      },
+      {
+        "name": "dueDate",
+        "type": "datetime",
+        "required": false,
+        "visibleInForm": true,
+        "visibleInList": true,
+        "nullable": true
+      },
+      {
+        "name": "createdAt",
+        "type": "datetime",
+        "generated": true,
+        "visibleInForm": false,
+        "visibleInList": true,
+        "nullable": false
+      },
+      {
+        "name": "updatedAt",
+        "type": "datetime",
+        "generated": true,
+        "visibleInForm": false,
+        "visibleInList": false,
+        "nullable": true
+      }
+    ]
+  }
+}
