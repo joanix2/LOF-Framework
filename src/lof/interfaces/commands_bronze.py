@@ -10,7 +10,6 @@ from rich.table import Table
 
 from lof.bronze.models import BronzeEntry
 from lof.bronze.store import BronzeStore
-from lof.silver.extractor import SpacyExtractor
 from lof.silver.graph import SilverGraph
 
 console = Console()
@@ -36,6 +35,7 @@ def add(
     console.print(f"[green]Bronze entry saved:[/green] {entry.id}")
 
     silver = SilverGraph()
+    from lof.silver.extractor import SpacyExtractor
     extractor = SpacyExtractor(silver)
     claims = extractor.extract_from_entry(entry)
     for c in claims:
