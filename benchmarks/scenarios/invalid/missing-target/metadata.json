@@ -1,0 +1,17 @@
+{
+  "id": "missing-target",
+  "title": "Relation targets a non-existent instance",
+  "level": 1,
+  "category": "smt",
+  "expectedOutcome": "unsat",
+  "tags": [
+    "smt",
+    "relation",
+    "validation"
+  ],
+  "features": [
+    "smt",
+    "relation",
+    "validation"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "enum-form",
+  "title": "Enum field and React form",
+  "level": 1,
+  "category": "frontend",
+  "expectedOutcome": "sat",
+  "tags": [
+    "enum",
+    "react",
+    "form",
+    "zod"
+  ],
+  "features": [
+    "enum",
+    "react",
+    "form",
+    "zod"
+  ]
+}

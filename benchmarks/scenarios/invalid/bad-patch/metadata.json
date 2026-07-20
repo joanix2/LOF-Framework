@@ -1,0 +1,17 @@
+{
+  "id": "bad-patch",
+  "title": "AST patch targeting non-existent class",
+  "level": 1,
+  "category": "ast",
+  "expectedOutcome": "unsat",
+  "tags": [
+    "patch",
+    "ast",
+    "libcst"
+  ],
+  "features": [
+    "patch",
+    "ast",
+    "libcst"
+  ]
+}

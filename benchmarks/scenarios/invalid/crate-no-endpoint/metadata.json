@@ -1,0 +1,17 @@
+{
+  "id": "crate-no-endpoint",
+  "title": "Create page requested but no create API operation",
+  "level": 3,
+  "category": "consistency",
+  "expectedOutcome": "unsat",
+  "tags": [
+    "consistency",
+    "operation",
+    "frontend"
+  ],
+  "features": [
+    "consistency",
+    "operation",
+    "frontend"
+  ]
+}

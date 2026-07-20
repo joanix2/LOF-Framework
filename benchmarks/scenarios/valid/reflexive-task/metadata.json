@@ -1,0 +1,17 @@
+{
+  "id": "reflexive-task",
+  "title": "Task with self-referential parent relation",
+  "level": 2,
+  "category": "relations",
+  "expectedOutcome": "sat",
+  "tags": [
+    "reflexive",
+    "recursion",
+    "graph"
+  ],
+  "features": [
+    "reflexive",
+    "recursion",
+    "graph"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "task-chain",
+  "title": "Task depends transitively on Customer via Project",
+  "level": 2,
+  "category": "relations",
+  "expectedOutcome": "sat",
+  "tags": [
+    "transitive",
+    "dependency",
+    "graph-context"
+  ],
+  "features": [
+    "transitive",
+    "dependency",
+    "graph-context"
+  ]
+}

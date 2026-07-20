@@ -1,0 +1,17 @@
+{
+  "id": "duplicate-route",
+  "title": "Duplicate API route between two entities",
+  "level": 3,
+  "category": "smt",
+  "expectedOutcome": "unsat",
+  "tags": [
+    "smt",
+    "uniqueness",
+    "constraint"
+  ],
+  "features": [
+    "smt",
+    "uniqueness",
+    "constraint"
+  ]
+}

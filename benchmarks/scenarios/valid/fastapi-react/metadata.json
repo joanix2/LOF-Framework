@@ -1,0 +1,19 @@
+{
+  "id": "fastapi-react",
+  "title": "Full FastAPI + React profile with all features",
+  "level": 3,
+  "category": "integration",
+  "expectedOutcome": "sat",
+  "tags": [
+    "fastapi",
+    "react",
+    "full-stack",
+    "integration"
+  ],
+  "features": [
+    "fastapi",
+    "react",
+    "full-stack",
+    "integration"
+  ]
+}

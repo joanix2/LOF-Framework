@@ -1,0 +1,19 @@
+{
+  "id": "customer-projects",
+  "title": "Customer with multiple Projects (one-to-many)",
+  "level": 1,
+  "category": "relations",
+  "expectedOutcome": "sat",
+  "tags": [
+    "relations",
+    "one-to-many",
+    "fastapi",
+    "react"
+  ],
+  "features": [
+    "relations",
+    "one-to-many",
+    "fastapi",
+    "react"
+  ]
+}

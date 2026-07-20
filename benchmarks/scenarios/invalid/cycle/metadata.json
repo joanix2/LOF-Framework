@@ -1,0 +1,17 @@
+{
+  "id": "cycle",
+  "title": "Circular type dependency",
+  "level": 2,
+  "category": "graph",
+  "expectedOutcome": "unsat",
+  "tags": [
+    "cycle",
+    "dependency",
+    "graph"
+  ],
+  "features": [
+    "cycle",
+    "dependency",
+    "graph"
+  ]
+}

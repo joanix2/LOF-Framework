@@ -1,0 +1,7 @@
+{
+  "status": "unsat",
+  "minViolations": 1,
+  "expectedCodes": [
+    "DUPLICATE_API_ROUTE"
+  ]
+}

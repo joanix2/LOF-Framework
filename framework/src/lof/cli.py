@@ -480,6 +480,90 @@ def gold_provenance(
             console.print(f"    - \"{s}\"")
 
 
+bench_app = typer.Typer(help="LOP-Bench benchmark framework")
+app.add_typer(bench_app, name="bench")
+
+
+@bench_app.command("list")
+def bench_list() -> None:
+    from lof.bench.scenario_loader import ScenarioLoader
+    loader = ScenarioLoader(Path.cwd())
+    scenarios = loader.list_scenarios()
+    if not scenarios:
+        console.print("[yellow]No benchmarks found.[/yellow]")
+        return
+    table = Table(title="LOP-Bench Scenarios")
+    table.add_column("ID", style="cyan")
+    table.add_column("Level", style="blue")
+    table.add_column("Category", style="green")
+    table.add_column("Expected", style="yellow")
+    table.add_column("Title")
+    for s in scenarios:
+        exp = s.metadata.expected_outcome[:8]
+        row = (s.metadata.id, str(s.metadata.level), s.metadata.category, exp, s.metadata.title)
+        table.add_row(*row)
+    console.print(table)
+
+
+@bench_app.command("run")
+def bench_run(
+    level: int = typer.Option(-1, "--level", "-l", help="Max difficulty level"),
+    category: str | None = typer.Option(None, "--category", "-c", help="Category filter"),
+    scenario_id: str | None = typer.Option(None, "--scenario", "-s", help="Single scenario"),
+) -> None:
+    from lof.bench.runner import BenchmarkRunner
+    runner = BenchmarkRunner(Path.cwd())
+
+    if scenario_id:
+        from lof.bench.scenario_loader import ScenarioLoader
+        sc_loader = ScenarioLoader(Path.cwd())
+        sc = sc_loader.get_scenario(scenario_id)
+        if sc is None:
+            console.print(f"[red]Scenario '{scenario_id}' not found.[/red]")
+            raise typer.Exit(1)
+        from lof.bench.models import BenchmarkReport
+        report = BenchmarkReport()
+        report.results = [runner._run_scenario(sc)]
+        report.total_scenarios = 1
+        report.passed = sum(1 for r in report.results if r.passed)
+        report.failed = report.total_scenarios - report.passed
+    else:
+        report = runner.run_all(level=level, category=category)
+
+    console.print("\n[bold]LOP-Bench Results[/bold]")
+    console.print(f"  Scenarios: {report.total_scenarios}")
+    console.print(f"  Passed:    [green]{report.passed}[/green]")
+    console.print(f"  Failed:    [red]{report.failed}[/red]")
+    console.print(f"  Pass rate: {report.pass_rate:.1%}")
+    if report.composite_score:
+        console.print(f"  Composite: {report.composite_score:.3f}")
+
+    for r in report.results:
+        status = "[green]PASS[/green]" if r.passed else "[red]FAIL[/red]"
+        console.print(f"  {status} {r.scenario_id} ({r.duration_ms:.0f}ms)")
+        for e in r.errors[:3]:
+            console.print(f"         {e}")
+
+    report_dir = Path.cwd() / "reports"
+    report_dir.mkdir(exist_ok=True)
+    import json
+    report_path = report_dir / "latest.json"
+    report_path.write_text(json.dumps(report.model_dump(), indent=2, default=str))
+    console.print(f"\n[blue]Report saved:[/blue] {report_path}")
+
+
+@bench_app.command("mutate")
+def bench_mutate(
+    scenario_id: str = typer.Argument(..., help="Base scenario ID to mutate"),
+) -> None:
+    from lof.bench.mutation_engine import MutationEngine
+    engine = MutationEngine(Path.cwd())
+    mutants = engine.mutate(scenario_id)
+    console.print(f"Generated {len(mutants)} mutant scenarios from '{scenario_id}'")
+    for m in mutants:
+        console.print(f"  - {m.metadata.id} ({m.metadata.expected_outcome})")
+
+
 def main() -> None:
     app()
 

@@ -1,0 +1,19 @@
+{
+  "id": "customer-simple",
+  "title": "Simple Customer entity with CRUD",
+  "level": 0,
+  "category": "basic",
+  "expectedOutcome": "sat",
+  "tags": [
+    "bronze",
+    "gold",
+    "fastapi",
+    "crud"
+  ],
+  "features": [
+    "bronze",
+    "gold",
+    "fastapi",
+    "crud"
+  ]
+}

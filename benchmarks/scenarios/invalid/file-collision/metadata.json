@@ -1,0 +1,17 @@
+{
+  "id": "file-collision",
+  "title": "Two projections produce the same output file",
+  "level": 2,
+  "category": "generation",
+  "expectedOutcome": "unsat",
+  "tags": [
+    "generation",
+    "collision",
+    "output"
+  ],
+  "features": [
+    "generation",
+    "collision",
+    "output"
+  ]
+}
