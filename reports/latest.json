@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-20 22:46:48.995789",
+  "timestamp": "2026-07-20 22:49:10.647605",
   "total_scenarios": 12,
   "passed": 12,
   "failed": 0,
@@ -16,7 +16,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 173.52890968322754
+      "duration_ms": 175.62055587768555
     },
     {
       "scenario_id": "crate-no-endpoint",
@@ -28,7 +28,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 160.9349250793457
+      "duration_ms": 163.84124755859375
     },
     {
       "scenario_id": "cycle",
@@ -40,7 +40,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 161.4704132080078
+      "duration_ms": 165.8167839050293
     },
     {
       "scenario_id": "duplicate-route",
@@ -52,7 +52,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 162.47844696044922
+      "duration_ms": 159.6388816833496
     },
     {
       "scenario_id": "file-collision",
@@ -64,7 +64,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 160.4914665222168
+      "duration_ms": 161.67783737182617
     },
     {
       "scenario_id": "missing-target",
@@ -76,7 +76,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 162.51301765441895
+      "duration_ms": 161.8509292602539
     },
     {
       "scenario_id": "customer-projects",
@@ -88,7 +88,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 162.8398895263672
+      "duration_ms": 163.1639003753662
     },
     {
       "scenario_id": "customer-simple",
@@ -100,7 +100,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 161.6816520690918
+      "duration_ms": 165.2967929840088
     },
     {
       "scenario_id": "enum-form",
@@ -112,7 +112,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 161.5748405456543
+      "duration_ms": 167.8473949432373
     },
     {
       "scenario_id": "fastapi-react",
@@ -124,7 +124,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 162.8859043121338
+      "duration_ms": 166.25332832336426
     },
     {
       "scenario_id": "reflexive-task",
@@ -136,7 +136,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 163.26427459716797
+      "duration_ms": 165.4958724975586
     },
     {
       "scenario_id": "task-chain",
@@ -148,7 +148,7 @@
       "generation_score": 1.0,
       "errors": [],
       "metrics": [],
-      "duration_ms": 163.7094020843506
+      "duration_ms": 161.92340850830078
     }
   ],
   "metrics": {}

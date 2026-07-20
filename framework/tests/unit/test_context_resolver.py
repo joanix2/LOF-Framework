@@ -37,7 +37,8 @@ def test_context_includes_defaults():
 
 def test_context_instance_overrides_default():
     reg = _make_registry()
-    reg.register_instance(InstanceDefinition(id="test", type="entity", values={"name": "X", "count": 5}))
+    v = {"name": "X", "count": 5}
+    reg.register_instance(InstanceDefinition(id="test", type="entity", values=v))
     pipeline = Pipeline(reg)
     ctx = pipeline._build_context(reg.get_instance("test"))
     assert ctx["count"] == 5

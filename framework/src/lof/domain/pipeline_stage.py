@@ -1,8 +1,8 @@
 """Generic pipeline stage protocol and execution context."""
 
 from dataclasses import dataclass, field
-from typing import Any, Protocol
 from pathlib import Path
+from typing import Any, Protocol
 
 
 @dataclass

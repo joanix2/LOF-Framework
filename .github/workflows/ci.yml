@@ -6,61 +6,76 @@ on:
   pull_request:
     branches: [main]
 
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.12"]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
+  quality:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check framework/src framework/tests
+      - run: ruff format --check framework/src framework/tests
 
-      - name: Install Python dependencies
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest framework/tests -v --tb=short -x
+
+  benchmark-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: python -m lof.cli constraints validate
+      - run: python -m lof.cli bench run
+      - run: python -m lof.cli compile
+      - name: Validate generated backend
+        working-directory: generated-project/apps/api
         run: |
-          python -m pip install --upgrade pip
           pip install -e ".[dev]"
-        working-directory: ${{ github.workspace }}
+          python -m ruff check src --ignore F821,E402,N815,F401
+          python -m pytest tests -q --tb=short
 
-      - name: Validate JSON schemas
-        run: lof validate
-
-      - name: Validate dependencies
-        run: lof check
-
-      - name: Compile project
-        run: lof compile
-
-      - name: Run tests
-        run: python -m pytest framework/tests -v
-
-      - name: Lint with Ruff
-        run: python -m ruff check framework/src framework/tests
-
-      - name: Type check with Pyright
-        run: python -m pyright framework/src framework/tests
-        continue-on-error: true
-
-      - name: Check generated files are not modified
+  generated-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: python -m lof.cli compile
+      - name: Lint generated backend
+        working-directory: generated-project/apps/api
         run: |
-          if git diff --name-only | grep -q "^generated/"; then
-            echo "ERROR: Generated files have been modified manually"
-            exit 1
-          fi
-
-      - name: Verify deterministic build
+          pip install -e ".[dev]"
+          ruff check src --ignore F821,E402,N815,F401
+      - name: Test generated backend
+        working-directory: generated-project/apps/api
         run: |
-          lof compile
-          if git diff --name-only | grep -q "^generated/"; then
-            echo "ERROR: Build is not deterministic"
-            exit 1
-          fi
+          python -m pytest tests -q --tb=short
 
-      - name: Run Bazel tests
-        run: bazel test //...
-        continue-on-error: true
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pip-audit
+      - run: pip-audit

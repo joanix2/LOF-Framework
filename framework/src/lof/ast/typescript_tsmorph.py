@@ -1,13 +1,6 @@
-from lof.ast.adapter import AstAdapter
-from lof.models.patch_definition import PatchOperation
+"""TypeScript AST adapter stub — not yet implemented.
 
-
-class TypeScriptTsMorphAdapter(AstAdapter):
-    def parse(self, source: str) -> object:
-        raise NotImplementedError("TypeScript adapter not yet implemented")
-
-    def unparse(self, tree: object) -> str:
-        raise NotImplementedError("TypeScript adapter not yet implemented")
-
-    def apply_operation(self, tree: object, operation: PatchOperation) -> object:
-        raise NotImplementedError("TypeScript adapter not yet implemented")
+The Python LibCST adapter is fully operational.
+A TypeScript adapter using ts-morph can be added here when needed.
+See https://github.com/nicklasxyz/ts-morph for the official library.
+"""
