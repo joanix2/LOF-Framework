@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "web-package-instance",
+  "type": "frontend-config",
+  "values": {
+    "title": "Application",
+    "apiBaseUrl": "http://localhost:8000/api/v1"
+  }
+}

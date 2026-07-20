@@ -1,0 +1,6 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "web-tsconfig-instance",
+  "type": "web-tsconfig",
+  "values": {}
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "module-init",
+  "description": "Python __init__.py for a module",
+  "dependsOn": ["entity-model"],
+  "parameters": {
+    "name": { "type": "string", "required": true }
+  },
+  "template": "templates/backend/__init__.py.j2",
+  "targetType": "python-module",
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/__init__.py"
+}

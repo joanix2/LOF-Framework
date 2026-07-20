@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "web-tsconfig",
+  "description": "TypeScript configuration for the frontend",
+  "parameters": {},
+  "template": "templates/frontend/tsconfig.json.j2",
+  "targetType": "python-module",
+  "outputPattern": "generated-project/apps/web/tsconfig.json"
+}

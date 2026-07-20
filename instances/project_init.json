@@ -1,0 +1,8 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "project-init",
+  "type": "module-init",
+  "values": {
+    "name": "Project"
+  }
+}

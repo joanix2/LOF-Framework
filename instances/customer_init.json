@@ -1,0 +1,8 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "customer-init",
+  "type": "module-init",
+  "values": {
+    "name": "Customer"
+  }
+}

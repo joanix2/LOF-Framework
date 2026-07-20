@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../schemas/type.schema.json",
+  "id": "frontend-tests",
+  "description": "Vitest tests for a frontend entity",
+  "dependsOn": ["entity-list-page", "entity-detail-page", "entity-form", "entity-hooks"],
+  "parameters": {
+    "name": { "type": "string", "required": true },
+    "pluralName": { "type": "string", "required": true },
+    "route": { "type": "string", "required": true },
+    "fields": { "type": "array", "required": true }
+  },
+  "template": "templates/frontend/test_entity.ts.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/__tests__/{{ name | snake_case }}.test.tsx"
+}

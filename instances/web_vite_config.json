@@ -1,0 +1,8 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "web-vite-config-instance",
+  "type": "web-vite-config",
+  "values": {
+    "title": "Application"
+  }
+}

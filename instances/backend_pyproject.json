@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "backend-pyproject-instance",
+  "type": "backend-pyproject",
+  "values": {
+    "title": "FastAPI React Template",
+    "version": "0.1.0"
+  }
+}

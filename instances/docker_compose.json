@@ -1,0 +1,12 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "docker-compose-instance",
+  "type": "docker-compose",
+  "values": {
+    "modules": [
+      "customer",
+      "project",
+      "task"
+    ]
+  }
+}
