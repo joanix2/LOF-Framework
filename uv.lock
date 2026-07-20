@@ -356,6 +356,7 @@ dependencies = [
     { name = "rich" },
     { name = "tomli-w" },
     { name = "typer" },
+    { name = "z3-solver" },
 ]
 
 [package.optional-dependencies]
@@ -364,20 +365,15 @@ all = [
     { name = "pytest" },
     { name = "ruff" },
     { name = "spacy" },
-    { name = "z3-solver" },
 ]
 dev = [
     { name = "pyright" },
     { name = "pytest" },
     { name = "ruff" },
     { name = "spacy" },
-    { name = "z3-solver" },
 ]
 ner = [
     { name = "spacy" },
-]
-reasoning = [
-    { name = "z3-solver" },
 ]
 
 [package.metadata]
@@ -386,7 +382,6 @@ requires-dist = [
     { name = "libcst", specifier = ">=1.0,<2.0" },
     { name = "lof-framework", extras = ["dev"], marker = "extra == 'all'" },
     { name = "lof-framework", extras = ["ner"], marker = "extra == 'all'" },
-    { name = "lof-framework", extras = ["reasoning"], marker = "extra == 'all'" },
     { name = "networkx", specifier = ">=3.0,<4.0" },
     { name = "pydantic", specifier = ">=2.0,<3.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.0,<2.0" },
@@ -399,10 +394,9 @@ requires-dist = [
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=1.1,<2.0" },
     { name = "tomli-w", specifier = ">=1.2,<2.0" },
     { name = "typer", specifier = ">=0.12,<1.0" },
-    { name = "z3-solver", marker = "extra == 'dev'", specifier = ">=5.0,<6.0" },
-    { name = "z3-solver", marker = "extra == 'reasoning'", specifier = ">=5.0,<6.0" },
+    { name = "z3-solver", specifier = ">=5.0,<6.0" },
 ]
-provides-extras = ["ner", "reasoning", "dev", "all"]
+provides-extras = ["ner", "dev", "all"]
 
 [[package]]
 name = "markdown-it-py"
