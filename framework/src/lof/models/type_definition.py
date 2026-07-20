@@ -11,6 +11,13 @@ class ParameterDefinition(BaseModel):
     enum: list[Any] | None = None
 
 
+class ContextQuery(BaseModel):
+    outgoing_relations: dict[str, Any] = Field(default_factory=lambda: {"max_depth": 0})
+    incoming_relations: dict[str, Any] = Field(default_factory=lambda: {"max_depth": 0})
+    dependencies: dict[str, Any] = Field(default_factory=lambda: {"max_depth": 0})
+    dependents: dict[str, Any] = Field(default_factory=lambda: {"max_depth": 0})
+
+
 class TypeDefinition(BaseModel):
     id: str
     description: str | None = None
@@ -20,3 +27,4 @@ class TypeDefinition(BaseModel):
     target_type: str | None = None
     interface_source: str | None = None
     output_pattern: str | None = None
+    context_query: ContextQuery | None = None

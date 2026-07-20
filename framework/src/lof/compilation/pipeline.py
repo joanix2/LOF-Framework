@@ -4,6 +4,8 @@ from typing import Any
 from lof.ast.patch_engine import PatchEngine
 from lof.compilation.manifest import ManifestManager
 from lof.compilation.writer import Writer
+from lof.graph.context_resolver import GraphContextResolver
+from lof.graph.instance_graph import InstanceGraph
 from lof.loading.registry import Registry
 from lof.models.artifact import Artifact
 from lof.models.instance_definition import InstanceDefinition
@@ -24,6 +26,22 @@ class Pipeline:
         self.patch_engine = PatchEngine()
         self.writer = Writer(self.root, dry_run)
         self.manifest_manager = ManifestManager(self.root)
+        self.instance_graph = InstanceGraph()
+        self.instance_graph.build(registry.instances)
+        self.graph_context_resolver = GraphContextResolver(registry, self.instance_graph)
+
+    def _resolve_context(self, instance: InstanceDefinition) -> tuple[dict[str, Any], list[str]]:
+        errors: list[str] = []
+        base_ctx, diag = self.context_resolver.resolve(instance)
+        errors.extend(diag.errors)
+
+        graph_ctx, gdiag = self.graph_context_resolver.context_for_template(instance)
+        errors.extend(gdiag.errors)
+
+        merged = dict(base_ctx)
+        merged.update(graph_ctx)
+        merged["instance_id"] = instance.id
+        return merged, errors
 
     def process_instance(self, instance: InstanceDefinition) -> tuple[Artifact | None, list[str]]:
         errors: list[str] = []
@@ -32,9 +50,9 @@ class Pipeline:
             errors.append(f"Type '{instance.type}' not found for instance '{instance.id}'")
             return None, errors
 
-        context, diag = self.context_resolver.resolve(instance)
-        if diag.has_errors:
-            errors.extend(diag.errors)
+        context, ctx_errors = self._resolve_context(instance)
+        errors.extend(ctx_errors)
+        if errors:
             return None, errors
 
         patches: list[PatchDefinition] = []

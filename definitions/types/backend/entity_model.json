@@ -21,6 +21,14 @@
       "default": "uuid"
     }
   },
+  "contextQuery": {
+    "outgoingRelations": {
+      "maxDepth": 1
+    },
+    "incomingRelations": {
+      "maxDepth": 1
+    }
+  },
   "template": "templates/backend/model.py.j2",
   "targetType": "python-module",
   "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/model.py"

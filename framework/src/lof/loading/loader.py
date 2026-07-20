@@ -24,6 +24,7 @@ class Loader:
             "targetType": "target_type",
             "interfaceSource": "interface_source",
             "outputPattern": "output_pattern",
+            "contextQuery": "context_query",
         }
         for old, new in _map.items():
             if old in data:

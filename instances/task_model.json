@@ -82,5 +82,16 @@
         "nullable": true
       }
     ]
-  }
+  },
+  "relations": [
+    {
+      "id": "task-project",
+      "kind": "many-to-one",
+      "target": "project-model",
+      "sourceField": "project_id",
+      "targetField": "id",
+      "inverse": "tasks",
+      "required": true
+    }
+  ]
 }

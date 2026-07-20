@@ -66,5 +66,16 @@
         "nullable": true
       }
     ]
-  }
+  },
+  "relations": [
+    {
+      "id": "project-customer",
+      "kind": "many-to-one",
+      "target": "customer-model",
+      "sourceField": "customer_id",
+      "targetField": "id",
+      "inverse": "projects",
+      "required": true
+    }
+  ]
 }

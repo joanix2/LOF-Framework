@@ -2,14 +2,41 @@
   "$schema": "../../../schemas/type.schema.json",
   "id": "entity-router",
   "description": "FastAPI router for an entity",
-  "dependsOn": ["entity-service", "entity-schemas"],
+  "dependsOn": [
+    "entity-service",
+    "entity-schemas"
+  ],
   "parameters": {
-    "name": { "type": "string", "required": true },
-    "route": { "type": "string", "required": true },
-    "pluralName": { "type": "string", "required": true },
-    "operations": { "type": "array", "default": ["create","read","update","delete","list","search"] }
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "route": {
+      "type": "string",
+      "required": true
+    },
+    "pluralName": {
+      "type": "string",
+      "required": true
+    },
+    "operations": {
+      "type": "array",
+      "default": [
+        "create",
+        "read",
+        "update",
+        "delete",
+        "list",
+        "search"
+      ]
+    }
   },
   "template": "templates/backend/router.py.j2",
   "targetType": "python-module",
-  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/router.py"
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/router.py",
+  "contextQuery": {
+    "outgoingRelations": {
+      "maxDepth": 1
+    }
+  }
 }
