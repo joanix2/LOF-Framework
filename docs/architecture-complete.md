@@ -13,7 +13,7 @@ GOLD — DSL canonique décrivant l'application
         ↓ validation structurelle (JSON Schema / Pydantic)
         ↓ validation sémantique (SMT / Z3)
    SAT ?
-   ├── NON → diagnostic pour LLM → retour Silver/Gold
+   ├── NON → diagnostic pour LLM → correction Bronze / règles / templates / patches
    └── OUI → compilation
               ↓ templates Jinja + patches AST
               PROGRAMME GÉNÉRÉ (FastAPI + React + SQL)

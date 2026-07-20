@@ -52,8 +52,11 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph Input["📥 Input Layer"]
+    subgraph Sources["📝 Sources (LLM-modifiable)"]
         B[("Bronze<br/>Raw tickets<br/>Append-only")]
+        RULES[("Inference Rules<br/>Datalog")]
+        TEMPL[("Templates<br/>Jinja")]
+        PATCHES[("Patches<br/>AST")]
     end
 
     subgraph Semantic["🧠 Semantic Layer"]
@@ -69,8 +72,7 @@ flowchart TB
     end
 
     subgraph Generation["⚙️ Generation Layer"]
-        T["Jinja Templates<br/>Backend + Frontend"]
-        P["AST Patches (LibCST)<br/>Structural transformations"]
+        GEN["Template Rendering<br/>+ AST Patching (LibCST)"]
         PROJ["📦 Generated Project<br/>FastAPI + React"]
     end
 
@@ -82,16 +84,18 @@ flowchart TB
     end
 
     B -->|spaCy extraction| S
+    RULES --> R
     S -->|facts + provenance| R
     R -->|inferred facts| G
     G --> SCHEMA
     SCHEMA --> SMT
     SMT --> DECIDE
     DECIDE -->|"UNSAT / UNKNOWN"| DIAG[("📋 Diagnostics<br/>for LLM repair")]
-    DIAG -.->|correction loop| G
-    DECIDE -->|SAT| T
-    T --> P
-    P --> PROJ
+    DIAG -.->|"LLM corrects: tickets / rules / templates / patches"| Sources
+    DECIDE -->|SAT| GEN
+    TEMPL --> GEN
+    PATCHES --> GEN
+    GEN --> PROJ
     PROJ --> LINT
     LINT --> TYPE
     TYPE --> TEST
