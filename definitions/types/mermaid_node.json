@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/type.schema.json",
+  "id": "mermaid-node",
+  "description": "Mermaid diagram node for entities",
+  "dependsOn": [
+    "named-element"
+  ],
+  "parameters": {
+    "entities": {
+      "type": "array",
+      "required": true,
+      "description": "List of entity definitions for the diagram"
+    }
+  },
+  "template": "templates/mermaid/entity.mmd.j2",
+  "targetType": "markdown-document",
+  "outputPattern": "generated/diagrams/model.mmd"
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "patch.schema.json",
+  "title": "Patch Definition",
+  "type": "object",
+  "required": ["id", "language", "operations"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the patch"
+    },
+    "language": {
+      "type": "string",
+      "description": "Target language (python, typescript, etc.)"
+    },
+    "targetSelector": {
+      "type": "object",
+      "description": "Selector for the AST node to patch"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["op"],
+        "properties": {
+          "op": {
+            "type": "string",
+            "description": "Operation type (add_import, add_method, add_decorator, etc.)"
+          },
+          "name": { "type": "string" },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "annotation": { "type": "string" }
+              }
+            }
+          },
+          "returnType": { "type": "string" },
+          "body": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "decorators": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "bases": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "module": { "type": "string" },
+          "importName": { "type": "string" },
+          "alias": { "type": "string" },
+          "annotation": { "type": "string" },
+          "value": { "type": "string" },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "annotation": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "dependsOn": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of patch IDs this patch depends on"
+    }
+  },
+  "additionalProperties": false
+}

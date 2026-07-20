@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/type.schema.json",
+  "id": "named-element",
+  "description": "Base type with a name parameter",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "The name of the element"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+load("@rules_python//python:py_binary.bzl", "py_binary")
+
+py_binary(
+    name = "compile",
+    srcs = ["compile.py"],
+    deps = ["//:lof_lib"],
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "validate",
+    srcs = ["validate.py"],
+    deps = ["//:lof_lib"],
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "inspect_graph",
+    srcs = ["inspect_graph.py"],
+    deps = ["//:lof_lib"],
+    visibility = ["//visibility:public"],
+)

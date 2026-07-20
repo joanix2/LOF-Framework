@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schemas/target.schema.json",
+  "id": "python-module",
+  "language": "python",
+  "extension": ".py",
+  "formatter": "ruff",
+  "astAdapter": "libcst"
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "project.schema.json",
+  "title": "Project Configuration",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Project name"
+    },
+    "version": {
+      "type": "string",
+      "description": "Project version"
+    },
+    "description": {
+      "type": "string",
+      "description": "Project description"
+    },
+    "types": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Glob patterns for type definition files"
+    },
+    "instances": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Glob patterns for instance files"
+    },
+    "templates": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Glob patterns for template directories"
+    },
+    "patches": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Glob patterns for patch files"
+    },
+    "targets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Glob patterns for target definition files"
+    },
+    "outputDir": {
+      "type": "string",
+      "default": "generated",
+      "description": "Output directory for generated files"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "model-diagram",
+  "type": "mermaid-node",
+  "values": {
+    "entities": [
+      {
+        "name": "Customer",
+        "fields": [
+          { "name": "id", "type": "UUID" },
+          { "name": "email", "type": "str" },
+          { "name": "name", "type": "str" }
+        ]
+      },
+      {
+        "name": "Project",
+        "fields": [
+          { "name": "id", "type": "UUID" },
+          { "name": "title", "type": "str" },
+          { "name": "description", "type": "str" }
+        ]
+      }
+    ]
+  }
+}

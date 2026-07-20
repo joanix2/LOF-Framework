@@ -1,0 +1,27 @@
+{
+  "$schema": "../../schemas/patch.schema.json",
+  "id": "customer-add-find-by-email",
+  "language": "python",
+  "targetSelector": {
+    "class": "Customer"
+  },
+  "operations": [
+    {
+      "op": "add_method",
+      "name": "find_by_email",
+      "parameters": [
+        {
+          "name": "email",
+          "annotation": "str"
+        }
+      ],
+      "returnType": "Optional[Customer]",
+      "body": [
+        "for item in self._items.values():",
+        "    if item.email == email:",
+        "        return item",
+        "return None"
+      ]
+    }
+  ]
+}

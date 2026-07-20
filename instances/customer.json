@@ -1,0 +1,28 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "customer",
+  "type": "python-entity",
+  "values": {
+    "name": "Customer",
+    "fields": [
+      {
+        "name": "id",
+        "type": "UUID",
+        "description": "Unique identifier"
+      },
+      {
+        "name": "email",
+        "type": "str",
+        "description": "Email address"
+      },
+      {
+        "name": "name",
+        "type": "str",
+        "description": "Full name"
+      }
+    ]
+  },
+  "patches": [
+    "customer-add-find-by-email"
+  ]
+}

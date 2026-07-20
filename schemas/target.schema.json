@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "target.schema.json",
+  "title": "Target Definition",
+  "type": "object",
+  "required": ["id", "language"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the target"
+    },
+    "language": {
+      "type": "string",
+      "description": "Target language"
+    },
+    "extension": {
+      "type": "string",
+      "description": "File extension for generated files"
+    },
+    "formatter": {
+      "type": "string",
+      "description": "Formatter tool to use (e.g. ruff, prettier)"
+    },
+    "astAdapter": {
+      "type": "string",
+      "description": "AST adapter to use (e.g. libcst, ts-morph)"
+    }
+  },
+  "additionalProperties": false
+}

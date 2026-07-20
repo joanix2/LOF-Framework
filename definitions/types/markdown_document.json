@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schemas/type.schema.json",
+  "id": "markdown-document",
+  "description": "Markdown documentation for an entity",
+  "dependsOn": [
+    "named-element"
+  ],
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array",
+      "required": true
+    }
+  },
+  "template": "templates/markdown/entity.md.j2",
+  "targetType": "markdown-document",
+  "outputPattern": "generated/docs/{{ name | snake_case }}.md"
+}

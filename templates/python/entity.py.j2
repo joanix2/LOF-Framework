@@ -1,0 +1,16 @@
+from pydantic import BaseModel
+from uuid import UUID, uuid4
+from datetime import datetime
+from typing import Optional
+
+
+class {{ name }}Base(BaseModel):
+{% for field in fields %}
+    {{ field.name }}: {{ field.type }}{% if field.default is defined %} = {{ field.default }}{% endif %}
+{% endfor %}
+
+
+class {{ name }}({{ name }}Base):
+    id: UUID = uuid4()
+    created_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now()

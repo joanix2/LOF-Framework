@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "instance.schema.json",
+  "title": "Instance Definition",
+  "type": "object",
+  "required": ["id", "type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the instance"
+    },
+    "type": {
+      "type": "string",
+      "description": "Reference to a type definition ID"
+    },
+    "values": {
+      "type": "object",
+      "description": "Parameter values for this instance"
+    },
+    "patches": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of patch IDs to apply"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this instance is enabled"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schemas/target.schema.json",
+  "id": "typescript-module",
+  "language": "typescript",
+  "extension": ".ts",
+  "formatter": "prettier",
+  "astAdapter": "ts-morph"
+}

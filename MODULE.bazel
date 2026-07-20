@@ -1,0 +1,25 @@
+module(
+    name = "language_oriented_framework",
+    version = "0.1.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "rules_python", version = "0.36.0")
+bazel_dep(name = "rules_js", version = "1.44.1")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = "3.12",
+    ignore_root_user_error = True,
+)
+
+use_repo(python, "python3_12_toolchains", "python3_12")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "lof_deps",
+    python_version = "3.12",
+    requirements_lock = "//:requirements_lock.txt",
+)
+
+use_repo(pip, "lof_deps")

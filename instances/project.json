@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "project",
+  "type": "python-entity",
+  "values": {
+    "name": "Project",
+    "fields": [
+      {
+        "name": "id",
+        "type": "UUID",
+        "description": "Unique identifier"
+      },
+      {
+        "name": "title",
+        "type": "str",
+        "description": "Project title"
+      },
+      {
+        "name": "description",
+        "type": "str",
+        "description": "Project description"
+      }
+    ]
+  }
+}

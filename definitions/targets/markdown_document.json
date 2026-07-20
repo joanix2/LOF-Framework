@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schemas/target.schema.json",
+  "id": "markdown-document",
+  "language": "markdown",
+  "extension": ".md",
+  "formatter": null,
+  "astAdapter": null
+}

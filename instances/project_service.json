@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/instance.schema.json",
+  "id": "project-service",
+  "type": "python-service",
+  "values": {
+    "name": "Project",
+    "entity_name": "Project"
+  }
+}
