@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from pydantic import BaseModel, EmailStr
 
 
@@ -9,24 +8,15 @@ class {{ name | pascal_case }}Base(BaseModel):
 {%- if f_name not in ("id", "created_at", "updated_at") %}
 {%- set f_type = field.get('type', 'string') %}
 {%- set f_required = field.get('required', False) %}
-{%- if f_type == "uuid" %}
-{%- set py_type = "str" %}
-{%- elif f_type == "email" %}
-{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}
-{%- set py_type = "str" %}
-{%- elif f_type in ("integer", "int") %}
-{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}
-{%- set py_type = "float" %}
-{%- elif f_type in ("boolean", "bool") %}
-{%- set py_type = "bool" %}
-{%- elif f_type in ("datetime", "date") %}
-{%- set py_type = "datetime" %}
-{%- else %}
-{%- set py_type = "str" %}
+{%- if f_type == "uuid" %}{%- set py_type = "str" %}
+{%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
+{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
+{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
+{%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
+{%- else %}{%- set py_type = "str" %}
 {%- endif %}
-
     {{ f_name }}: {{ py_type }}{% if not f_required %} | None = None{% endif %}
 {%- endif %}
 {%- endfor %}
@@ -38,24 +28,15 @@ class {{ name | pascal_case }}Create({{ name | pascal_case }}Base):
 {%- set f_name = field.get('name', '') | snake_case %}
 {%- if f_name not in ("id", "created_at", "updated_at") and f_required and not f_generated %}
 {%- set f_type = field.get('type', 'string') %}
-{%- if f_type == "uuid" %}
-{%- set py_type = "str" %}
-{%- elif f_type == "email" %}
-{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}
-{%- set py_type = "str" %}
-{%- elif f_type in ("integer", "int") %}
-{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}
-{%- set py_type = "float" %}
-{%- elif f_type in ("boolean", "bool") %}
-{%- set py_type = "bool" %}
-{%- elif f_type in ("datetime", "date") %}
-{%- set py_type = "datetime" %}
-{%- else %}
-{%- set py_type = "str" %}
+{%- if f_type == "uuid" %}{%- set py_type = "str" %}
+{%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
+{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
+{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
+{%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
+{%- else %}{%- set py_type = "str" %}
 {%- endif %}
-
     {{ f_name }}: {{ py_type }}
 {%- endif %}
 {%- endfor %}
@@ -71,24 +52,15 @@ class {{ name | pascal_case }}Update(BaseModel):
 {%- set f_name = field.get('name', '') | snake_case %}
 {%- if f_name not in ("id", "created_at", "updated_at") %}
 {%- set f_type = field.get('type', 'string') %}
-{%- if f_type == "uuid" %}
-{%- set py_type = "str" %}
-{%- elif f_type == "email" %}
-{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}
-{%- set py_type = "str" %}
-{%- elif f_type in ("integer", "int") %}
-{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}
-{%- set py_type = "float" %}
-{%- elif f_type in ("boolean", "bool") %}
-{%- set py_type = "bool" %}
-{%- elif f_type in ("datetime", "date") %}
-{%- set py_type = "datetime" %}
-{%- else %}
-{%- set py_type = "str" %}
+{%- if f_type == "uuid" %}{%- set py_type = "str" %}
+{%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
+{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
+{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
+{%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
+{%- else %}{%- set py_type = "str" %}
 {%- endif %}
-
     {{ f_name }}: {{ py_type }} | None = None
 {%- endif %}
 {%- endfor %}
@@ -100,24 +72,15 @@ class {{ name | pascal_case }}List(BaseModel):
 {%- set f_visible = field.get('visibleInList', True) %}
 {%- if f_visible and f_name != "id" %}
 {%- set f_type = field.get('type', 'string') %}
-{%- if f_type == "uuid" %}
-{%- set py_type = "str" %}
-{%- elif f_type == "email" %}
-{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}
-{%- set py_type = "str" %}
-{%- elif f_type in ("integer", "int") %}
-{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}
-{%- set py_type = "float" %}
-{%- elif f_type in ("boolean", "bool") %}
-{%- set py_type = "bool" %}
-{%- elif f_type in ("datetime", "date") %}
-{%- set py_type = "datetime" %}
-{%- else %}
-{%- set py_type = "str" %}
+{%- if f_type == "uuid" %}{%- set py_type = "str" %}
+{%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
+{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
+{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
+{%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
+{%- else %}{%- set py_type = "str" %}
 {%- endif %}
-
     {{ f_name }}: {{ py_type }}
 {%- endif %}
 {%- endfor %}
