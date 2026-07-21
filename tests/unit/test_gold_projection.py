@@ -7,17 +7,17 @@ from pathlib import Path
 from lof.gold.instance_generator import GoldInstanceGenerator
 from lof.gold.json_loader import load_gold_application
 from lof.gold.projection import EntityProjector
-from lof.models.gold_models import GoldCapabilities, GoldEntity, GoldField, GoldRelation
+from lof.models.gold_models import GoldCapabilities, ModelDef, AttributeDef, GoldRelation
 
 LIBRARY_JSON = Path(__file__).resolve().parent.parent / "fixtures" / "json" / "library.json"
 ISOCLIM_JSON = Path(__file__).resolve().parent.parent / "fixtures" / "json" / "isoclim.json"
 
 
 def test_project_entity():
-    ent = GoldEntity(id="client", name="Client", fields=[
-        GoldField(id="id", type="uuid", primary=True, generated=True, list_visible=False),
-        GoldField(id="name", type="string", required=True, searchable=True),
-        GoldField(id="email", type="email", required=True, unique=True),
+    ent = ModelDef(id="client", name="Client", fields=[
+        AttributeDef(id="id", type="uuid", primary=True, generated=True, list_visible=False),
+        AttributeDef(id="name", type="string", required=True, searchable=True),
+        AttributeDef(id="email", type="email", required=True, unique=True),
     ])
     ctx = EntityProjector().project(ent)
     assert ctx["name"] == "Client"
@@ -30,7 +30,7 @@ def test_project_entity():
 
 def test_project_entity_with_operations():
     cap = GoldCapabilities(create=True, list=True, delete=False)
-    ent = GoldEntity(id="project", capabilities=cap)
+    ent = ModelDef(id="project", capabilities=cap)
     ctx = EntityProjector().project(ent)
     assert "create" in ctx["operations"]
     assert "list" in ctx["operations"]
@@ -38,20 +38,20 @@ def test_project_entity_with_operations():
 
 
 def test_project_relation_many_to_one():
-    book = GoldEntity(id="book", relations=[
+    book = ModelDef(id="book", relations=[
         GoldRelation(id="book_author", source="book", target="author",
                      kind="many-to-one", source_field="author_id",
                      target_display_field="name", required=True),
     ])
-    ctx = EntityProjector().project(book, [GoldEntity(id="author"), book])
+    ctx = EntityProjector().project(book, [ModelDef(id="author"), book])
     assert len(ctx["relations"]) == 1
     assert ctx["relations"][0]["kind"] == "many-to-one"
     assert ctx["relations"][0]["source_field"] == "author_id"
 
 
 def test_project_incoming_relation():
-    author = GoldEntity(id="author")
-    book = GoldEntity(id="book", relations=[
+    author = ModelDef(id="author")
+    book = ModelDef(id="book", relations=[
         GoldRelation(id="book_author", source="book", target="author",
                      kind="many-to-one", back_populates="author_books"),
     ])
@@ -61,10 +61,10 @@ def test_project_incoming_relation():
 
 
 def test_field_types_preserved():
-    ent = GoldEntity(id="t", fields=[
-        GoldField(id="s", type="string"), GoldField(id="i", type="integer"),
-        GoldField(id="b", type="boolean"), GoldField(id="d", type="date"),
-        GoldField(id="e", type="email"), GoldField(id="m", type="money"),
+    ent = ModelDef(id="t", fields=[
+        AttributeDef(id="s", type="string"), AttributeDef(id="i", type="integer"),
+        AttributeDef(id="b", type="boolean"), AttributeDef(id="d", type="date"),
+        AttributeDef(id="e", type="email"), AttributeDef(id="m", type="money"),
     ])
     ctx = EntityProjector().project(ent)
     types = {f["name"]: f["type"] for f in ctx["fields"]}

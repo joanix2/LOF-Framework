@@ -18,7 +18,7 @@ class GoldEnum(BaseModel):
     values: list[EnumValue] = Field(default_factory=list)
 
 
-class GoldField(BaseModel):
+class AttributeDef(BaseModel):
     id: str
     label: str = ""
     type: str = "string"
@@ -109,13 +109,13 @@ class NavigationConfig(BaseModel):
     order: int = 100
 
 
-class GoldEntity(BaseModel):
+class ModelDef(BaseModel):
     id: str
     name: str = ""
     plural_name: str = ""
     description: str = ""
     display_field: str = "id"
-    fields: list[GoldField] = Field(default_factory=list)
+    fields: list[AttributeDef] = Field(default_factory=list)
     enums: list[GoldEnum] = Field(default_factory=list)
     relations: list[GoldRelation] = Field(default_factory=list)
     capabilities: GoldCapabilities = Field(default_factory=GoldCapabilities)
@@ -129,5 +129,5 @@ class GoldApplication(BaseModel):
     id: str = "app"
     name: str = ""
     profile: str = "fastapi-react"
-    entities: list[GoldEntity] = Field(default_factory=list)
+    entities: list[ModelDef] = Field(default_factory=list)
     enums: list[GoldEnum] = Field(default_factory=list)

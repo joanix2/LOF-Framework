@@ -7,7 +7,7 @@ come from the active Profile configuration.
 from typing import Any
 
 from lof.gold.profile import Profile
-from lof.models.gold_models import GoldCapabilities, GoldEntity
+from lof.models.gold_models import GoldCapabilities, ModelDef
 
 
 def _has_operation(caps: GoldCapabilities, op: str) -> bool:
@@ -18,7 +18,7 @@ class EntityProjector:
     def __init__(self, profile: Profile | None = None):
         self.profile = profile
 
-    def project(self, entity: GoldEntity, all_entities=None) -> dict[str, Any]:
+    def project(self, entity: ModelDef, all_entities=None) -> dict[str, Any]:
         all_ents = all_entities or [entity]
         caps = entity.capabilities
 
