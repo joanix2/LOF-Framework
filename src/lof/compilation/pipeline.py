@@ -143,8 +143,11 @@ class Pipeline:
         if td.output_pattern:
             try:
                 return self.renderer.render_from_string(td.output_pattern, ctx)
-            except Exception:
-                pass
+            except Exception as e:
+                raise ValueError(
+                    f"Output pattern rendering failed for '{instance.id}': "
+                    f"pattern='{td.output_pattern}', error={e}"
+                )
         name = ctx.get("name", instance.id)
         from lof.utils.naming import snake_case
 

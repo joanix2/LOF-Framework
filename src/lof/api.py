@@ -1,94 +1,125 @@
 """Public API for the LOF framework."""
 
 from pathlib import Path
-from typing import Any
 
-from lof.compilation.compiler import Compiler
+from lof.compilation.session import ProjectSession
 from lof.domain.settings import LofSettings
+from lof.models.reports import (
+    CheckReport,
+    CompilationReport,
+    SemanticValidationReport,
+    StepResult,
+    ValidationReport,
+)
 
 
 class Project:
     """Represents a LOF project at a given root directory. Main entry point."""
 
-    def __init__(self, root: Path | None = None):
+    def __init__(self, root: Path | None = None, settings: LofSettings | None = None):
         self.root = (root or Path.cwd()).resolve()
-        self.settings = LofSettings()
+        self.settings = settings or LofSettings()
+        self._session: ProjectSession | None = None
+
+    @property
+    def session(self) -> ProjectSession:
+        if self._session is None:
+            self._session = ProjectSession(self.root, self.settings)
+        return self._session
 
     @classmethod
     def load(cls, root: Path | None = None) -> "Project":
         return cls(root)
 
-    def validate(self) -> dict[str, Any]:
-        compiler = Compiler(self.root)
-        compiler.load_all()
+    def validate(self) -> ValidationReport:
+        compiler = self.session.new_compiler()
         errors = compiler.validate_all()
-        return {"valid": len(errors) == 0, "errors": errors}
+        return ValidationReport(
+            valid=len(errors) == 0,
+            errors=errors,
+            types_loaded=compiler.registry.type_count,
+            instances_loaded=compiler.registry.instance_count,
+            patches_loaded=compiler.registry.patch_count,
+        )
 
-    def validate_smt(self) -> dict[str, Any]:
+    def validate_smt(self) -> SemanticValidationReport:
         from lof.graph.instance_graph import InstanceGraph
         from lof.validation.smt.validation_engine import SemanticValidationEngine
 
-        compiler = Compiler(self.root)
-        compiler.load_all()
+        compiler = self.session.new_compiler()
         ig = InstanceGraph()
         ig.build(compiler.registry.instances)
         engine = SemanticValidationEngine(compiler.registry, ig)
         result = engine.validate_with_json_diagnostics(output_dir=self.root)
-        return {
-            "status": result.status,
-            "diagnostics": [d.model_dump() for d in result.diagnostics],
-        }  # noqa: E501
+        return SemanticValidationReport(
+            status=result.status,
+            diagnostics=[d.model_dump() for d in result.diagnostics],
+        )
 
-    def compile(self, dry_run: bool = False) -> dict[str, Any]:
-        compiler = Compiler(self.root, dry_run=dry_run)
-        report = compiler.compile()
-        return {
-            "success": report.success,
-            "types_loaded": report.types_loaded,
-            "instances_loaded": report.instances_loaded,
-            "generated": report.artifacts_generated,
-            "patched": report.artifacts_patched,
-            "errors": report.errors,
-        }
+    def compile(
+        self,
+        dry_run: bool = False,
+        instance_filter: str | None = None,
+        type_filter: str | None = None,
+        force: bool = False,
+    ) -> CompilationReport:
+        compiler = self.session.new_compiler(
+            dry_run=dry_run,
+            instance_filter=instance_filter,
+            type_filter=type_filter,
+            force=force,
+        )
+        return compiler.compile()
 
-    def check(self) -> dict[str, Any]:
-        result = {"steps": []}
+    def check(self) -> CheckReport:
+        report = CheckReport()
 
         v = self.validate()
-        result["steps"].append({"step": "validate", "passed": v["valid"]})
-        if not v["valid"]:
-            result["errors"] = v["errors"]
-            return result
+        report.steps.append(StepResult(step="validate", passed=v.valid, details=v.errors))
+        if not v.valid:
+            return report
 
         smt = self.validate_smt()
-        smt_passed = smt["status"] == "sat"
-        result["steps"].append({"step": "smt", "passed": smt_passed})
+        smt_passed = smt.status == "sat"
+        report.steps.append(
+            StepResult(step="smt", passed=smt_passed, details=smt.diagnostics)
+        )
         if not smt_passed:
-            return result
+            return report
 
         c = self.compile()
-        result["steps"].append({"step": "compile", "passed": c["success"]})
-        result["compilation"] = c
-        if not c["success"]:
-            return result
+        report.steps.append(
+            StepResult(
+                step="compile",
+                passed=c.success,
+                details=c.errors,
+            )
+        )
+        report.compilation = c
+        if not c.success:
+            return report
 
         from lof.compilation.artifact_validator import ArtifactValidator
         from lof.compilation.manifest import ManifestManager
 
         validator = ArtifactValidator(self.root)
         val_errors = validator.validate_all()
-        result["steps"].append({"step": "backend_lint", "passed": len(val_errors) == 0})
+        report.steps.append(
+            StepResult(step="backend_lint", passed=len(val_errors) == 0, details=val_errors)
+        )
         if val_errors:
-            result["errors"] = val_errors
-            return result
+            return report
 
         manifest_mgr = ManifestManager(self.root)
         manifest = manifest_mgr.load()
         if manifest.artifacts:
             hashes_ok = all(len(a.hash) == 16 for a in manifest.artifacts)
-            result["steps"].append({"step": "manifest_integrity", "passed": hashes_ok})
+            report.steps.append(
+                StepResult(step="manifest_integrity", passed=hashes_ok)
+            )
 
-        return result
+        report.all_passed = all(s.passed for s in report.steps)
+        return report
 
     def explain(self, target: str) -> str:
         lines = [f"Explanation for: {target}"]

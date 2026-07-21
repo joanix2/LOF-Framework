@@ -4,10 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from lof.reasoning.models import Fact
-from lof.reasoning.engine import DatalogEngine
-from lof.reasoning.models import Rule, Condition, Conclusion
 from lof.compilation.writer import ArtifactPath, ArtifactPathError, Writer
+from lof.reasoning.engine import DatalogEngine
+from lof.reasoning.models import Conclusion, Condition, Fact, Rule
 
 
 class TestContradictionFix:

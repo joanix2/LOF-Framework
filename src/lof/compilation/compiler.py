@@ -5,12 +5,14 @@ from pathlib import Path
 
 from lof.compilation.manifest import ManifestManager
 from lof.compilation.pipeline import Pipeline
+from lof.domain.settings import LofSettings
 from lof.graph.builder import GraphBuilder
 from lof.graph.instance_graph import InstanceGraph
 from lof.graph.validator import GraphValidator
 from lof.loading.loader import Loader
 from lof.loading.registry import Registry
-from lof.models.artifact import CompilationReport, ProjectManifest
+from lof.models.artifact import ProjectManifest
+from lof.models.reports import CompilationReport
 from lof.validation.semantic_validator import SemanticValidator
 from lof.validation.smt.validation_engine import SemanticValidationEngine
 
@@ -23,6 +25,8 @@ class Compiler:
         instance_filter: str | None = None,
         type_filter: str | None = None,
         force: bool = False,
+        registry: Registry | None = None,
+        settings: LofSettings | None = None,
     ):
         self.root = root or Path.cwd()
         self.dry_run = dry_run
@@ -30,9 +34,12 @@ class Compiler:
         self.type_filter = type_filter
         self.force = force
         self.loader = Loader(self.root)
-        self.registry = Registry()
+        self.registry = registry or Registry()
+        self.settings = settings or LofSettings()
 
     def load_all(self) -> None:
+        if self.registry.type_count > 0:
+            return
         for t in self.loader.load_types_from_dir():
             self.registry.register_type(t)
         for inst in self.loader.load_instances_from_dir():

@@ -177,36 +177,42 @@ def explain(
 @app.command()
 def profiles():
     """List available profiles."""
+    from lof.reasoning.profiles import list_profiles
+
     table = Table(title="Available Profiles")
     table.add_column("Name", style="cyan")
     table.add_column("Version", style="green")
     table.add_column("Description")
-    table.add_row("fastapi-react", "0.2", "FastAPI backend + React frontend with full CRUD")
+    for p in list_profiles():
+        table.add_row(p.id, p.version, p.description)
+    if not list_profiles():
+        table.add_row("(none)", "", "No profiles registered")
     console.print(table)
 
 
 @app.command()
-def init() -> None:
+def init(
+    profile: str = typer.Option("fastapi-react", "--profile", "-p", help="Profile name"),
+) -> None:
     root = Path.cwd()
     for d in [
         "definitions/types",
         "definitions/targets",
-        "templates/python",
-        "templates/typescript",
-        "templates/markdown",
-        "templates/mermaid",
+        "templates",
         "instances",
-        "patches/python",
-        "patches/typescript",
-        "interfaces/python",
-        "interfaces/typescript",
-        "generated/python",
-        "generated/typescript",
-        "generated/docs",
-        "generated/diagrams",
+        "patches",
+        "generated",
+        "app/bronze",
+        "app/silver",
+        "app/gold",
+        "app/rules",
     ]:
         (root / d).mkdir(parents=True, exist_ok=True)
-    console.print("[green]LOF project initialized[/green]")
+    readme = root / "README.md"
+    if not readme.exists():
+        readme.write_text(f"# LOF Project\n\nProfile: {profile}\n")
+    console.print(f"[green]LOF project initialized (profile: {profile})[/green]")
+    console.print("  Next: define types in definitions/types/, add instances, then run lof compile")
 
 
 @app.command()
@@ -271,14 +277,13 @@ def compile_cmd(
     force: bool = typer.Option(False, "--force"),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
-    compiler = Compiler(
-        Path.cwd(),
+    project = Project(Path.cwd())
+    report = project.compile(
         dry_run=dry_run,
         instance_filter=instance,
         type_filter=type,
         force=force,
     )
-    report = compiler.compile()
 
     if json_output:
         console.print(json.dumps(report.model_dump(), indent=2))
@@ -327,21 +332,29 @@ def diff() -> None:
     mm = ManifestManager(root)
     old = mm.load()
     if not old.artifacts:
-        console.print("[yellow]No prior manifest.[/yellow]")
+        console.print("[yellow]No prior manifest. Run 'lof compile' first.[/yellow]")
         return
-    compiler = Compiler(root, dry_run=True)
-    report = compiler.compile()
-    from lof.models.artifact import Artifact, ProjectManifest
+    project = Project(root)
+    report = project.compile(dry_run=True)
+    if not report.success:
+        console.print("[red]Compilation failed — cannot compute diff[/red]")
+        return
+    old_map = {a.output: a.hash for a in old.artifacts}
+    new_map = {}
     from lof.utils.hashing import compute_hash
+    for a in report.artifacts_generated:
+        new_map[a] = compute_hash(a)
 
-    new = ProjectManifest(
-        project_hash="",
-        artifacts=[
-            Artifact(instance="", type="", output=a, hash=compute_hash(""))
-            for a in report.artifacts_generated  # noqa: E501
-        ],
-    )
-    changes = mm.diff(old, new)
+    changes = []
+    for out in sorted(set(list(old_map.keys()) + list(new_map.keys()))):
+        old_h = old_map.get(out)
+        new_h = new_map.get(out)
+        if old_h is None:
+            changes.append(f"  [green]ADDED[/green]    {out}")
+        elif new_h is None:
+            changes.append(f"  [red]REMOVED[/red]  {out}")
+        elif old_h != new_h:
+            changes.append(f"  [yellow]MODIFIED[/yellow] {out}")
     if changes:
         for c in changes:
             console.print(c)
@@ -351,26 +364,17 @@ def diff() -> None:
 
 @app.command()
 def check():
-    from lof.compilation.artifact_validator import ArtifactValidator
-
     project = Project(Path.cwd())
-    result = project.check()
+    report = project.check()
+
     all_passed = True
-
-    for step in result["steps"]:
-        status = "[green]PASS[/green]" if step["passed"] else "[red]FAIL[/red]"
-        console.print(f"  {status} {step['step']}")
-        if not step["passed"]:
+    for step in report.steps:
+        status = "[green]PASS[/green]" if step.passed else "[red]FAIL[/red]"
+        console.print(f"  {status} {step.step}")
+        if not step.passed:
             all_passed = False
-
-    generated_dir = Path.cwd() / "generated"
-    if generated_dir.exists():
-        validator = ArtifactValidator(Path.cwd())
-        val_errors = validator.validate_all()
-        if val_errors:
-            all_passed = False
-            for e in val_errors:
-                console.print(f"  [red]FAIL[/red] {e}")
+            for d in step.details[:5]:
+                console.print(f"         {d}")
 
     if all_passed:
         console.print("[green]All checks passed[/green]")

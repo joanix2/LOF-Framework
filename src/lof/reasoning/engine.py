@@ -57,7 +57,11 @@ class DatalogEngine:
                                         iteration=iteration,
                                     )
                                 )
-                            elif existing.is_active and cf.is_active and existing.polarity != cf.polarity:
+                            elif (
+                                existing.is_active
+                                and cf.is_active
+                                and existing.polarity != cf.polarity
+                            ):
                                 contradictions.append(
                                     f"Contradiction: {cf.key} inferred as {cf.polarity} "
                                     f"but already exists as {existing.polarity} "
