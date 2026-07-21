@@ -1,68 +1,33 @@
 # LOP Framework — Règles de programmation orientée langage
 
-## Architecture
+## Architecture MDE à 4 niveaux
 
 ```
-Bronze (tickets bruts, append-only)
-  → Silver (extraction sémantique spaCy)
-  → Reasoning (inférence Datalog)
-  → Gold (DSL applicatif)
-  → SMT validation (Z3)
-  → Compilation (Jinja + patches AST)
-  → Projet généré
-  → Linters + tests
+M3  Métacompilateur       src/lof/                     Python
+M2  Langage (Profile)     profiles/fastapi-react/      JSON + Jinja
+M1  Programme DSL         isoclim.json                 JSON
+M0  Application générée   generated-project/           FastAPI + React
 ```
 
-## Sources modifiables
+## Sources modifiables (M2)
 
-- `definitions/types/` — définitions de types
-- `instances/` — instances d'entités
+- `profiles/fastapi-react/profile.json` — schéma, conventions, contraintes, projections
 - `templates/` — templates Jinja
-- `patches/` — patches AST
-- `schemas/` — schémas JSON
-- `definitions/targets/` — cibles
-- `framework/src/lof/reasoning/profiles/` — règles d'inférence
+- `src/lof/reasoning/profiles/` — règles d'inférence
+- `validation/smt/compilers/` — compilateurs de contraintes
 - `benchmarks/` — scénarios de benchmark
 - `tests/` — tests
 
 ## Sources interdites
 
-Ne jamais modifier directement :
-- `generated/`
-- `generated-project/`
-- `data/` (sauf via `lof bronze add`)
-- `.lof/diagnostics/`
-- SDK OpenAPI généré
-
-## Agents
-
-Voir `.opencode/agents/` pour la liste complète et les responsabilités.
-L'agent orchestrateur analyse la demande et délègue aux agents spécialisés.
-
-## Skills
-
-Voir `.opencode/skills/` pour les procédures réutilisables.
-Chaque skill a un objectif, des étapes, et des validations.
-
-## Workflows
-
-Voir `.opencode/workflows/` pour les enchaînements complets.
+- `isoclim.json` et tout programme DSL (M1) — ❌ Jamais, c'est le modèle métier
+- `generated-project/` — ❌ Jamais, régénéré à chaque compile
+- `.lof/` — ❌ Jamais, interne au compilateur
 
 ## Règles
 
-- Une fonction = une responsabilité
 - Pas de logique métier dans les templates Jinja
 - Pas de contournement de la validation SMT
 - Pas de modification des fichiers générés
-- Pas de valeurs métier en dur (utiliser `domain/settings.py`)
-- Signatures typées pour toutes les APIs publiques
-- `make validate-agentic-system && make format && make lint && make typecheck && make test` après chaque modification
-
-<!-- BEGIN AGENT KANBAN — DO NOT EDIT THIS SECTION -->
-## Agent Kanban
-
-Read `.agentkanban/INSTRUCTION.md` for task workflow rules.
-Read `.agentkanban/memory.md` for project context.
-
-If a task file (`.agentkanban/tasks/**/*.md`) was referenced earlier in this conversation, re-read it before responding and always respond in and at the end the task file.
-<!-- END AGENT KANBAN -->
+- Tout ce qui est M2 doit être dans le profil, pas dans le code Python
+- `make format && make lint && make test` après chaque modification

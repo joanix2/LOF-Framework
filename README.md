@@ -4,109 +4,66 @@
 
 The generated project runs **independently** — it does not require LOF at runtime.
 
-## Architecture
-
-```mermaid
-flowchart LR
-    subgraph Source["📝 Source of Truth"]
-        TYPES[("Types")]
-        INST[("Instances")]
-        TEMPL[("Templates")]
-        PATCH[("Patches")]
-        RULES[("Rules")]
-    end
-
-    subgraph LOF["⚡ LOF Framework"]
-        COMPILER["Compiler<br/>Graph → Context → Render → Patch"]
-        SMT["SMT Validator<br/>Z3"]
-        REASON["Reasoning Engine<br/>Datalog"]
-        GRAPH["Graph Engine<br/>NetworkX"]
-    end
-
-    subgraph Output["📦 Generated Project"]
-        API["FastAPI Backend<br/>SQLAlchemy + Pydantic"]
-        WEB["React Frontend<br/>TanStack Query + Zod"]
-        DOCS[("Docs + Diagrams<br/>Mermaid")]
-    end
-
-    TYPES --> GRAPH
-    INST --> GRAPH
-    RULES --> REASON
-    GRAPH --> COMPILER
-    REASON --> COMPILER
-    TEMPL --> COMPILER
-    PATCH --> COMPILER
-    COMPILER --> SMT
-    SMT -->|SAT| COMPILER
-    SMT -->|UNSAT| DIAG[("Diagnostics")]
-    COMPILER --> API
-    COMPILER --> WEB
-    COMPILER --> DOCS
-
-    style Source fill:#fef3c7,stroke:#d97706
-    style LOF fill:#dbeafe,stroke:#2563eb
-    style Output fill:#d1fae5,stroke:#059669
-```
-
 ## Pipeline
 
 ```mermaid
 flowchart TB
-    subgraph Input["📥 Input Layer"]
-        B[("Bronze<br/>Raw tickets<br/>Append-only")]
+    subgraph M1["M1 — Programme DSL"]
+        BRONZE[("Bronze<br/>Tickets bruts")]
+        APP[("Application JSON<br/>isoclim.json")]
     end
 
-    subgraph Semantic["🧠 Semantic Layer"]
-        S[("Silver<br/>Open semantic graph<br/>spaCy NER + dependencies")]
-        R["Reasoning<br/>Datalog fixpoint<br/>Inference rules"]
-        G[("Gold<br/>Canonical DSL<br/>Application model")]
+    subgraph M2["M2 — Langage (Profile)"]
+        SCHEMA[("Schéma GoldApplication")]
+        NAMING[("Conventions<br/>nommage")]
+        PROJECTIONS[("Projections<br/>déclaratives")]
+        CONSTRAINTS[("Contraintes SMT")]
+        WIDGETS[("Widget mappings")]
+        VERBS[("Verbes FR→EN")]
     end
 
-    subgraph Validation["✅ Validation Layer"]
-        SCHEMA["JSON Schema<br/>Structural validation"]
-        SMT["SMT Solver (Z3)<br/>Semantic consistency"]
-        DECIDE{"SAT ?"}
+    subgraph M3["M3 — Métacompilateur"]
+        COMPILER["Compiler"]
+        SMT["Z3 Solver"]
+        REASON["Datalog Engine"]
+        GRAPH["Graphe + Contexte"]
     end
 
-    subgraph Generation["⚙️ Generation Layer"]
-        T["Jinja Templates<br/>Backend + Frontend"]
-        P["AST Patches (LibCST)<br/>Structural transformations"]
-        PROJ["📦 Generated Project<br/>FastAPI + React"]
+    subgraph M0["M0 — Application générée"]
+        API["FastAPI Backend"]
+        WEB["React Frontend"]
     end
 
-    subgraph Verification["🔍 Verification Layer"]
-        LINT["Ruff + Prettier<br/>Static analysis"]
-        TYPE["Pyright + tsc<br/>Type checking"]
-        TEST["Pytest + Vitest<br/>Behavioral tests"]
-        VALID["✅ Project Validated"]
-    end
+    BRONZE -->|extraction| APP
+    APP --> COMPILER
+    SCHEMA -->|valide| APP
+    COMPILER --> SMT
+    GRAPH --> COMPILER
+    REASON --> COMPILER
+    COMPILER --> API
+    COMPILER --> WEB
+    SMT -->|UNSAT| DIAG[("Diagnostics")]
 
-    B -->|spaCy extraction| S
-    S -->|facts + provenance| R
-    R -->|inferred facts| G
-    G --> SCHEMA
-    SCHEMA --> SMT
-    SMT --> DECIDE
-    DECIDE -->|"UNSAT / UNKNOWN"| DIAG[("📋 Diagnostics<br/>for LLM repair")]
-    DIAG -.->|correction loop| G
-    DECIDE -->|SAT| T
-    T --> P
-    P --> PROJ
-    PROJ --> LINT
-    LINT --> TYPE
-    TYPE --> TEST
-    TEST --> VALID
-
-    style B fill:#fef3c7,stroke:#d97706,color:#000
-    style S fill:#dbeafe,stroke:#2563eb,color:#000
-    style R fill:#ede9fe,stroke:#7c3aed,color:#000
-    style G fill:#d1fae5,stroke:#059669,color:#000
-    style SMT fill:#fee2e2,stroke:#dc2626,color:#000
-    style DECIDE fill:#fef3c7,stroke:#d97706,color:#000
-    style DIAG fill:#fce7f3,stroke:#db2777,color:#000
-    style PROJ fill:#dbeafe,stroke:#2563eb,color:#000
-    style VALID fill:#d1fae5,stroke:#059669,color:#000
+    style M1 fill:#fef3c7,stroke:#d97706
+    style M2 fill:#dbeafe,stroke:#2563eb
+    style M3 fill:#ede9fe,stroke:#7c3aed
+    style M0 fill:#d1fae5,stroke:#059669
 ```
+
+## Ce que le LLM peut modifier
+
+| Composant | Niveau | Modifiable ? |
+|-----------|--------|-------------|
+| Tickets bruts (Bronze) | M1 | ✅ Ajout uniquement (append-only) |
+| Programme DSL (isoclim.json) | M1 | ❌ Jamais — c'est le modèle métier |
+| Règles d'inférence | M2 | ✅ |
+| Contraintes SMT | M2 | ✅ |
+| Templates Jinja | M2 | ✅ |
+| Conventions de nommage | M2 | ✅ |
+| Mapping verbes | M2 | ✅ |
+| Schéma du DSL | M2 | ✅ |
+| Métacompilateur (Python) | M3 | ❌ Ne modifie que le compilateur |
+| Code généré | M0 | ❌ Jamais — régénéré à chaque compile |
 
 ## Quick start
 
