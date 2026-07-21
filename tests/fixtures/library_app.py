@@ -1,4 +1,4 @@
-"""Test fixture: Author/Book/Category — independent of LMP."""
+"""Test fixture: Author/Book/Category — independent of ISOCLIM."""
 
 from lof.models.gold_models import (
     GoldApplication,
