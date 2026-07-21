@@ -3,8 +3,6 @@
   "type": "entity-list-page",
   "values": {
     "name": "\u00c9quipe",
-    "pluralName": "\u00c9quipes",
-    "route": "equipe",
     "fields": [
       {
         "name": "id",
@@ -88,7 +86,9 @@
         "enum_ref": null,
         "default": true
       }
-    ]
+    ],
+    "pluralName": "\u00c9quipes",
+    "route": "equipe"
   },
   "relations": []
 }

@@ -3,6 +3,8 @@
   "type": "entity-model",
   "values": {
     "name": "Client",
+    "pluralName": "Clients",
+    "route": "client",
     "tableName": "client",
     "fields": [
       {
@@ -150,13 +152,14 @@
       }
     ],
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
-    ]
+      "delete",
+      "list",
+      "search"
+    ],
+    "relations": []
   },
   "relations": []
 }

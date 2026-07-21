@@ -3,8 +3,6 @@
   "type": "entity-list-page",
   "values": {
     "name": "Chantier",
-    "pluralName": "Chantiers",
-    "route": "chantier",
     "fields": [
       {
         "name": "id",
@@ -128,7 +126,9 @@
         "enum_ref": null,
         "default": "planned"
       }
-    ]
+    ],
+    "pluralName": "Chantiers",
+    "route": "chantier"
   },
   "relations": []
 }

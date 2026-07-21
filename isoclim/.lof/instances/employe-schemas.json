@@ -127,7 +127,9 @@
         "enum_ref": null,
         "default": true
       }
-    ]
+    ],
+    "pluralName": "Employ\u00e9s",
+    "route": "employe"
   },
   "relations": []
 }

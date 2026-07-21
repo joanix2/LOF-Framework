@@ -3,6 +3,8 @@
   "type": "entity-model",
   "values": {
     "name": "Employ\u00e9",
+    "pluralName": "Employ\u00e9s",
+    "route": "employe",
     "tableName": "employe",
     "fields": [
       {
@@ -130,29 +132,30 @@
       }
     ],
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
+      "delete",
+      "list",
+      "search"
+    ],
+    "relations": [
+      {
+        "id": "employe_equipe",
+        "source": "employe",
+        "target": "equipe-model",
+        "kind": "many-to-one",
+        "source_field": "equipe_id",
+        "target_field": "id",
+        "target_display_field": "name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "equipe_employes"
+      }
     ]
   },
-  "relations": [
-    {
-      "id": "employe_equipe",
-      "source": "employe",
-      "target": "equipe-model",
-      "kind": "many-to-one",
-      "source_field": "equipe_id",
-      "target_field": "id",
-      "target_display_field": "name",
-      "required": true,
-      "nullable": true,
-      "on_delete": "restrict",
-      "list_visible": true,
-      "detail_visible": true,
-      "back_populates": "equipe_employes"
-    }
-  ]
+  "relations": []
 }

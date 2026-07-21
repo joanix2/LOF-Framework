@@ -126,7 +126,9 @@
         "enum_ref": null,
         "default": "planned"
       }
-    ]
+    ],
+    "pluralName": "Chantiers",
+    "route": "chantier"
   },
   "relations": []
 }

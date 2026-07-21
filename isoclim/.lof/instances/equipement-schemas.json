@@ -128,7 +128,9 @@
         "enum_ref": null,
         "default": true
       }
-    ]
+    ],
+    "pluralName": "\u00c9quipements",
+    "route": "equipement"
   },
   "relations": []
 }

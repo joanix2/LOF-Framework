@@ -126,7 +126,9 @@
         "generated": false,
         "enum_ref": null
       }
-    ]
+    ],
+    "pluralName": "Commandes",
+    "route": "commande"
   },
   "relations": []
 }

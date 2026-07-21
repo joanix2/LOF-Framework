@@ -3,8 +3,6 @@
   "type": "entity-list-page",
   "values": {
     "name": "Mission",
-    "pluralName": "Missions",
-    "route": "mission",
     "fields": [
       {
         "name": "id",
@@ -169,7 +167,9 @@
         "generated": false,
         "enum_ref": null
       }
-    ]
+    ],
+    "pluralName": "Missions",
+    "route": "mission"
   },
   "relations": []
 }

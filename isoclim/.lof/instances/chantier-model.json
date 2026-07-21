@@ -3,6 +3,8 @@
   "type": "entity-model",
   "values": {
     "name": "Chantier",
+    "pluralName": "Chantiers",
+    "route": "chantier",
     "tableName": "chantier",
     "fields": [
       {
@@ -129,29 +131,30 @@
       }
     ],
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
+      "delete",
+      "list",
+      "search"
+    ],
+    "relations": [
+      {
+        "id": "chantier_commande",
+        "source": "chantier",
+        "target": "commande-model",
+        "kind": "many-to-one",
+        "source_field": "commande_id",
+        "target_field": "id",
+        "target_display_field": "reference",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "commande_chantiers"
+      }
     ]
   },
-  "relations": [
-    {
-      "id": "chantier_commande",
-      "source": "chantier",
-      "target": "commande-model",
-      "kind": "many-to-one",
-      "source_field": "commande_id",
-      "target_field": "id",
-      "target_display_field": "reference",
-      "required": true,
-      "nullable": true,
-      "on_delete": "restrict",
-      "list_visible": true,
-      "detail_visible": true,
-      "back_populates": "commande_chantiers"
-    }
-  ]
+  "relations": []
 }

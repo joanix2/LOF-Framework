@@ -3,6 +3,8 @@
   "type": "entity-model",
   "values": {
     "name": "\u00c9quipement",
+    "pluralName": "\u00c9quipements",
+    "route": "equipement",
     "tableName": "equipement",
     "fields": [
       {
@@ -131,29 +133,30 @@
       }
     ],
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
+      "delete",
+      "list",
+      "search"
+    ],
+    "relations": [
+      {
+        "id": "equipement_mission",
+        "source": "equipement",
+        "target": "mission-model",
+        "kind": "many-to-one",
+        "source_field": "mission_id",
+        "target_field": "id",
+        "target_display_field": "title",
+        "required": false,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "mission_equipements"
+      }
     ]
   },
-  "relations": [
-    {
-      "id": "equipement_mission",
-      "source": "equipement",
-      "target": "mission-model",
-      "kind": "many-to-one",
-      "source_field": "mission_id",
-      "target_field": "id",
-      "target_display_field": "title",
-      "required": false,
-      "nullable": true,
-      "on_delete": "restrict",
-      "list_visible": true,
-      "detail_visible": true,
-      "back_populates": "mission_equipements"
-    }
-  ]
+  "relations": []
 }

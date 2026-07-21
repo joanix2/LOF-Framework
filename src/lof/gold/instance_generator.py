@@ -20,8 +20,6 @@ class GoldInstanceGenerator:
 
     def generate(self, output_dir: Path) -> list[Path]:
         written = []
-        gold_dir = output_dir / ".lof" / "gold" / "instances"
-        gold_dir.mkdir(parents=True, exist_ok=True)
         inst_dir = output_dir / ".lof" / "instances"
         inst_dir.mkdir(parents=True, exist_ok=True)
 
@@ -38,10 +36,8 @@ class GoldInstanceGenerator:
                     "values": values,
                     "relations": [],
                 }
-                path = gold_dir / f"{entity.id}-{suffix}.json"
+                path = inst_dir / f"{entity.id}-{suffix}.json"
                 path.write_text(json.dumps(instance, indent=2))
-                inst_path = inst_dir / f"{entity.id}-{suffix}.json"
-                inst_path.write_text(json.dumps(instance, indent=2))
                 written.append(path)
 
         return written

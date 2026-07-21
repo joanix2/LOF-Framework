@@ -3,6 +3,8 @@
   "type": "entity-model",
   "values": {
     "name": "Commentaire",
+    "pluralName": "Commentaires",
+    "route": "commentaire-mission",
     "tableName": "commentaire_mission",
     "fields": [
       {
@@ -68,27 +70,28 @@
       }
     ],
     "operations": [
-      "list",
       "create",
       "read",
-      "delete"
+      "delete",
+      "list"
+    ],
+    "relations": [
+      {
+        "id": "commentaire_mission_ref",
+        "source": "commentaire_mission",
+        "target": "mission-model",
+        "kind": "many-to-one",
+        "source_field": "mission_id",
+        "target_field": "id",
+        "target_display_field": "title",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "mission_commentaires"
+      }
     ]
   },
-  "relations": [
-    {
-      "id": "commentaire_mission_ref",
-      "source": "commentaire_mission",
-      "target": "mission-model",
-      "kind": "many-to-one",
-      "source_field": "mission_id",
-      "target_field": "id",
-      "target_display_field": "title",
-      "required": true,
-      "nullable": true,
-      "on_delete": "restrict",
-      "list_visible": true,
-      "detail_visible": true,
-      "back_populates": "mission_commentaires"
-    }
-  ]
+  "relations": []
 }

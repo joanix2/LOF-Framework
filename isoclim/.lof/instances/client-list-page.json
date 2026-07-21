@@ -3,8 +3,6 @@
   "type": "entity-list-page",
   "values": {
     "name": "Client",
-    "pluralName": "Clients",
-    "route": "client",
     "fields": [
       {
         "name": "id",
@@ -149,7 +147,9 @@
         "enum_ref": null,
         "default": true
       }
-    ]
+    ],
+    "pluralName": "Clients",
+    "route": "client"
   },
   "relations": []
 }

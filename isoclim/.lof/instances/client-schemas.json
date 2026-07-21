@@ -147,7 +147,9 @@
         "enum_ref": null,
         "default": true
       }
-    ]
+    ],
+    "pluralName": "Clients",
+    "route": "client"
   },
   "relations": []
 }

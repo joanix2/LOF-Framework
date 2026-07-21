@@ -6,12 +6,12 @@
     "route": "equipement",
     "pluralName": "\u00c9quipements",
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
+      "delete",
+      "list",
+      "search"
     ]
   },
   "relations": []

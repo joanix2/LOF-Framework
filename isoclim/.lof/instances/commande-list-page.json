@@ -3,8 +3,6 @@
   "type": "entity-list-page",
   "values": {
     "name": "Commande",
-    "pluralName": "Commandes",
-    "route": "commande",
     "fields": [
       {
         "name": "id",
@@ -128,7 +126,9 @@
         "generated": false,
         "enum_ref": null
       }
-    ]
+    ],
+    "pluralName": "Commandes",
+    "route": "commande"
   },
   "relations": []
 }

@@ -3,6 +3,8 @@
   "type": "entity-model",
   "values": {
     "name": "\u00c9quipe",
+    "pluralName": "\u00c9quipes",
+    "route": "equipe",
     "tableName": "equipe",
     "fields": [
       {
@@ -89,13 +91,14 @@
       }
     ],
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
-    ]
+      "delete",
+      "list",
+      "search"
+    ],
+    "relations": []
   },
   "relations": []
 }

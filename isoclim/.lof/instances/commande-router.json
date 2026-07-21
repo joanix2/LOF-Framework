@@ -6,12 +6,12 @@
     "route": "commande",
     "pluralName": "Commandes",
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
+      "delete",
+      "list",
+      "search"
     ]
   },
   "relations": []

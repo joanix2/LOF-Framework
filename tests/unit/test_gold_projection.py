@@ -88,7 +88,7 @@ def test_book_relation_from_json():
     app = load_gold_application(LIBRARY_JSON)
     with tempfile.TemporaryDirectory() as tmp:
         GoldInstanceGenerator(app).generate(Path(tmp))
-        book_path = Path(tmp) / ".lof" / "gold" / "instances" / "book-model.json"
+        book_path = Path(tmp) / ".lof" / "instances" / "book-model.json"
         book = json.loads(book_path.read_text())
         rels = book["values"].get("relations", [])
         assert len(rels) == 2

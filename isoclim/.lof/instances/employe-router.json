@@ -6,12 +6,12 @@
     "route": "employe",
     "pluralName": "Employ\u00e9s",
     "operations": [
-      "list",
-      "search",
       "create",
       "read",
       "update",
-      "delete"
+      "delete",
+      "list",
+      "search"
     ]
   },
   "relations": []

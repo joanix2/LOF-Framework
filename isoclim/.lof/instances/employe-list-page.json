@@ -3,8 +3,6 @@
   "type": "entity-list-page",
   "values": {
     "name": "Employ\u00e9",
-    "pluralName": "Employ\u00e9s",
-    "route": "employe",
     "fields": [
       {
         "name": "id",
@@ -129,7 +127,9 @@
         "enum_ref": null,
         "default": true
       }
-    ]
+    ],
+    "pluralName": "Employ\u00e9s",
+    "route": "employe"
   },
   "relations": []
 }

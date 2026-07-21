@@ -3,8 +3,6 @@
   "type": "entity-list-page",
   "values": {
     "name": "Commentaire",
-    "pluralName": "Commentaires",
-    "route": "commentaire-mission",
     "fields": [
       {
         "name": "id",
@@ -67,7 +65,9 @@
         "enum_ref": null,
         "max_length": 100
       }
-    ]
+    ],
+    "pluralName": "Commentaires",
+    "route": "commentaire-mission"
   },
   "relations": []
 }
