@@ -140,7 +140,9 @@ class Compiler:
             if self.dry_run:
                 pass
             else:
-                staging_generated.replace(generated_dir)
+                if generated_dir.exists():
+                    shutil.rmtree(generated_dir)
+                shutil.copytree(staging_generated, generated_dir, dirs_exist_ok=True)
                 manifest_manager.save(new_manifest)
 
         if staging_root.exists():

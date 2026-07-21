@@ -1,6 +1,8 @@
 {
   "id": "employee",
   "description": "Employee profile",
+  "template": "templates/mobile/data/entity.ts.j2",
+  "outputPattern": "generated/typescript/{{ instance_id }}.ts",
   "parameters": {
     "firstName": {"type": "string", "required": true},
     "lastName": {"type": "string", "required": true},
