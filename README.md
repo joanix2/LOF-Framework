@@ -7,47 +7,50 @@ The generated project runs **independently** — it does not require LOF at runt
 ## Pipeline
 
 ```mermaid
-flowchart TB
-    subgraph M1["M1 — Programme DSL"]
-        BRONZE[("Bronze<br/>Tickets bruts")]
-        APP[("Application JSON<br/>isoclim.json")]
+flowchart LR
+    subgraph M1_M0["M1 · Programme"]
+        TICKETS[("Tickets bruts<br/>Bronze")]
+        TRIPLETS[("Triplets extraits<br/>Sujet-Verbe-Objet")]
+        APP[("Modèle applicatif<br/>isoclim.json")]
     end
 
-    subgraph M2["M2 — Langage (Profile)"]
-        SCHEMA[("Schéma GoldApplication")]
-        NAMING[("Conventions<br/>nommage")]
-        PROJECTIONS[("Projections<br/>déclaratives")]
+    subgraph M2["M2 · Langage"]
+        RULES[("Règles d'inférence<br/>Datalog")]
         CONSTRAINTS[("Contraintes SMT")]
-        WIDGETS[("Widget mappings")]
-        VERBS[("Verbes FR→EN")]
+        TEMPLATES[("Templates Jinja")]
+        PROFILE[("Profil<br/>conventions + mapping")]
     end
 
-    subgraph M3["M3 — Métacompilateur"]
-        COMPILER["Compiler"]
-        SMT["Z3 Solver"]
-        REASON["Datalog Engine"]
-        GRAPH["Graphe + Contexte"]
+    subgraph M3["M3 · Métacompilateur"]
+        EXTRACT[("Extraction<br/>spaCy NER + déps")]
+        INFER[("Raisonnement<br/>point fixe Datalog")]
+        COMPILE[("Compilation<br/>graphe → templates → patches")]
+        SMT[("Validation<br/>Z3")]
     end
 
-    subgraph M0["M0 — Application générée"]
-        API["FastAPI Backend"]
-        WEB["React Frontend"]
+    subgraph M0_GEN["M0 · Application"]
+        API[("FastAPI")]
+        WEB[("React")]
     end
 
-    BRONZE -->|extraction| APP
-    APP --> COMPILER
-    SCHEMA -->|valide| APP
-    COMPILER --> SMT
-    GRAPH --> COMPILER
-    REASON --> COMPILER
-    COMPILER --> API
-    COMPILER --> WEB
+    TICKETS -->|NER + dépendances| EXTRACT
+    EXTRACT --> TRIPLETS
+    TRIPLETS -->|faits| INFER
+    RULES --> INFER
+    INFER -->|faits inférés| APP
+    PROFILE --> COMPILE
+    TEMPLATES --> COMPILE
+    APP -->|valide| SMT
+    CONSTRAINTS --> SMT
+    SMT -->|SAT| COMPILE
     SMT -->|UNSAT| DIAG[("Diagnostics")]
+    COMPILE --> API
+    COMPILE --> WEB
 
-    style M1 fill:#fef3c7,stroke:#d97706
+    style M1_M0 fill:#fef3c7,stroke:#d97706
     style M2 fill:#dbeafe,stroke:#2563eb
     style M3 fill:#ede9fe,stroke:#7c3aed
-    style M0 fill:#d1fae5,stroke:#059669
+    style M0_GEN fill:#d1fae5,stroke:#059669
 ```
 
 ## Ce que le LLM peut modifier
