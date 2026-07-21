@@ -53,16 +53,41 @@ class Project:
 
     def check(self) -> dict[str, Any]:
         result = {"steps": []}
+
         v = self.validate()
         result["steps"].append({"step": "validate", "passed": v["valid"]})
-        if v["valid"]:
-            smt = self.validate_smt()
-            smt_passed = smt["status"] == "sat"
-            result["steps"].append({"step": "smt", "passed": smt_passed})
-            if smt_passed:
-                c = self.compile()
-                result["steps"].append({"step": "compile", "passed": c["success"]})
-                result["compilation"] = c
+        if not v["valid"]:
+            result["errors"] = v["errors"]
+            return result
+
+        smt = self.validate_smt()
+        smt_passed = smt["status"] == "sat"
+        result["steps"].append({"step": "smt", "passed": smt_passed})
+        if not smt_passed:
+            return result
+
+        c = self.compile()
+        result["steps"].append({"step": "compile", "passed": c["success"]})
+        result["compilation"] = c
+        if not c["success"]:
+            return result
+
+        from lof.compilation.artifact_validator import ArtifactValidator
+        from lof.compilation.manifest import ManifestManager
+
+        validator = ArtifactValidator(self.root)
+        val_errors = validator.validate_all()
+        result["steps"].append({"step": "backend_lint", "passed": len(val_errors) == 0})
+        if val_errors:
+            result["errors"] = val_errors
+            return result
+
+        manifest_mgr = ManifestManager(self.root)
+        manifest = manifest_mgr.load()
+        if manifest.artifacts:
+            hashes_ok = all(len(a.hash) == 16 for a in manifest.artifacts)
+            result["steps"].append({"step": "manifest_integrity", "passed": hashes_ok})
+
         return result
 
     def explain(self, target: str) -> str:

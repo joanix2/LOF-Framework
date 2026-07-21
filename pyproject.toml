@@ -5,11 +5,11 @@ build-backend = "hatchling.build"
 [project]
 name = "lof-framework"
 version = "0.2.0"
-description = "Language-Oriented Programming Framework — generative DSL to autonomous FastAPI+React projects"
+description = "Language-Oriented Programming Framework — generative DSL to autonomous projects"
 requires-python = ">=3.12"
 authors = [{ name = "LOF Contributors" }]
 license = { text = "MIT" }
-keywords = ["code-generation", "dsl", "fastapi", "react", "low-code"]
+keywords = ["code-generation", "dsl", "low-code", "framework"]
 readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -43,8 +43,8 @@ dev = [
 all = ["lof-framework[ner]", "lof-framework[dev]"]
 
 [project.urls]
-Homepage = "https://github.com/graphify-labs/lof"
-Repository = "https://github.com/graphify-labs/lof"
+Homepage = "https://github.com/joanix2/LOF-Framework"
+Repository = "https://github.com/joanix2/LOF-Framework"
 
 [project.scripts]
 lof = "lof.cli:app"

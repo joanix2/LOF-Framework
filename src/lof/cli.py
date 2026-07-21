@@ -106,8 +106,15 @@ def doctor():
 
 
 @app.command()
-def dev():
+def dev(
+    print_commands: bool = typer.Option(
+        False, "--print-commands", "-p",
+        help="Print commands instead of running",
+    ),
+):
     """Start development servers for the generated project."""
+    import subprocess
+
     root = Path.cwd()
     gen = root / "generated"
     if not gen.exists():
@@ -116,14 +123,45 @@ def dev():
 
     api_dir = gen / "apps" / "api"
     web_dir = gen / "apps" / "web"
+    commands = []
 
     if api_dir.exists():
-        console.print("[green]Starting API...[/green]")
-        console.print(f"  cd {api_dir} && uvicorn app.main:app --reload --port 8000")
+        commands.append(("API", str(api_dir), ["uvicorn", "app.main:app", "--reload", "--port", "8000"]))  # noqa: E501
     if web_dir.exists():
-        console.print("[green]Starting Web...[/green]")
-        console.print(f"  cd {web_dir} && npm run dev")
-    console.print("\n[yellow]Run these commands in separate terminals.[/yellow]")
+        commands.append(("Web", str(web_dir), ["npm", "run", "dev"]))
+
+    if not commands:
+        console.print("[yellow]No known services found in generated/[/yellow]")
+        raise typer.Exit(1)
+
+    if print_commands:
+        for name, cwd, cmd in commands:
+            console.print(f"[green]{name}:[/green] cd {cwd} && {' '.join(cmd)}")
+        return
+
+    processes = []
+    try:
+        for name, cwd, cmd in commands:
+            console.print(f"[green]Starting {name}...[/green]  cd {cwd} && {' '.join(cmd)}")
+            p = subprocess.Popen(cmd, cwd=cwd)
+            processes.append(p)
+
+        for p in processes:
+            p.wait()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Shutting down...[/yellow]")
+        for p in processes:
+            p.terminate()
+        for p in processes:
+            try:
+                p.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                p.kill()
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        for p in processes:
+            p.terminate()
+        raise typer.Exit(1)
 
 
 @app.command()
@@ -233,7 +271,13 @@ def compile_cmd(
     force: bool = typer.Option(False, "--force"),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
-    compiler = Compiler(Path.cwd(), dry_run=dry_run)
+    compiler = Compiler(
+        Path.cwd(),
+        dry_run=dry_run,
+        instance_filter=instance,
+        type_filter=type,
+        force=force,
+    )
     report = compiler.compile()
 
     if json_output:
@@ -306,15 +350,32 @@ def diff() -> None:
 
 
 @app.command()
-def check() -> None:
-    compiler = Compiler(Path.cwd())
-    compiler.load_all()
-    errors = compiler.validate_all()
-    if errors:
-        for e in errors:
-            console.print(f"[red]ERROR:[/red] {e}")
+def check():
+    from lof.compilation.artifact_validator import ArtifactValidator
+
+    project = Project(Path.cwd())
+    result = project.check()
+    all_passed = True
+
+    for step in result["steps"]:
+        status = "[green]PASS[/green]" if step["passed"] else "[red]FAIL[/red]"
+        console.print(f"  {status} {step['step']}")
+        if not step["passed"]:
+            all_passed = False
+
+    generated_dir = Path.cwd() / "generated"
+    if generated_dir.exists():
+        validator = ArtifactValidator(Path.cwd())
+        val_errors = validator.validate_all()
+        if val_errors:
+            all_passed = False
+            for e in val_errors:
+                console.print(f"  [red]FAIL[/red] {e}")
+
+    if all_passed:
+        console.print("[green]All checks passed[/green]")
+    else:
         raise typer.Exit(1)
-    console.print("[green]All checks passed[/green]")
 
 
 @app.command()

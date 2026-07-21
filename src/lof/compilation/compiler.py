@@ -1,3 +1,6 @@
+import datetime
+import shutil
+import uuid
 from pathlib import Path
 
 from lof.compilation.manifest import ManifestManager
@@ -13,9 +16,19 @@ from lof.validation.smt.validation_engine import SemanticValidationEngine
 
 
 class Compiler:
-    def __init__(self, root: Path | None = None, dry_run: bool = False):
+    def __init__(
+        self,
+        root: Path | None = None,
+        dry_run: bool = False,
+        instance_filter: str | None = None,
+        type_filter: str | None = None,
+        force: bool = False,
+    ):
         self.root = root or Path.cwd()
         self.dry_run = dry_run
+        self.instance_filter = instance_filter
+        self.type_filter = type_filter
+        self.force = force
         self.loader = Loader(self.root)
         self.registry = Registry()
 
@@ -75,32 +88,58 @@ class Compiler:
             report.success = False
             return report
 
+        instances = list(self.registry.instances.values())
+        if self.instance_filter:
+            instances = [i for i in instances if i.id == self.instance_filter]
+        if self.type_filter:
+            instances = [i for i in instances if i.type == self.type_filter]
+
+        staging_id = uuid.uuid4().hex[:12]
+        staging_root = self.root / ".lof" / "staging" / staging_id
         manifest_manager = ManifestManager(self.root)
-        pipeline = Pipeline(self.registry, self.root, self.dry_run)
+
+        pipeline = Pipeline(self.registry, self.root, self.dry_run, staging_root=staging_root)
         artifacts = []
 
-        for inst in self.registry.instances.values():
+        for inst in instances:
             if not inst.enabled:
                 continue
             artifact, errors = pipeline.process_instance(inst)
             if errors:
                 report.errors.extend(errors)
+                break
             if artifact:
                 artifacts.append(artifact)
                 report.artifacts_generated.append(artifact.output)
                 if artifact.patches:
                     report.artifacts_patched.append(artifact.output)
 
+        if report.errors:
+            if staging_root.exists():
+                shutil.rmtree(staging_root)
+            report.success = False
+            return report
+
         new_manifest = ProjectManifest(project_hash="")
         for a in artifacts:
             new_manifest = manifest_manager.add_artifact(new_manifest, a)
         new_manifest.project_hash = manifest_manager.compute_project_hash(new_manifest)
-        import datetime
-
         new_manifest.compiled_at = datetime.datetime.now().isoformat()
-        manifest_manager.save(new_manifest)
 
-        report.success = len(report.errors) == 0
+        generated_dir = self.root / "generated"
+        staging_generated = staging_root / "generated"
+
+        if staging_generated.exists():
+            if self.dry_run:
+                pass
+            else:
+                staging_generated.replace(generated_dir)
+                manifest_manager.save(new_manifest)
+
+        if staging_root.exists():
+            shutil.rmtree(staging_root)
+
+        report.success = True
         return report
 
     def get_compilation_order(self) -> list[str]:

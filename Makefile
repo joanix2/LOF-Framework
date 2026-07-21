@@ -1,4 +1,4 @@
-.PHONY: help install doctor format format-check lint typecheck test test-unit test-cli test-generation test-independence build package clean ci
+.PHONY: help install doctor format format-check lint lint-fix typecheck test test-unit test-cli test-generation test-independence build package clean ci
 
 help: ## Show this help
 	@awk -F ':.*?## ' '/^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -16,11 +16,14 @@ format: ## Format all code
 format-check: ## Check formatting
 	ruff format --check src/lof tests
 
-lint: ## Lint all code
+lint: ## Check lint (no fixes)
+	ruff check src/lof tests
+
+lint-fix: ## Fix lint issues
 	ruff check --fix src/lof tests
 
 typecheck: ## Type checking
-	pyright src/lof || true
+	pyright src/lof
 
 test: test-unit test-cli ## Run all tests
 
@@ -33,12 +36,11 @@ test-cli: ## Test CLI commands
 	python -m lof.cli profiles > /dev/null
 
 test-generation: ## Test project generation
-	cd /tmp && rm -rf lof-test-gen && lof new lof-test-gen --mode minimal && rm -rf lof-test-gen
+	cd /tmp && rm -rf lof-test-gen && lof new lof-test-gen --profile fastapi-react --mode minimal && rm -rf lof-test-gen
 
-test-independence: ## Verify generated project is independent
+test-independence: ## Verify generated project is independent (blocking)
 	cd /tmp && rm -rf lof-test-indep && lof new lof-test-indep --mode minimal
-	@echo "Generated project does NOT import LOF:"
-	@! grep -r "from lof\|import lof" /tmp/lof-test-indep/generated 2>/dev/null && echo "  ✓ No LOF dependency found" || echo "  ⚠  LOF dependency detected"
+	@grep -r "from lof\|import lof" /tmp/lof-test-indep/generated 2>/dev/null && { echo "  FAIL: LOF dependency detected in generated project"; exit 1; } || echo "  ✓ No LOF dependency found in generated project"
 
 build: ## Build package (wheel + sdist)
 	uv build
@@ -59,4 +61,4 @@ distclean: clean ## Remove everything except source
 clean: ## Remove build artifacts
 	rm -rf dist/ build/ *.egg-info
 
-ci: format-check lint test test-cli test-generation test-independence ## Full CI
+ci: format-check lint typecheck test test-cli test-generation test-independence ## Full CI

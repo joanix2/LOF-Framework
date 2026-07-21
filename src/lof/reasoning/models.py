@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+TruthPolarity = Literal["positive", "negative"]
+EpistemicStatus = Literal["asserted", "inferred", "hypothesized", "rejected", "contradicted"]
 TruthStatus = Literal["asserted", "inferred", "hypothesized", "rejected", "contradicted"]
 RuleMode = Literal["certain", "default", "hypothesis"]
 WorldType = Literal["open", "closed"]
@@ -12,6 +14,7 @@ class Fact(BaseModel):
     predicate: str
     args: tuple[str, ...]
     status: TruthStatus = "asserted"
+    polarity: TruthPolarity = "positive"
     confidence: float = 1.0
     rule_id: str | None = None
     source_facts: list[str] = Field(default_factory=list)
@@ -19,6 +22,10 @@ class Fact(BaseModel):
     explanation: str | None = None
     world: WorldType = "open"
     created_at: datetime = Field(default_factory=datetime.now)
+
+    @property
+    def is_active(self) -> bool:
+        return self.status != "rejected"
 
     @property
     def key(self) -> str:

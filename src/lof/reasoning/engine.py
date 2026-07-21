@@ -43,22 +43,28 @@ class DatalogEngine:
                         cf = self._build_conclusion_fact(
                             conclusion, bindings, rule, source_keys, fact_map
                         )  # noqa: E501
-                        if cf and cf.key not in fact_map:
-                            fact_map[cf.key] = cf
-                            new_facts.append(cf)
-                            iteration_traces.append(
-                                InferenceTrace(
-                                    fact_key=cf.key,
-                                    rule_id=rule.id,
-                                    source_keys=list(source_keys),
-                                    bindings=dict(bindings),
-                                    iteration=iteration,
+                        if cf:
+                            existing = fact_map.get(cf.key)
+                            if existing is None:
+                                fact_map[cf.key] = cf
+                                new_facts.append(cf)
+                                iteration_traces.append(
+                                    InferenceTrace(
+                                        fact_key=cf.key,
+                                        rule_id=rule.id,
+                                        source_keys=list(source_keys),
+                                        bindings=dict(bindings),
+                                        iteration=iteration,
+                                    )
                                 )
-                            )
+                            elif existing.is_active and cf.is_active and existing.polarity != cf.polarity:
+                                contradictions.append(
+                                    f"Contradiction: {cf.key} inferred as {cf.polarity} "
+                                    f"but already exists as {existing.polarity} "
+                                    f"(rule: {rule.id})"
+                                )
 
             traces.extend(iteration_traces)
-            contras = self._detect_contradictions(fact_map)
-            contradictions.extend(contras)
 
             if not new_facts:
                 converged = True
@@ -199,14 +205,18 @@ class DatalogEngine:
         contras: list[str] = []
         groups: dict[str, list[Fact]] = defaultdict(list)
         for f in fact_map.values():
-            if f.status == "rejected":
-                continue
             groups[f.key].append(f)
 
         for key, facts in groups.items():
-            statuses = {f.status for f in facts}
-            if "asserted" in statuses and "rejected" in statuses:
-                contras.append(f"Contradiction: {key} is both asserted and rejected")
-            if "inferred" in statuses and "rejected" in statuses:
-                contras.append(f"Contradiction: {key} is inferred but rejected")
+            active = [f for f in facts if f.is_active]
+            if len(active) < 2:
+                continue
+            for i in range(len(active)):
+                for j in range(i + 1, len(active)):
+                    if active[i].polarity != active[j].polarity:
+                        contras.append(
+                            f"Contradiction: {key} is both "
+                            f"{active[i].polarity} ({active[i].status}) and "
+                            f"{active[j].polarity} ({active[j].status})"
+                        )
         return contras

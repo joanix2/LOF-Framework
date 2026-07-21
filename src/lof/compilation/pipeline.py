@@ -17,13 +17,21 @@ from lof.utils.hashing import compute_hash
 
 
 class Pipeline:
-    def __init__(self, registry: Registry, root: Path | None = None, dry_run: bool = False):
+    def __init__(
+        self,
+        registry: Registry,
+        root: Path | None = None,
+        dry_run: bool = False,
+        staging_root: Path | None = None,
+    ):
         self.registry = registry
         self.root = root or Path.cwd()
         self.dry_run = dry_run
+        self.staging_root = staging_root
         self.renderer = JinjaRenderer(self.root)
         self.patch_engine = PatchEngine()
-        self.writer = Writer(self.root, dry_run)
+        writer_root = staging_root if staging_root else self.root
+        self.writer = Writer(writer_root, dry_run)
         self.manifest_manager = ManifestManager(self.root)
         self.instance_graph = InstanceGraph()
         self.instance_graph.build(registry.instances)

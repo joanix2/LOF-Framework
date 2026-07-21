@@ -58,7 +58,7 @@ flowchart TB
 
     subgraph Semantic["🧠 Semantic Layer"]
         S[("Silver<br/>Open semantic graph<br/>spaCy NER + dependencies")]
-        R["Reasoning<br/>Datalog fixpoint<br/>25 inference rules"]
+        R["Reasoning<br/>Datalog fixpoint<br/>Inference rules"]
         G[("Gold<br/>Canonical DSL<br/>Application model")]
     end
 

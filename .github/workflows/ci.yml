@@ -20,6 +20,7 @@ jobs:
       - run: uv sync --frozen --all-extras
       - run: uv run ruff check src/lof tests
       - run: uv run ruff format --check src/lof tests
+      - run: uv run pyright src/lof tests
 
   unit-tests:
     runs-on: ubuntu-latest
