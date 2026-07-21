@@ -1,0 +1,20 @@
+{
+  "id": "mission-MIS-043",
+  "type": "mission",
+  "values": {
+    "reference": "MIS-2026-043",
+    "title": "Installation d'une porte sectionnelle - zone de stockage",
+    "status": "in_progress",
+    "priority": "normal",
+    "description": "Installer une porte sectionnelle industrielle sur la nouvelle zone de stockage.",
+    "startTime": "09:00",
+    "endTime": "15:00",
+    "estimatedDuration": 6,
+    "clientId": "client-atlantique",
+    "worksiteId": "worksite-chambre-froide",
+    "teamMembers": ["employee-julien", "employee-karim"],
+    "safetyChecklist": ["Port des chaussures de sécurité", "Port du casque", "Travail en hauteur"],
+    "equipmentChecklist": ["Visseuses", "Perforateur", "Laser de mesure", "Nacelle"],
+    "materialChecklist": ["Porte sectionnelle", "Rails de guidage", "Moteur", "Commandes"]
+  }
+}

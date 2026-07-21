@@ -1,0 +1,7 @@
+{
+  "id": "expo-component",
+  "language": "typescript",
+  "extension": ".tsx",
+  "validators": ["tsc"],
+  "astAdapter": null
+}

@@ -1,0 +1,20 @@
+{
+  "id": "mission-MIS-044",
+  "type": "mission",
+  "values": {
+    "reference": "MIS-2026-044",
+    "title": "Maintenance porte souple rapide",
+    "status": "completed",
+    "priority": "normal",
+    "description": "Maintenance préventive et corrective de la porte souple rapide.",
+    "startTime": "10:00",
+    "endTime": "12:00",
+    "estimatedDuration": 2,
+    "clientId": "client-atlantique",
+    "worksiteId": "worksite-chambre-froide",
+    "teamMembers": ["employee-lucas"],
+    "safetyChecklist": ["Port des équipements de protection"],
+    "equipmentChecklist": ["Multimètre", "Jeu de clés", "Tournevis"],
+    "materialChecklist": ["Capteur de remplacement"]
+  }
+}

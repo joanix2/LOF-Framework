@@ -1,0 +1,12 @@
+{
+  "id": "employee-karim",
+  "type": "employee",
+  "values": {
+    "firstName": "Karim",
+    "lastName": "Benali",
+    "role": "Poseur",
+    "team": "Équipe Pose 2",
+    "phone": "06 12 34 56 78",
+    "certifications": ["Travail en hauteur", "CACES nacelle"]
+  }
+}

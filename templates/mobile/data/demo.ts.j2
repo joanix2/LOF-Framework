@@ -1,0 +1,105 @@
+export interface Employee {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  team: string;
+  phone: string;
+  vehicle?: string;
+  certifications: string[];
+}
+
+export interface Mission {
+  reference: string;
+  title: string;
+  status: 'planned' | 'in_progress' | 'paused' | 'blocked' | 'completed';
+  priority: 'normal' | 'urgent';
+  description: string;
+  startTime: string;
+  endTime: string;
+  estimatedDuration: number;
+  clientId: string;
+  worksiteId: string;
+  teamMembers: string[];
+  safetyChecklist: string[];
+  equipmentChecklist: string[];
+  materialChecklist: string[];
+}
+
+export const DEMO_EMPLOYEE: Employee = {
+  id: 'employee-julien',
+  firstName: 'Julien',
+  lastName: 'Moreau',
+  role: "Chef d'équipe pose",
+  team: 'Équipe Pose 2',
+  phone: '06 45 23 18 90',
+  vehicle: 'Renault Master - GH-482-KL',
+  certifications: ['Travail en hauteur', 'CACES nacelle', 'Habilitation électrique B1V', 'Permis B'],
+};
+
+export const DEMO_MISSIONS: Mission[] = [
+  {
+    reference: 'MIS-2026-042',
+    title: 'Pose de panneaux isothermes',
+    status: 'planned',
+    priority: 'normal',
+    description: 'Poser les panneaux isothermes sur les parois nord et est.',
+    startTime: '08:00',
+    endTime: '16:30',
+    estimatedDuration: 8,
+    clientId: 'client-atlantique',
+    worksiteId: 'worksite-chambre-froide',
+    teamMembers: ['employee-julien', 'employee-karim', 'employee-lucas'],
+    safetyChecklist: ['Port des chaussures de sécurité', 'Port du casque', 'Travail en hauteur'],
+    equipmentChecklist: ['Visseuses', 'Scie circulaire', 'Laser de mesure', 'Nacelle'],
+    materialChecklist: ['18 panneaux isothermes 100mm', '24 profils aluminium', '12 cartouches de mastic'],
+  },
+  {
+    reference: 'MIS-2026-043',
+    title: 'Installation porte sectionnelle',
+    status: 'in_progress',
+    priority: 'normal',
+    description: 'Installer une porte sectionnelle industrielle.',
+    startTime: '09:00',
+    endTime: '15:00',
+    estimatedDuration: 6,
+    clientId: 'client-atlantique',
+    worksiteId: 'worksite-chambre-froide',
+    teamMembers: ['employee-julien', 'employee-karim'],
+    safetyChecklist: ['Port des chaussures de sécurité', 'Port du casque'],
+    equipmentChecklist: ['Visseuses', 'Perforateur', 'Laser de mesure'],
+    materialChecklist: ['Porte sectionnelle', 'Rails de guidage', 'Moteur'],
+  },
+  {
+    reference: 'MIS-2026-044',
+    title: 'Maintenance porte souple',
+    status: 'completed',
+    priority: 'normal',
+    description: 'Maintenance préventive et corrective.',
+    startTime: '10:00',
+    endTime: '12:00',
+    estimatedDuration: 2,
+    clientId: 'client-atlantique',
+    worksiteId: 'worksite-chambre-froide',
+    teamMembers: ['employee-lucas'],
+    safetyChecklist: ['Port des EPI'],
+    equipmentChecklist: ['Multimètre', 'Jeu de clés'],
+    materialChecklist: ['Capteur de remplacement'],
+  },
+  {
+    reference: 'MIS-2026-045',
+    title: 'Dépannage chambre froide',
+    status: 'planned',
+    priority: 'urgent',
+    description: "La porte ne ferme plus et la température remonte.",
+    startTime: '17:00',
+    endTime: '19:00',
+    estimatedDuration: 2,
+    clientId: 'client-atlantique',
+    worksiteId: 'worksite-chambre-froide',
+    teamMembers: ['employee-julien', 'employee-lucas'],
+    safetyChecklist: ['Port des EPI', 'Désinfection'],
+    equipmentChecklist: ['Multimètre', 'Jeu de clés'],
+    materialChecklist: ['Joint de porte', 'Fermeture provisoire'],
+  },
+];

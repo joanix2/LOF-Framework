@@ -1,4 +1,5 @@
 from lof.reasoning.profiles.fastapi_react import FASTAPI_REACT_RULES
+from lof.reasoning.profiles.mobile_field import MOBILE_FIELD_RULES
 from lof.reasoning.profiles.registry import ProfileRegistry
 
 _PROFILE_REGISTRY: ProfileRegistry | None = None
@@ -10,6 +11,9 @@ def _get_registry() -> ProfileRegistry:
         _PROFILE_REGISTRY = ProfileRegistry()
         _PROFILE_REGISTRY.register(
             "fastapi-react", "0.3", "FastAPI backend + React frontend", FASTAPI_REACT_RULES
+        )
+        _PROFILE_REGISTRY.register(
+            "mobile-field", "0.1", "React Native + Expo mobile field app", MOBILE_FIELD_RULES
         )
     return _PROFILE_REGISTRY
 

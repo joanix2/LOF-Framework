@@ -1,0 +1,13 @@
+{
+  "id": "worksite-chambre-froide",
+  "type": "worksite",
+  "values": {
+    "name": "Extension chambre froide négative",
+    "address": "18 rue des Artisans",
+    "city": "Saint-Genis-de-Saintonge",
+    "postalCode": "17240",
+    "accessHours": "7h30 - 17h00",
+    "siteContact": "M. Dubois",
+    "sitePhone": "05 46 98 12 34"
+  }
+}

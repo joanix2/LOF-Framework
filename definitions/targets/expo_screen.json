@@ -1,0 +1,7 @@
+{
+  "id": "expo-screen",
+  "language": "typescript",
+  "extension": ".tsx",
+  "validators": ["tsc"],
+  "astAdapter": null
+}

@@ -1,0 +1,14 @@
+{
+  "id": "employee",
+  "description": "Employee profile",
+  "parameters": {
+    "firstName": {"type": "string", "required": true},
+    "lastName": {"type": "string", "required": true},
+    "role": {"type": "string"},
+    "team": {"type": "string"},
+    "phone": {"type": "string"},
+    "vehicle": {"type": "string"},
+    "certifications": {"type": "array"}
+  },
+  "targetType": "expo-service"
+}
