@@ -1,0 +1,15 @@
+{
+  "id": "schema",
+  "template": ".lof/templates/backend/schemas.py.j2",
+  "targetType": "python-module",
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/schemas.py",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

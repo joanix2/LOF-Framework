@@ -24,7 +24,6 @@ class ProjectionExpander:
                 expanded.extend(self._expand_entity(inst))
             else:
                 expanded.append(inst)
-
         return expanded
 
     def _expand_entity(self, entity_inst: InstanceDefinition) -> list[InstanceDefinition]:
@@ -35,20 +34,19 @@ class ProjectionExpander:
 
         for proj_def in self.profile.projections:
             condition = proj_def.get("condition", "always")
-            if not self._match_condition(condition, ops, can_list, has_ops):
+            if not self._match_condition(condition, has_ops, can_list):
                 continue
 
             type_id = proj_def["type"]
-            suffix = type_id.replace("entity-", "")
 
             proj_inst = InstanceDefinition(
-                id=f"{entity_inst.id}-{suffix}",
+                id=f"{entity_inst.id}_{type_id}",
                 type=type_id,
                 values=dict(entity_inst.values),
                 enabled=entity_inst.enabled,
             )
 
-            if type_id == "entity-model":
+            if type_id == "model":
                 proj_inst.values["relations"] = [
                     {**r, "target": f"{r['target']}"}
                     for r in entity_inst.values.get("relations", [])
@@ -58,7 +56,7 @@ class ProjectionExpander:
 
         return results
 
-    def _match_condition(self, condition: str, ops: list, can_list: bool, has_ops: bool) -> bool:
+    def _match_condition(self, condition: str, has_ops: bool, can_list: bool) -> bool:
         if condition == "always":
             return True
         if condition == "has_operations":
