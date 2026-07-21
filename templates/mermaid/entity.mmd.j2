@@ -1,8 +1,0 @@
-classDiagram
-{% for entity in entities %}
-    class {{ entity.name }} {
-{% for field in entity.fields %}
-        +{{ field.type }} {{ field.name }}
-{% endfor %}
-    }
-{% endfor %}
