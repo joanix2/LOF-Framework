@@ -57,3 +57,12 @@ Voir `.opencode/workflows/` pour les enchaînements complets.
 - Pas de valeurs métier en dur (utiliser `domain/settings.py`)
 - Signatures typées pour toutes les APIs publiques
 - `make validate-agentic-system && make format && make lint && make typecheck && make test` après chaque modification
+
+<!-- BEGIN AGENT KANBAN — DO NOT EDIT THIS SECTION -->
+## Agent Kanban
+
+Read `.agentkanban/INSTRUCTION.md` for task workflow rules.
+Read `.agentkanban/memory.md` for project context.
+
+If a task file (`.agentkanban/tasks/**/*.md`) was referenced earlier in this conversation, re-read it before responding and always respond in and at the end the task file.
+<!-- END AGENT KANBAN -->
