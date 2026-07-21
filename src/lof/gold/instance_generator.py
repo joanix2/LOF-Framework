@@ -14,25 +14,50 @@ class GoldInstanceGenerator:
 
     def generate(self, output_dir: Path) -> list[Path]:
         written = []
+        gold_dir = output_dir / "data" / "gold" / "instances"
+        gold_dir.mkdir(parents=True, exist_ok=True)
+
         for entity in self.application.entities:
             ctx = self.projector.project(entity, self.application.entities)
-            instance = {
-                "id": ctx["id"],
-                "type": "entity-model",
-                "values": {
-                    "name": ctx["name"],
-                    "pluralName": ctx["pluralName"],
-                    "route": ctx["route"],
-                    "tableName": ctx["tableName"],
-                    "fields": ctx["fields"],
-                    "operations": ctx["operations"],
-                    "displayField": ctx["displayField"],
-                },
-                "relations": ctx["relations"],
-            }
-            gold_dir = output_dir / "data" / "gold" / "instances"
-            gold_dir.mkdir(parents=True, exist_ok=True)
-            path = gold_dir / f"{entity.id}.json"
-            path.write_text(json.dumps(instance, indent=2))
-            written.append(path)
+            n, r, pl, rt, tb = ctx["name"], ctx["route"], ctx["pluralName"], ctx["route"], ctx["tableName"]
+            fds, ops = ctx["fields"], ctx["operations"]
+
+            model_relations = [
+                {**rel, "target": f"{rel['target']}-model"}
+                for rel in ctx.get("relations", [])
+            ]
+
+            projections = [
+                ("model", "entity-model", {
+                    "name": n, "tableName": tb, "fields": fds, "operations": ops,
+                    "relations": model_relations,
+                }),
+                ("schemas", "entity-schemas", {
+                    "name": n, "fields": fds,
+                }),
+                ("router", "entity-router", {
+                    "name": n, "route": rt, "pluralName": pl, "operations": ops,
+                }),
+                ("types", "entity-types", {
+                    "name": n, "fields": fds,
+                }),
+                ("hooks", "entity-hooks", {
+                    "name": n, "route": rt, "pluralName": pl,
+                }),
+                ("list-page", "entity-list-page", {
+                    "name": n, "pluralName": pl, "route": rt, "fields": fds,
+                }),
+            ]
+
+            for suffix, type_id, values in projections:
+                instance = {
+                    "id": f"{entity.id}-{suffix}",
+                    "type": type_id,
+                    "values": values,
+                    "relations": values.pop("relations", []) if suffix == "model" else [],
+                }
+                path = gold_dir / f"{entity.id}-{suffix}.json"
+                path.write_text(json.dumps(instance, indent=2))
+                written.append(path)
+
         return written

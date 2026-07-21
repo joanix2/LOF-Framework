@@ -105,5 +105,7 @@ def test_book_relation_preserved():
         import json
         book_path = tmp_p / "data" / "gold" / "instances" / "book.json"
         book = json.loads(book_path.read_text())
-        assert len(book["relations"]) == 1
-        assert book["relations"][0]["target"] == "author"
+        assert len(book["relations"]) == 2
+        targets = [r["target"] for r in book["relations"]]
+        assert "author" in targets
+        assert "category" in targets
