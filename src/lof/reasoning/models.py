@@ -68,12 +68,21 @@ class InferenceTrace(BaseModel):
     iteration: int = 0
 
 
+class RuleStats(BaseModel):
+    rule_id: str
+    match_count: int = 0
+    produce_count: int = 0
+    eval_time_ms: float = 0.0
+
+
 class ReasoningResult(BaseModel):
     facts: list[Fact] = Field(default_factory=list)
     inferred: list[Fact] = Field(default_factory=list)
     hypotheses: list[Fact] = Field(default_factory=list)
     traces: list[InferenceTrace] = Field(default_factory=list)
     contradictions: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
     iteration_count: int = 0
     converged: bool = False
     duration_ms: float = 0.0
+    stats: list[RuleStats] = Field(default_factory=list)

@@ -1,3 +1,5 @@
+"""Datalog engine with semi-naive evaluation, negation, indexing, and statistics."""
+
 import time
 from collections import defaultdict
 
@@ -8,8 +10,16 @@ from lof.reasoning.models import (
     InferenceTrace,
     ReasoningResult,
     Rule,
+    RuleStats,
     TruthStatus,
 )
+
+# Predicates known to be closed-world (absence = negation)
+CLOSED_WORLD_PREDICATES = {
+    "requires_projection",
+    "requires_endpoint",
+    "form_widget",
+}
 
 
 class DatalogEngine:
@@ -19,6 +29,13 @@ class DatalogEngine:
         for rule in rules:
             for c in rule.when:
                 self._rule_index[c.predicate].append(rule)
+        self._stats: dict[str, RuleStats] = {
+            rule.id: RuleStats(rule_id=rule.id) for rule in rules
+        }
+
+    @property
+    def stats(self) -> list[RuleStats]:
+        return list(self._stats.values())
 
     def evaluate(self, facts: list[Fact], max_iterations: int = 100) -> ReasoningResult:
         start = time.time()
@@ -26,28 +43,53 @@ class DatalogEngine:
         for f in facts:
             fact_map[f.key] = f
 
+        errors: list[str] = []
+        for rule in self.rules:
+            rule_errors = self._validate_rule(rule)
+            errors.extend(rule_errors)
+        if errors:
+            return ReasoningResult(
+                facts=list(fact_map.values()),
+                inferred=[],
+                hypotheses=[],
+                traces=[],
+                contradictions=[],
+                errors=errors,
+                iteration_count=0,
+                converged=False,
+                duration_ms=(time.time() - start) * 1000,
+                stats=list(self._stats.values()),
+            )
+
         traces: list[InferenceTrace] = []
         contradictions: list[str] = []
         iteration = 0
         converged = False
 
+        new_keys: set[str] = set(fact_map.keys())
+
         while iteration < max_iterations:
             iteration += 1
-            new_facts: list[Fact] = []
+            derived: list[Fact] = []
             iteration_traces: list[InferenceTrace] = []
 
             for rule in self.rules:
-                matches = self._match_rule(rule, fact_map)
+                rule_start = time.time()
+                matches = self._match_rule(rule, fact_map, semi_naive_keys=new_keys)
+                self._stats[rule.id].match_count += len(matches)
+                self._stats[rule.id].eval_time_ms += (time.time() - rule_start) * 1000
+
                 for bindings, source_keys in matches:
                     for conclusion in rule.then:
                         cf = self._build_conclusion_fact(
                             conclusion, bindings, rule, source_keys, fact_map
-                        )  # noqa: E501
+                        )
                         if cf:
                             existing = fact_map.get(cf.key)
                             if existing is None:
                                 fact_map[cf.key] = cf
-                                new_facts.append(cf)
+                                derived.append(cf)
+                                self._stats[rule.id].produce_count += 1
                                 iteration_traces.append(
                                     InferenceTrace(
                                         fact_key=cf.key,
@@ -69,8 +111,9 @@ class DatalogEngine:
                                 )
 
             traces.extend(iteration_traces)
+            new_keys = {f.key for f in derived}
 
-            if not new_facts:
+            if not derived:
                 converged = True
                 break
 
@@ -83,39 +126,42 @@ class DatalogEngine:
             hypotheses=hypotheses,
             traces=traces,
             contradictions=contradictions,
+            errors=errors,
             iteration_count=iteration,
             converged=converged,
             duration_ms=(time.time() - start) * 1000,
+            stats=list(self._stats.values()),
         )
 
-    def _match_rule(
-        self, rule: Rule, fact_map: dict[str, Fact]
-    ) -> list[tuple[dict[str, str], set[str]]]:  # noqa: E501
-        if not rule.when:
-            return [({}, set())]
-
-        results: list[tuple[dict[str, str], set[str]]] = []
-        first = rule.when[0]
-        remaining = rule.when[1:]
-        var_map: dict[str, str] = {}
-
-        for fact in fact_map.values():
-            if fact.status == "rejected":
-                continue
-            bindings = self._match_condition(first, fact, var_map)
-            if bindings is not None:
-                combined = dict(var_map)
-                combined.update(bindings)
-                source_keys = {fact.key}
-                self._match_remaining(remaining, fact_map, combined, source_keys, results, rule)
-
-        return results
+    def _validate_rule(self, rule: Rule) -> list[str]:
+        errors: list[str] = []
+        bound: set[str] = set()
+        for cond in rule.when:
+            if cond.negated:
+                for v in cond.vars:
+                    if v not in bound and not v.startswith("_"):
+                        errors.append(
+                            f"Rule '{rule.id}': unbound variable '{v}' "
+                            f"in negated condition '{cond.predicate}'"
+                        )
+            else:
+                for v in cond.vars:
+                    if not v.startswith("_"):
+                        bound.add(v)
+        for concl in rule.then:
+            for v in concl.vars:
+                if v not in bound and not v.startswith("_"):
+                    errors.append(
+                        f"Rule '{rule.id}': unbound variable '{v}' "
+                        f"in conclusion '{concl.predicate}'"
+                    )
+        return errors
 
     def _match_condition(
         self, cond: Condition, fact: Fact, var_map: dict[str, str]
-    ) -> dict[str, str] | None:  # noqa: E501
+    ) -> dict[str, str] | None:
         if cond.negated:
-            return None
+            return self._match_negated(cond, fact, var_map)
         if fact.predicate != cond.predicate:
             return None
         if len(fact.args) != len(cond.vars):
@@ -133,6 +179,57 @@ class DatalogEngine:
             else:
                 bindings[c_var] = f_arg
         return bindings
+
+    def _match_negated(
+        self, cond: Condition, fact: Fact, var_map: dict[str, str]
+    ) -> dict[str, str] | None:
+        if fact.status == "rejected":
+            return None
+        if fact.predicate != cond.predicate:
+            return None
+        if len(fact.args) != len(cond.vars):
+            return None
+        for f_arg, c_var in zip(fact.args, cond.vars):
+            if c_var.startswith("_"):
+                continue
+            if c_var in var_map:
+                if var_map[c_var] != f_arg:
+                    return None
+        if fact.polarity == "negative":
+            return dict(var_map)
+        return None
+
+    def _match_rule(
+        self,
+        rule: Rule,
+        fact_map: dict[str, Fact],
+        semi_naive_keys: set[str] | None = None,
+    ) -> list[tuple[dict[str, str], set[str]]]:
+        if not rule.when:
+            return [({}, set())]
+
+        results: list[tuple[dict[str, str], set[str]]] = []
+        first = rule.when[0]
+        remaining = rule.when[1:]
+        var_map: dict[str, str] = {}
+
+        candidates = (
+            [f for f in fact_map.values() if f.key in semi_naive_keys]
+            if semi_naive_keys
+            else list(fact_map.values())
+        )
+
+        for fact in candidates:
+            if fact.status == "rejected":
+                continue
+            bindings = self._match_condition(first, fact, var_map)
+            if bindings is not None:
+                combined = dict(var_map)
+                combined.update(bindings)
+                source_keys = {fact.key}
+                self._match_remaining(remaining, fact_map, combined, source_keys, results, rule)
+
+        return results
 
     def _match_remaining(
         self,
@@ -194,15 +291,8 @@ class DatalogEngine:
             bronze_ids=list(bronze_ids),
             explanation=f"Inferred by rule '{rule.id}': {rule.description}"
             if rule.description
-            else None,  # noqa: E501
-            world="closed"
-            if conclusion.predicate
-            in (
-                "requires_projection",  # noqa: E501
-                "requires_endpoint",
-                "form_widget",
-            )
-            else "open",
+            else None,
+            world="closed" if conclusion.predicate in CLOSED_WORLD_PREDICATES else "open",
         )
 
     def _detect_contradictions(self, fact_map: dict[str, Fact]) -> list[str]:
