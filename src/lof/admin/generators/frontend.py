@@ -1,77 +1,49 @@
-"""Generates React/TypeScript frontend code from the intermediate schema."""
+"""Generates React/TypeScript frontend code from AdminModel adapter."""
 
-from lof.admin.schema.models import ApplicationSchema, ModelField, ModelSchema
-
-
-def _ts_type(field: ModelField) -> str:
-    mapping = {
-        "string": "string",
-        "text": "string",
-        "integer": "number",
-        "float": "number",
-        "boolean": "boolean",
-        "date": "string",
-        "datetime": "string",
-        "enum": "string",
-        "uuid": "string",
-    }
-    return mapping.get(field.type, "string")
+from lof.admin.schema.adapter import AdminApp, AdminModel
 
 
-def generate_types(model: ModelSchema) -> str:
+def generate_types(model: AdminModel) -> str:
     lines = [f"export interface {model.name} {{"]
-    for field in model.fields:
-        if field.relation:
+    for f in model.fields:
+        if f.is_relation:
             continue
-        ts_t = _ts_type(field)
-        opt = "" if field.required else "?"
-        if field.type == "enum":
-            lines.append(f"  {field.name}{opt}: string;")
-        else:
-            lines.append(f"  {field.name}{opt}: {ts_t};")
+        opt = "" if f.required else "?"
+        lines.append(f"  {f.name}{opt}: {f.ts_type};")
     lines.append("}")
     lines.append("")
 
     lines.append(f"export interface {model.name}Create {{")
-    for field in model.fields:
-        if field.primary_key and field.generated:
+    for f in model.fields:
+        if f.name == "id":
             continue
-        if field.relation:
+        if f.is_relation:
             continue
-        ts_t = _ts_type(field)
-        opt = "" if field.required else "?"
-        lines.append(f"  {field.name}{opt}: {ts_t};")
+        opt = "" if f.required else "?"
+        lines.append(f"  {f.name}{opt}: {f.ts_type};")
     lines.append("}")
     lines.append("")
 
     lines.append(f"export interface {model.name}Update {{")
-    for field in model.fields:
-        if field.primary_key and field.generated:
+    for f in model.fields:
+        if f.name == "id":
             continue
-        if field.relation:
+        if f.is_relation:
             continue
-        lines.append(f"  {field.name}?: {_ts_type(field)};")
-    lines.append("}")
-    lines.append("")
-
-    lines.append(f"export interface {model.name}ListParams {{")
-    lines.append("  skip?: number;")
-    lines.append("  limit?: number;")
-    for field in model.fields:
-        if field.ui.list.filterable:
-            lines.append(f"  {field.name}?: string;")
+        lines.append(f"  {f.name}?: {f.ts_type};")
     lines.append("}")
     lines.append("")
     return "\n".join(lines)
 
 
-def generate_service(model: ModelSchema) -> str:
+def generate_service(model: AdminModel) -> str:
+    sn = model.name.lower()
     lines = [
-        f"import api from '@/lib/api';",
-        f"import {{{model.name}, {model.name}Create, {model.name}Update, {model.name}ListParams}} from './{model.name.lower()}.types';",
+        "import api from '@/lib/api';",
+        f"import {{{model.name}, {model.name}Create, {model.name}Update}} from './{sn}.types';",
         "",
-        f"export const {model.name.lower()}Service = {{",
-        f"  list: (params?: {model.name}ListParams): Promise<{model.name}[]> =>",
+        f"export const {sn}Service = {{",
+        f"  list: (params?: any): Promise<{model.name}[]> =>",
         f"    api.get('/{model.route_path}', {{ params }}).then(r => r.data),",
         f"  get: (id: string): Promise<{model.name}> =>",
         f"    api.get(`/{model.route_path}/${{id}}`).then(r => r.data),",
@@ -87,78 +59,82 @@ def generate_service(model: ModelSchema) -> str:
     return "\n".join(lines)
 
 
-def generate_hooks(model: ModelSchema) -> str:
+def generate_hooks(model: AdminModel) -> str:
     sn = model.name.lower()
     lines = [
         "import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';",
-        f"import {{{model.name.lower()}Service}} from './{sn}.service';",
+        f"import {{{sn}Service}} from './{sn}.service';",
         f"import {{{model.name}, {model.name}Create, {model.name}Update}} from './{sn}.types';",
         "",
         f"export function use{model.name}s(params?: any) {{",
-        f"  return useQuery({{",
+        "  return useQuery({",
         f"    queryKey: ['{sn}s', params],",
-        f"    queryFn: () => {model.name.lower()}Service.list(params),",
-        f"  }});",
+        f"    queryFn: () => {sn}Service.list(params),",
+        "  });",
         "}",
         "",
         f"export function use{model.name}(id: string) {{",
-        f"  return useQuery({{",
+        "  return useQuery({",
         f"    queryKey: ['{sn}', id],",
-        f"    queryFn: () => {model.name.lower()}Service.get(id),",
-        f"    enabled: !!id,",
-        f"  }});",
+        f"    queryFn: () => {sn}Service.get(id),",
+        "    enabled: !!id,",
+        "  });",
         "}",
         "",
         f"export function useCreate{model.name}() {{",
         "  const qc = useQueryClient();",
-        f"  return useMutation({{",
-        f"    mutationFn: (payload: {model.name}Create) => {model.name.lower()}Service.create(payload),",
-        f"    onSuccess: () => qc.invalidateQueries({{ queryKey: ['{sn}s'] }}),",
-        f"  }});",
+        "  return useMutation({",
+        f"    mutationFn: (payload: {model.name}Create) => {sn}Service.create(payload),",
+        "    onSuccess: () => qc.invalidateQueries({ queryKey: ['{sn}s'] }),",
+        "  });",
         "}",
         "",
         f"export function useUpdate{model.name}() {{",
         "  const qc = useQueryClient();",
-        f"  return useMutation({{",
+        "  return useMutation({",
         f"    mutationFn: ({{ id, payload }}: {{ id: string; payload: {model.name}Update }}) =>",
-        f"      {model.name.lower()}Service.update(id, payload),",
-        f"    onSuccess: () => qc.invalidateQueries({{ queryKey: ['{sn}s'] }}),",
-        f"  }});",
+        f"      {sn}Service.update(id, payload),",
+        "    onSuccess: () => qc.invalidateQueries({ queryKey: ['{sn}s'] }),",
+        "  });",
         "}",
         "",
         f"export function useDelete{model.name}() {{",
         "  const qc = useQueryClient();",
-        f"  return useMutation({{",
-        f"    mutationFn: (id: string) => {model.name.lower()}Service.remove(id),",
-        f"    onSuccess: () => qc.invalidateQueries({{ queryKey: ['{sn}s'] }}),",
-        f"  }});",
+        "  return useMutation({",
+        f"    mutationFn: (id: string) => {sn}Service.remove(id),",
+        "    onSuccess: () => qc.invalidateQueries({ queryKey: ['{sn}s'] }),",
+        "  });",
         "}",
         "",
     ]
     return "\n".join(lines)
 
 
-def generate_data_grid(model: ModelSchema) -> str:
-    visible = [f for f in model.fields if f.ui.list.visible]
-    columns = []
-    for f in visible:
-        if f.type == "enum":
-            columns.append(f"      {{ key: '{f.name}', label: '{f.ui.label or f.name}', render: (v: string) => <Badge>{v}</Badge> }},")
-        elif f.type == "boolean":
-            columns.append(f"      {{ key: '{f.name}', label: '{f.ui.label or f.name}', render: (v: boolean) => v ? '✓' : '✗' }},")
-        elif f.relation:
-            columns.append(f"      {{ key: '{f.name}_id', label: '{f.ui.label or f.name}' }},")
-        else:
-            columns.append(f"      {{ key: '{f.name}', label: '{f.ui.label or f.name}' }},")
-
+def generate_data_grid(model: AdminModel) -> str:
     sn = model.name.lower()
+    columns = []
+    for f in model.fields_for_list():
+        if f.type == "enum":
+            columns.append(
+                f"  {{ key: '{f.name}', label: '{f.name}', "
+                f"render: (v: string) => <Badge>{{v}}</Badge> }},"
+            )
+        elif f.type == "boolean":
+            columns.append(
+                f"  {{ key: '{f.name}', label: '{f.name}', "
+                f"render: (v: boolean) => v ? '\\u2713' : '\\u2717' }},"
+            )
+        else:
+            columns.append(f"  {{ key: '{f.name}', label: '{f.name}' }},")
+
+    col_str = "\n".join(columns)
     lines = [
         "import { DataGrid, Column } from '@/components/DataGrid';",
         f"import {{{model.name}}} from './{sn}.types';",
         f"import {{ use{model.name}s, useDelete{model.name} }} from './{sn}.hooks';",
         "",
         f"const columns: Column<{model.name}>[] = [",
-        *columns,
+        col_str,
         "];",
         "",
         f"export function {model.name}DataGrid() {{",
@@ -167,9 +143,9 @@ def generate_data_grid(model: ModelSchema) -> str:
         "",
         "  return (",
         "    <DataGrid",
-        f"      columns={{columns}}",
-        "      data={{data || []}}",
-        "      loading={{isLoading}}",
+        "      columns={columns}",
+        "      data={data || []}",
+        "      loading={isLoading}",
         "      onDelete={(row) => deleteMutation.mutate(row.id)}",
         "    />",
         "  );",
@@ -179,34 +155,48 @@ def generate_data_grid(model: ModelSchema) -> str:
     return "\n".join(lines)
 
 
-def generate_form(model: ModelSchema) -> str:
+def generate_form(model: AdminModel) -> str:
     sn = model.name.lower()
     fields_jsx = []
-    for field in model.fields:
-        if field.primary_key and field.generated:
+    for f in model.fields:
+        if f.name == "id":
             continue
-        label = field.ui.label or field.name
-        required = field.required
-        widget = field.resolved_widget()
+        label = f.name
+        widget = f.widget
         if widget == "textarea":
-            fields_jsx.append(f'      <textarea {{...register("{field.name}", {{ required: {str(required).lower()} }})}} placeholder="{label}" />')
+            fields_jsx.append(
+                f'      <textarea {{...register("{f.name}")}} placeholder="{label}" />'
+            )
         elif widget in ("switch", "checkbox"):
-            fields_jsx.append(f'      <label><input type="checkbox" {{...register("{field.name}")}} /> {label}</label>')
-        elif widget == "select" and field.type == "enum":
-            opts = "\n".join(f'        <option value="{v}">{v}</option>' for v in field.enum_values)
-            fields_jsx.append(f'      <select {{...register("{field.name}", {{ required: {str(required).lower()} }})}}>')
+            fields_jsx.append(
+                f'      <label><input type="checkbox" {{...register("{f.name}")}} /> {label}</label>'
+            )
+        elif widget == "select" and f.enum_values:
+            fields_jsx.append(
+                f'      <select {{...register("{f.name}")}}>'
+            )
             fields_jsx.append(f'        <option value="">-- {label} --</option>')
-            for v in field.enum_values:
+            for v in f.enum_values:
                 fields_jsx.append(f'        <option value="{v}">{v}</option>')
             fields_jsx.append(f'      </select>')
         elif widget == "number-input":
-            fields_jsx.append(f'      <input type="number" {{...register("{field.name}", {{ required: {str(required).lower()} }})}} placeholder="{label}" />')
-        elif widget == "date-picker":
-            fields_jsx.append(f'      <input type="date" {{...register("{field.name}", {{ required: {str(required).lower()} }})}} placeholder="{label}" />')
-        elif widget == "datetime-picker":
-            fields_jsx.append(f'      <input type="datetime-local" {{...register("{field.name}", {{ required: {str(required).lower()} }})}} placeholder="{label}" />')
+            fields_jsx.append(
+                f'      <input type="number" {{...register("{f.name}")}} placeholder="{label}" />'
+            )
+        elif widget in ("date-picker", "datetime-picker"):
+            input_type = "datetime-local" if "datetime" in widget else "date"
+            fields_jsx.append(
+                f'      <input type="{input_type}" {{...register("{f.name}")}} '
+                f'placeholder="{label}" />'
+            )
+        elif widget == "autocomplete":
+            fields_jsx.append(
+                f'      <input {{...register("{f.name}")}} placeholder="{label}" />'
+            )
         else:
-            fields_jsx.append(f'      <input {{...register("{field.name}", {{ required: {str(required).lower()} }})}} placeholder="{label}" />')
+            fields_jsx.append(
+                f'      <input {{...register("{f.name}")}} placeholder="{label}" />'
+            )
 
     lines = [
         "import { useForm } from 'react-hook-form';",
@@ -214,16 +204,16 @@ def generate_form(model: ModelSchema) -> str:
         f"import {{ useCreate{model.name}, useUpdate{model.name} }} from './{sn}.hooks';",
         "",
         f"interface {model.name}FormProps {{",
-        f"  id?: string;",
+        "  id?: string;",
         f"  defaultValues?: Partial<{model.name}Create>;",
-        f"  onSuccess?: () => void;",
+        "  onSuccess?: () => void;",
         "}",
         "",
         f"export function {model.name}Form({{ id, defaultValues, onSuccess }}: {model.name}FormProps) {{",
-        f"  const {{ register, handleSubmit }} = useForm({{ defaultValues }});",
+        "  const { register, handleSubmit } = useForm({ defaultValues });",
         f"  const createMutation = useCreate{model.name}();",
         f"  const updateMutation = useUpdate{model.name}();",
-        f"  const isEdit = !!id;",
+        "  const isEdit = !!id;",
         "",
         "  const onSubmit = async (data: any) => {",
         "    try {",
@@ -239,7 +229,7 @@ def generate_form(model: ModelSchema) -> str:
         "  };",
         "",
         "  return (",
-        '    <form onSubmit={handleSubmit(onSubmit)}>',
+        "    <form onSubmit={handleSubmit(onSubmit)}>",
         *fields_jsx,
         '      <button type="submit">{isEdit ? "Modifier" : "Créer"}</button>',
         "    </form>",
@@ -250,7 +240,7 @@ def generate_form(model: ModelSchema) -> str:
     return "\n".join(lines)
 
 
-def generate_list_page(model: ModelSchema) -> str:
+def generate_list_page(model: AdminModel) -> str:
     sn = model.name.lower()
     lines = [
         "import { useState } from 'react';",
@@ -267,7 +257,7 @@ def generate_list_page(model: ModelSchema) -> str:
         "      <button onClick={() => { setEditId(undefined); setOpen(true); }}>",
         f"        Nouveau {model.label}",
         "      </button>",
-        ("      <" + model.name + 'DataGrid onEdit={(id) => { setEditId(id); setOpen(true); }} />'),
+        "      <" + model.name + 'DataGrid onEdit={(id) => { setEditId(id); setOpen(true); }} />',
         "      {open && (",
         "        <div className='drawer'>",
         f"          <{model.name}Form",
@@ -284,8 +274,8 @@ def generate_list_page(model: ModelSchema) -> str:
     return "\n".join(lines)
 
 
-def generate_all(app: ApplicationSchema) -> dict[str, str]:
-    files: dict[str, str] = {}
+def generate_all(app: AdminApp) -> dict[str, str]:
+    files = {}
     for model in app.models:
         prefix = f"apps/web/src/features/{model.name.lower()}"
         files[f"{prefix}/{model.name.lower()}.types.ts"] = generate_types(model)
