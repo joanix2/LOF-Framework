@@ -1,52 +1,86 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { use{{ id | pascal_case }}, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}';
+import { useState } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { use{{ id | pascal_case }}, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}'
+import { Button } from '../components/ui/button'
+import { Badge } from '../components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle,
+} from '../components/ui/dialog'
 
 export default function {{ id | pascal_case }}DetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const { data, isLoading, error } = use{{ id | pascal_case }}(id || '');
-  const deleteMutation = useDelete{{ id | pascal_case }}();
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { data, isLoading, error } = use{{ id | pascal_case }}(id || '')
+  const deleteMutation = useDelete{{ id | pascal_case }}()
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
-  if (error || !data) return <div className="p-4 text-red-500">{{ id | pascal_case }} not found</div>;
+  const handleDelete = async () => {
+    await deleteMutation.mutateAsync(id!)
+    navigate('/{{ route }}')
+  }
+
+  if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Loading...</div>
+  if (error || !data) return <div className="text-destructive p-4">{{ id | pascal_case }} not found</div>
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{{ id | pascal_case }} Details</h1>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">{{ id | pascal_case }} Details</h1>
         <div className="flex gap-2">
-          <Link
-            to={`/{{ route }}/${id}/edit`}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            Edit
+          <Link to={`/{{ route }}/${id}/edit`}>
+            <Button variant="secondary">Edit</Button>
           </Link>
-          <Link
-            to="/{{ route }}"
-            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-          >
-            Back
+          <Button variant="destructive" onClick={() => setConfirmDelete(true)}>Delete</Button>
+          <Link to="/{{ route }}">
+            <Button variant="outline">Back</Button>
           </Link>
         </div>
       </div>
 
-      <div className="bg-white shadow rounded p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{{ name }}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
 {% for field in fields %}
 {% set f_name = field.get('name') %}
 {% set f_type = field.get('type', 'string') %}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">{{ f_name }}</label>
+          <div className="grid grid-cols-3 gap-2">
+            <dt className="text-sm font-medium text-muted-foreground">{{ f_name }}</dt>
+            <dd className="col-span-2 text-sm">
 {% if f_type in ("datetime", "date") %}
-          <p className="mt-1">{new Date(data.{{ f_name }}).toLocaleString()}</p>
+              {new Date(data.{{ f_name }}).toLocaleString()}
 {% elif f_type in ("boolean", "bool") %}
-          <p className="mt-1">{data.{{ f_name }} ? 'Yes' : 'No'}</p>
+              <Badge variant={data.{{ f_name }} ? 'default' : 'secondary'}>{data.{{ f_name }} ? 'Yes' : 'No'}</Badge>
+{% elif f_type in ("enum",) %}
+              <Badge variant="outline">{data.{{ f_name }}}</Badge>
 {% else %}
-          <p className="mt-1">{data.{{ f_name }}}</p>
+              {data.{{ f_name }}}
 {% endif %}
-        </div>
+            </dd>
+          </div>
 {% endfor %}
-      </div>
+        </CardContent>
+      </Card>
+
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this {{ name | lower }}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
+  )
 }

@@ -1,0 +1,15 @@
+{
+  "id": "app-vite-config",
+  "template": ".lof/templates/frontend/vite.config.ts.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/vite.config.ts",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

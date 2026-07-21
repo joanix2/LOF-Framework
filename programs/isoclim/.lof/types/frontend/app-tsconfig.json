@@ -1,0 +1,15 @@
+{
+  "id": "app-tsconfig",
+  "template": ".lof/templates/frontend/tsconfig.json.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/tsconfig.json",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

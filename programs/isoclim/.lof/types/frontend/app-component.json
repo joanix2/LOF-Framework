@@ -1,0 +1,15 @@
+{
+  "id": "app-component",
+  "template": ".lof/templates/frontend/App.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/App.tsx",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

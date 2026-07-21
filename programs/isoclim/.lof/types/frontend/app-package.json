@@ -1,0 +1,15 @@
+{
+  "id": "app-package",
+  "template": ".lof/templates/frontend/package.json.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/package.json",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

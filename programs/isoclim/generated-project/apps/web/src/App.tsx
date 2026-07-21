@@ -2,14 +2,23 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 
 const pages = [
+
   { path: 'client', label: 'Clients', component: lazy(() => import('./pages/ClientListPage')) },
+
   { path: 'commande', label: 'Commandes', component: lazy(() => import('./pages/CommandeListPage')) },
+
   { path: 'chantier', label: 'Chantiers', component: lazy(() => import('./pages/ChantierListPage')) },
+
+  { path: 'equipe', label: 'Equipes', component: lazy(() => import('./pages/EquipeListPage')) },
+
+  { path: 'employe', label: 'Employes', component: lazy(() => import('./pages/EmployeListPage')) },
+
   { path: 'mission', label: 'Missions', component: lazy(() => import('./pages/MissionListPage')) },
-  { path: 'equipe', label: 'Équipes', component: lazy(() => import('./pages/EquipeListPage')) },
-  { path: 'employe', label: 'Employés', component: lazy(() => import('./pages/EmployeListPage')) },
-  { path: 'equipement', label: 'Équipements', component: lazy(() => import('./pages/EquipementListPage')) },
-  { path: 'commentaire-mission', label: 'Commentaires', component: lazy(() => import('./pages/CommentaireMissionListPage')) },
+
+  { path: 'equipement', label: 'Equipements', component: lazy(() => import('./pages/EquipementListPage')) },
+
+  { path: 'commentaire-mission', label: 'CommentaireMissions', component: lazy(() => import('./pages/CommentaireMissionListPage')) },
+
 ]
 
 export default function App() {

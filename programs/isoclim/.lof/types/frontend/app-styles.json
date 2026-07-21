@@ -1,0 +1,15 @@
+{
+  "id": "app-styles",
+  "template": ".lof/templates/frontend/index.css.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/src/index.css",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

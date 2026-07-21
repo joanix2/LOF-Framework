@@ -186,6 +186,110 @@
       "template": ".lof/templates/frontend/Dockerfile.j2",
       "outputPattern": "generated-project/apps/web/Dockerfile",
       "targetType": "typescript-module"
+    },
+    {
+      "type": "app-tailwind-config",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/tailwind.config.js.j2",
+      "outputPattern": "generated-project/apps/web/tailwind.config.js",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-postcss-config",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/postcss.config.js.j2",
+      "outputPattern": "generated-project/apps/web/postcss.config.js",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-components-json",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/components.json.j2",
+      "outputPattern": "generated-project/apps/web/components.json",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-utils",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/lib/utils.ts.j2",
+      "outputPattern": "generated-project/apps/web/src/lib/utils.ts",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-ui-button",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/button.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/button.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-input",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/input.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/input.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-label",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/label.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/label.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-card",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/card.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/card.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-badge",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/badge.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/badge.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-dialog",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/dialog.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/dialog.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-table",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/table.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/table.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-select",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/select.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/select.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-ui-textarea",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/ui/textarea.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/ui/textarea.tsx",
+      "targetType": "react-component"
     }
   ],
   "closed_world_predicates": [

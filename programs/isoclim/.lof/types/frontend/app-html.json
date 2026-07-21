@@ -1,0 +1,15 @@
+{
+  "id": "app-html",
+  "template": ".lof/templates/frontend/index.html.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/index.html",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

@@ -1,140 +1,151 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { use{{ id | pascal_case }}List, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}';
-import type { {{ id | pascal_case }} } from '../types/{{ id }}';
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { use{{ id | pascal_case }}List, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}'
+import type { {{ id | pascal_case }} } from '../types/{{ id }}'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '../components/ui/table'
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle,
+} from '../components/ui/dialog'
 
 export default function {{ id | pascal_case }}ListPage() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const { data, isLoading, error } = use{{ id | pascal_case }}List(page, 20, search || undefined);
-  const deleteMutation = useDelete{{ id | pascal_case }}();
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const { data, isLoading, error } = use{{ id | pascal_case }}List(page, 20, search || undefined)
+  const deleteMutation = useDelete{{ id | pascal_case }}()
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
-    await deleteMutation.mutateAsync(id);
-    setConfirmDelete(null);
-  };
+    try {
+      await deleteMutation.mutateAsync(id)
+      setConfirmDelete(null)
+    } catch (e) {
+      setDeleteError('Failed to delete')
+    }
+  }
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
-  if (error) return <div className="p-4 text-red-500">Error loading {{ pluralName | lower }}</div>;
+  if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Loading...</div>
+  if (error) return <div className="text-destructive p-4">Error loading {{ pluralName | lower }}</div>
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{{ pluralName }}</h1>
-        <Link
-          to="/{{ route }}/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          New {{ id | pascal_case }}
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">{{ pluralName }}</h1>
+        <Link to="/{{ route }}/new">
+          <Button>New {{ id | pascal_case }}</Button>
         </Link>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search {{ pluralName | lower }}..."
-        value={search}
-        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-        className="border p-2 mb-4 w-full rounded"
-      />
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Search</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            placeholder="Search {{ pluralName | lower }}..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+            className="max-w-sm"
+          />
+        </CardContent>
+      </Card>
 
-      <table className="w-full border-collapse border">
-        <thead>
-          <tr className="bg-gray-100">
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
 {% for field in fields %}
 {% if field.get('list_visible', True) %}
-            <th className="border p-2 text-left">{{ field.get('name') }}</th>
+                <TableHead>{{ field.get('name') }}</TableHead>
 {% endif %}
 {% endfor %}
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.items.map((item: {{ id | pascal_case }}) => (
-            <tr key={item.id} className="hover:bg-gray-50">
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data?.items.map((item: {{ id | pascal_case }}) => (
+                <TableRow key={item.id}>
 {% for field in fields %}
 {% if field.get('list_visible', True) %}
 {% set f_type = field.get('type', 'string') %}
 {% set f_name = field.get('name') %}
 {% if f_type in ("boolean", "bool") %}
-              <td className="border p-2">{item.{{ f_name }} ? '\u2713' : '\u2717'}</td>
+                  <TableCell>{item.{{ f_name }} ? '\u2713' : '\u2717'}</TableCell>
 {% elif f_type in ("datetime", "date") %}
-              <td className="border p-2">{new Date(item.{{ f_name }}).toLocaleDateString()}</td>
+                  <TableCell>{new Date(item.{{ f_name }}).toLocaleDateString()}</TableCell>
 {% else %}
-              <td className="border p-2">{item.{{ f_name }}}</td>
+                  <TableCell>{item.{{ f_name }}}</TableCell>
 {% endif %}
 {% endif %}
 {% endfor %}
-              <td className="border p-2">
-                <Link
-                  to={`/{{ route }}/${item.id}`}
-                  className="text-blue-600 hover:underline mr-2"
-                >
-                  View
-                </Link>
-                <Link
-                  to={`/{{ route }}/${item.id}/edit`}
-                  className="text-green-600 hover:underline mr-2"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => setConfirmDelete(item.id)}
-                  className="text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {confirmDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded">
-            <p className="mb-4">Are you sure you want to delete this {{ name | lower }}?</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleDelete(confirmDelete)}
-                className="bg-red-600 text-white px-4 py-2 rounded"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                  <TableCell className="text-right">
+                    <Link to={`/{{ route }}/${item.id}`}>
+                      <Button variant="outline" size="sm" className="mr-2">View</Button>
+                    </Link>
+                    <Link to={`/{{ route }}/${item.id}/edit`}>
+                      <Button variant="secondary" size="sm" className="mr-2">Edit</Button>
+                    </Link>
+                    <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(item.id)}>
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {data && (
-        <div className="flex justify-between items-center mt-4">
-          <span>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
             Page {data.page} of {data.total_pages} ({data.total} total)
-          </span>
+          </p>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setPage((p: number) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
             >
               Previous
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setPage((p: number) => p + 1)}
               disabled={page >= (data?.total_pages || 1)}
-              className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
+
+      <Dialog open={!!confirmDelete} onOpenChange={(o) => { if (!o) setConfirmDelete(null); setDeleteError(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this {{ name | lower }}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => handleDelete(confirmDelete!)} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
+  )
 }

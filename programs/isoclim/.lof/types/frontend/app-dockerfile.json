@@ -1,0 +1,15 @@
+{
+  "id": "app-dockerfile",
+  "template": ".lof/templates/frontend/Dockerfile.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/Dockerfile",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

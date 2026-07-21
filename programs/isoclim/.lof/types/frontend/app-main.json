@@ -1,0 +1,15 @@
+{
+  "id": "app-main",
+  "template": ".lof/templates/frontend/main.tsx.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/src/main.tsx",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "application",
+  "type": "application",
+  "values": {
+    "id": "isoclim",
+    "name": "ISOCLIM",
+    "title": "ISOCLIM",
+    "version": "0.1.0",
+    "modules": [
+      "client",
+      "commande",
+      "chantier",
+      "equipe",
+      "employe",
+      "mission",
+      "equipement",
+      "commentaire_mission"
+    ],
+    "apiPrefix": "/api/v1",
+    "databaseUrl": "sqlite+aiosqlite:///./app.db",
+    "echo": false
+  }
+}

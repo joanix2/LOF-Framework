@@ -13,6 +13,7 @@
 | K-007 | FastAPI downgrade 0.139.2 → 0.114.2 (include_router) |
 | K-008 | Types manquants (money, uuid, phone) dans templates |
 | K-009 | Scaffolding frontend package.json, vite, tsconfig (templates Jinja + pipeline M3) |
+| K-010 | Intégrer shadcn/ui dans les templates frontend |
 
 ## 🟡 In Progress
 
@@ -23,7 +24,6 @@
 
 | Ticket | Description |
 |--------|-------------|
-| K-010 | Intégrer shadcn/ui dans les templates frontend |
 | K-011 | Système type-driven UI : chaque type DSL → composant dédié |
 | K-012 | Formulaires générés (create + edit) avec validation |
 | K-013 | Templates frontend manquants : detail_page, app_layout |

@@ -31,3 +31,12 @@ M0  Application générée   generated-project/           FastAPI + React
 - Pas de modification des fichiers générés
 - Tout ce qui est M2 doit être dans le profil, pas dans le code Python
 - `make format && make lint && make test` après chaque modification
+
+<!-- BEGIN AGENT KANBAN — DO NOT EDIT THIS SECTION -->
+## Agent Kanban
+
+Read `.agentkanban/INSTRUCTION.md` for task workflow rules.
+Read `.agentkanban/memory.md` for project context.
+
+If a task file (`.agentkanban/tasks/**/*.md`) was referenced earlier in this conversation, re-read it before responding and always respond in and at the end the task file.
+<!-- END AGENT KANBAN -->
