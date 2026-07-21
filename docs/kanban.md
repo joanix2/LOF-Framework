@@ -12,12 +12,12 @@
 | K-006 | Docker Compose : API + Frontend `docker compose up` |
 | K-007 | FastAPI downgrade 0.139.2 → 0.114.2 (include_router) |
 | K-008 | Types manquants (money, uuid, phone) dans templates |
+| K-009 | Scaffolding frontend package.json, vite, tsconfig (templates Jinja + pipeline M3) |
 
 ## 🟡 In Progress
 
 | Ticket | Description |
 |--------|-------------|
-| K-009 | Scaffolding frontend package.json, vite, tsconfig (fait manu, à templatiser) |
 
 ## 🔵 Todo
 
