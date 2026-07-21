@@ -13,7 +13,6 @@ from lof.loading.loader import Loader
 from lof.loading.registry import Registry
 from lof.models.artifact import ProjectManifest
 from lof.models.reports import CompilationReport
-from lof.validation.semantic_validator import SemanticValidator
 from lof.validation.smt.validation_engine import SemanticValidationEngine
 
 
@@ -57,9 +56,6 @@ class Compiler:
         graph_diag = graph_validator.validate(graph)
         errors.extend(graph_diag.errors)
 
-        semantic_validator = SemanticValidator(self.registry)
-        sem_diag = semantic_validator.validate()
-        errors.extend(sem_diag.errors)
 
         return errors
 

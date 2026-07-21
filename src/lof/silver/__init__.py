@@ -1,4 +1,4 @@
-from lof.silver.gold_builder import GoldCandidateBuilder
+from lof.silver.extractor import SpacyExtractor
 from lof.silver.graph import SilverGraph
 from lof.silver.models import (
     ProvenanceRef,
@@ -8,12 +8,5 @@ from lof.silver.models import (
     SilverRelation,
 )
 
-__all__ = [
-    "SilverGraph",
-    "SilverEntity",
-    "SilverClaim",
-    "SilverRelation",
-    "SilverContradiction",
-    "ProvenanceRef",
-    "GoldCandidateBuilder",
-]
+__all__ = ['SpacyExtractor', 'SilverGraph', 'SilverClaim', 'SilverEntity',
+    'SilverRelation', 'SilverContradiction', 'ProvenanceRef']
