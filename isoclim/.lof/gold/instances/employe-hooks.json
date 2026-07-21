@@ -1,0 +1,10 @@
+{
+  "id": "employe-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "Employ\u00e9",
+    "route": "employe",
+    "pluralName": "Employ\u00e9s"
+  },
+  "relations": []
+}

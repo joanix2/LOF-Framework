@@ -1,0 +1,64 @@
+import { useForm } from 'react-hook-form';
+import type { {{ name | pascal_case }}Create, {{ name | pascal_case }}Update } from '../types/{{ name | snake_case }}';
+
+interface {{ name | pascal_case }}FormProps {
+  initialData?: {{ name | pascal_case }}Create;
+  onSubmit: (data: {{ name | pascal_case }}Create | {{ name | pascal_case }}Update) => void;
+  isSubmitting?: boolean;
+}
+
+export default function {{ name | pascal_case }}Form({ initialData, onSubmit, isSubmitting }: {{ name | pascal_case }}FormProps) {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: initialData || {},
+  });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+{% for field in fields %}
+{% set f_name = field.get('name') %}
+{% set f_visible = field.get('visibleInForm', True) %}
+{% if f_visible and f_name != "id" %}
+{% set f_type = field.get('type', 'string') %}
+{% set f_required = field.get('required', False) %}
+{% if f_type in ("boolean", "bool") %}
+      <div>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" {...register('{{ f_name }}')} />
+          <span>{{ f_name }}</span>
+        </label>
+      </div>
+{% elif f_type == "text" %}
+      <div>
+        <label className="block text-sm font-medium">{{ f_name }}</label>
+        <textarea
+          {...register('{{ f_name }}', { required: {{ "true" if f_required else "false" }} })}
+          className="border p-2 w-full rounded"
+          rows={4}
+        />
+        {errors.{{ f_name }} && <span className="text-red-500 text-sm">Required</span>}
+      </div>
+{% else %}
+{% set input_type = "email" if f_type == "email" else "number" if f_type in ("integer", "int", "float", "decimal") else "datetime-local" if f_type in ("datetime", "date") else "text" %}
+      <div>
+        <label className="block text-sm font-medium">{{ f_name }}</label>
+        <input
+          type="{{ input_type }}"
+          {...register('{{ f_name }}', { required: {{ "true" if f_required else "false" }} })}
+          className="border p-2 w-full rounded"
+        />
+        {errors.{{ f_name }} && <span className="text-red-500 text-sm">Required</span>}
+      </div>
+{% endif %}
+{% endif %}
+{% endfor %}
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        {isSubmitting ? 'Saving...' : 'Save'}
+      </button>
+    </form>
+  );
+}

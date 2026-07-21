@@ -1,0 +1,16 @@
+{
+  "id": "entity-types",
+  "template": ".lof/templates/frontend/types.ts.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/src/types/{{ name | snake_case }}.ts",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array",
+      "required": true
+    }
+  }
+}

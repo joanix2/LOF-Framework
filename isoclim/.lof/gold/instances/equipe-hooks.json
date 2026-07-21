@@ -1,0 +1,10 @@
+{
+  "id": "equipe-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "\u00c9quipe",
+    "route": "equipe",
+    "pluralName": "\u00c9quipes"
+  },
+  "relations": []
+}

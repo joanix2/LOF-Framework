@@ -1,0 +1,79 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { {{ name | pascal_case }}, {{ name | pascal_case }}Create, {{ name | pascal_case }}Update, {{ name | pascal_case }}Page } from '../types/{{ name | snake_case }}';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
+export function use{{ name | pascal_case }}List(page = 1, pageSize = 20, search?: string) {
+  return useQuery<{{ name | pascal_case }}Page>({
+    queryKey: ['{{ name | snake_case }}', 'list', page, pageSize, search],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+      if (search) params.set('search', search);
+      const res = await fetch(`${API_BASE}/{{ route }}?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch {{ pluralName | lower }}');
+      return res.json();
+    },
+  });
+}
+
+export function use{{ name | pascal_case }}(id: string) {
+  return useQuery<{{ name | pascal_case }}>({
+    queryKey: ['{{ name | snake_case }}', id],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE}/{{ route }}/${id}`);
+      if (!res.ok) throw new Error('Failed to fetch {{ name | lower }}');
+      return res.json();
+    },
+    enabled: !!id,
+  });
+}
+
+export function useCreate{{ name | pascal_case }}() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {{ name | pascal_case }}Create) => {
+      const res = await fetch(`${API_BASE}/{{ route }}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to create {{ name | lower }}');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', 'list'] });
+    },
+  });
+}
+
+export function useUpdate{{ name | pascal_case }}() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: {{ name | pascal_case }}Update }) => {
+      const res = await fetch(`${API_BASE}/{{ route }}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to update {{ name | lower }}');
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', variables.id] });
+    },
+  });
+}
+
+export function useDelete{{ name | pascal_case }}() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`${API_BASE}/{{ route }}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete {{ name | lower }}');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', 'list'] });
+    },
+  });
+}

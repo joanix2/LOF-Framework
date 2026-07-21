@@ -1,0 +1,10 @@
+{
+  "id": "chantier-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "Chantier",
+    "route": "chantier",
+    "pluralName": "Chantiers"
+  },
+  "relations": []
+}

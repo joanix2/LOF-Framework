@@ -1,0 +1,158 @@
+"""Tests for the {{ name | pascal_case }} API endpoints."""
+
+import pytest
+from httpx import AsyncClient
+
+{%- if "create" in operations %}
+
+class TestCreate{{ name | pascal_case }}:
+    @pytest.mark.asyncio
+    async def test_create_{{ name | snake_case }}_success(self, async_client: AsyncClient):
+        payload = {
+{%- for field in fields %}
+{%- set f_name = field.get('name', '') | snake_case %}
+{%- set f_required = field.get('required', False) %}
+{%- set f_generated = field.get('generated', False) %}
+{%- if f_required and f_name not in ("id", "created_at", "updated_at") and not f_generated %}
+{%- set f_type = field.get('type') %}
+{%- if f_type in ("string", "url", "text", "enum") %}
+            "{{ f_name }}": "test-{{ f_name }}",
+{%- elif f_type == "email" %}
+            "{{ f_name }}": "test@example.com",
+{%- elif f_type in ("integer", "int") %}
+            "{{ f_name }}": 1,
+{%- elif f_type in ("float", "decimal") %}
+            "{{ f_name }}": 1.0,
+{%- elif f_type in ("boolean", "bool") %}
+            "{{ f_name }}": True,
+{%- elif f_type == "uuid" %}
+            "{{ f_name }}": "00000000-0000-0000-0000-000000000000",
+{%- elif f_type in ("datetime", "date") %}
+            "{{ f_name }}": "2024-01-01T00:00:00",
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+        }
+        response = await async_client.post("/api/v1/{{ route }}", json=payload)
+        assert response.status_code == 201
+        data = response.json()
+        assert "id" in data
+
+    @pytest.mark.asyncio
+    async def test_create_{{ name | snake_case }}_validation_error(self, async_client: AsyncClient):
+        response = await async_client.post("/api/v1/{{ route }}", json={})
+        assert response.status_code == 422
+{%- endif %}
+
+{%- if "list" in operations %}
+
+class TestList{{ name | pascal_case }}:
+    @pytest.mark.asyncio
+    async def test_list_{{ name | snake_case }}_empty(self, async_client: AsyncClient):
+        response = await async_client.get("/api/v1/{{ route }}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 0
+        assert data["items"] == []
+
+    @pytest.mark.asyncio
+    async def test_list_{{ name | snake_case }}_pagination(self, async_client: AsyncClient):
+        response = await async_client.get("/api/v1/{{ route }}?page=1&page_size=10")
+        assert response.status_code == 200
+        data = response.json()
+        assert "items" in data
+        assert "total" in data
+        assert data["page"] == 1
+
+    @pytest.mark.asyncio
+    async def test_list_{{ name | snake_case }}_sorting(self, async_client: AsyncClient):
+        response = await async_client.get("/api/v1/{{ route }}?sort_by=created_at&sort_desc=true")
+        assert response.status_code == 200
+{%- endif %}
+
+{%- if "read" in operations %}
+
+class TestGet{{ name | pascal_case }}:
+    @pytest.mark.asyncio
+    async def test_get_{{ name | snake_case }}_not_found(self, async_client: AsyncClient):
+        response = await async_client.get("/api/v1/{{ route }}/00000000-0000-0000-0000-000000000000")
+        assert response.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_get_{{ name | snake_case }}_invalid_uuid(self, async_client: AsyncClient):
+        response = await async_client.get("/api/v1/{{ route }}/invalid-uuid")
+        assert response.status_code == 404
+{%- endif %}
+
+{%- if "update" in operations %}
+
+class TestUpdate{{ name | pascal_case }}:
+    @pytest.mark.asyncio
+    async def test_update_{{ name | snake_case }}_not_found(self, async_client: AsyncClient):
+        response = await async_client.patch(
+            "/api/v1/{{ route }}/00000000-0000-0000-0000-000000000000",
+            json={},
+        )
+        assert response.status_code == 404
+{%- endif %}
+
+{%- if "delete" in operations %}
+
+class TestDelete{{ name | pascal_case }}:
+    @pytest.mark.asyncio
+    async def test_delete_{{ name | snake_case }}_not_found(self, async_client: AsyncClient):
+        response = await async_client.delete(
+            "/api/v1/{{ route }}/00000000-0000-0000-0000-000000000000",
+        )
+        assert response.status_code == 404
+{%- endif %}
+
+{%- if "search" in operations %}
+
+class TestSearch{{ name | pascal_case }}:
+    @pytest.mark.asyncio
+    async def test_search_{{ name | snake_case }}(self, async_client: AsyncClient):
+        response = await async_client.get("/api/v1/{{ route }}?search=test")
+        assert response.status_code == 200
+        data = response.json()
+        assert "items" in data
+{%- endif %}
+
+{%- if "create" in operations and "read" in operations and "delete" in operations %}
+
+class Test{{ name | pascal_case }}Integration:
+    @pytest.mark.asyncio
+    async def test_full_crud_flow(self, async_client: AsyncClient):
+        payload = {
+{%- for field in fields %}
+{%- set f_name = field.get('name', '') | snake_case %}
+{%- set f_required = field.get('required', False) %}
+{%- set f_generated = field.get('generated', False) %}
+{%- if f_required and f_name not in ("id", "created_at", "updated_at") and not f_generated %}
+{%- set f_type = field.get('type') %}
+{%- if f_type == "email" %}
+            "{{ f_name }}": "test@example.com",
+{%- else %}
+            "{{ f_name }}": "test-{{ f_name }}",
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+        }
+        create_resp = await async_client.post("/api/v1/{{ route }}", json=payload)
+        assert create_resp.status_code == 201
+        entity_id = create_resp.json()["id"]
+
+        get_resp = await async_client.get(f"/api/v1/{{ route }}/{entity_id}")
+        assert get_resp.status_code == 200
+        assert get_resp.json()["id"] == entity_id
+
+        list_resp = await async_client.get("/api/v1/{{ route }}")
+        assert list_resp.status_code == 200
+        assert list_resp.json()["total"] >= 1
+
+        del_resp = await async_client.delete(f"/api/v1/{{ route }}/{entity_id}")
+        assert del_resp.status_code == 204
+
+        get_deleted = await async_client.get(f"/api/v1/{{ route }}/{entity_id}")
+        assert get_deleted.status_code == 404
+{%- endif %}

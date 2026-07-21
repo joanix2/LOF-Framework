@@ -1,0 +1,10 @@
+{
+  "id": "mission-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "Mission",
+    "route": "mission",
+    "pluralName": "Missions"
+  },
+  "relations": []
+}

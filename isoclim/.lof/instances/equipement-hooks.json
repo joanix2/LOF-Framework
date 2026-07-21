@@ -1,0 +1,10 @@
+{
+  "id": "equipement-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "\u00c9quipement",
+    "route": "equipement",
+    "pluralName": "\u00c9quipements"
+  },
+  "relations": []
+}

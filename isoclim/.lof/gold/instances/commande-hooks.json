@@ -1,0 +1,10 @@
+{
+  "id": "commande-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "Commande",
+    "route": "commande",
+    "pluralName": "Commandes"
+  },
+  "relations": []
+}

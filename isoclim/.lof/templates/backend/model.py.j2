@@ -1,0 +1,55 @@
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Column, String, Boolean, DateTime, Text, Integer, Float, ForeignKey
+
+from app.database import Base
+
+
+class {{ name | pascal_case }}(Base):
+    __tablename__ = "{{ tableName }}"
+{%- for field in fields %}
+{%- set f_name = field.get('name', '') | snake_case %}
+{%- set f_type = field.get('type', 'string') %}
+{%- set f_primary = field.get('primary', False) %}
+{%- set f_relation = field.get('relation', None) %}
+{%- set f_nullable = field.get('nullable', True) %}
+{%- if f_name == "id" and f_primary %}
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+{%- elif f_name in ("created_at",) and field.get('generated') %}
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+{%- elif f_name in ("updated_at",) and field.get('generated') %}
+
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+{%- elif f_relation == "foreign_key" %}
+
+    {{ f_name }} = Column(String(36), ForeignKey("{{ field.get('foreignTable', 'unknown') }}.id"), nullable={% if f_nullable %}True{% else %}False{% endif %})
+{%- elif f_type in ("string", "email", "url") %}
+
+    {{ f_name }} = Column(String(255), nullable={% if f_nullable %}True{% else %}False{% endif %}{%- if field.get('unique', False) %}, unique=True{% endif %}{%- if field.get('index', False) %}, index=True{% endif %})
+{%- elif f_type == "text" %}
+
+    {{ f_name }} = Column(Text, nullable={% if f_nullable %}True{% else %}False{% endif %})
+{%- elif f_type in ("boolean", "bool") %}
+
+    {{ f_name }} = Column(Boolean, default={% if field.get('default', False) %}True{% else %}False{% endif %}, nullable=False)
+{%- elif f_type in ("datetime", "date") %}
+
+    {{ f_name }} = Column(DateTime, default=datetime.utcnow{% if not f_nullable %}, nullable=False{% endif %})
+{%- elif f_type in ("integer", "int") %}
+
+    {{ f_name }} = Column(Integer, default={{ field.get('default', 0) }}, nullable=False)
+{%- elif f_type in ("float", "decimal") %}
+
+    {{ f_name }} = Column(Float, default={{ field.get('default', 0.0) }}, nullable=False)
+{%- elif f_type == "enum" %}
+{%- set f_default = field.get('default', None) %}
+
+    {{ f_name }} = Column(String(50), nullable={% if f_nullable %}True{% else %}False{% endif %}{% if f_default %}, default="{{ f_default }}"{% endif %})
+{%- endif %}
+{%- endfor %}
+
+    def __repr__(self) -> str:
+        return f"<{{ name | pascal_case }}(id={self.id})>"

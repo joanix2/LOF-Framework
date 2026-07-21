@@ -1,0 +1,52 @@
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { use{{ name | pascal_case }}, useDelete{{ name | pascal_case }} } from '../hooks/use{{ name | pascal_case }}';
+
+export default function {{ name | pascal_case }}DetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const { data, isLoading, error } = use{{ name | pascal_case }}(id || '');
+  const deleteMutation = useDelete{{ name | pascal_case }}();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (error || !data) return <div className="p-4 text-red-500">{{ name | pascal_case }} not found</div>;
+
+  return (
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">{{ name | pascal_case }} Details</h1>
+        <div className="flex gap-2">
+          <Link
+            to={`/{{ route }}/${id}/edit`}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Edit
+          </Link>
+          <Link
+            to="/{{ route }}"
+            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+          >
+            Back
+          </Link>
+        </div>
+      </div>
+
+      <div className="bg-white shadow rounded p-6">
+{% for field in fields %}
+{% set f_name = field.get('name') %}
+{% set f_type = field.get('type', 'string') %}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-600">{{ f_name }}</label>
+{% if f_type in ("datetime", "date") %}
+          <p className="mt-1">{new Date(data.{{ f_name }}).toLocaleString()}</p>
+{% elif f_type in ("boolean", "bool") %}
+          <p className="mt-1">{data.{{ f_name }} ? 'Yes' : 'No'}</p>
+{% else %}
+          <p className="mt-1">{data.{{ f_name }}}</p>
+{% endif %}
+        </div>
+{% endfor %}
+      </div>
+    </div>
+  );
+}

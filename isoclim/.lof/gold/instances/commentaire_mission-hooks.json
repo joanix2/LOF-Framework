@@ -1,0 +1,10 @@
+{
+  "id": "commentaire_mission-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "Commentaire",
+    "route": "commentaire-mission",
+    "pluralName": "Commentaires"
+  },
+  "relations": []
+}

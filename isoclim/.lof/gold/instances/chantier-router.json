@@ -1,0 +1,18 @@
+{
+  "id": "chantier-router",
+  "type": "entity-router",
+  "values": {
+    "name": "Chantier",
+    "route": "chantier",
+    "pluralName": "Chantiers",
+    "operations": [
+      "list",
+      "search",
+      "create",
+      "read",
+      "update",
+      "delete"
+    ]
+  },
+  "relations": []
+}

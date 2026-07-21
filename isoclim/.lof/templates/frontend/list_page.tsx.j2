@@ -1,0 +1,140 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { use{{ name | pascal_case }}List, useDelete{{ name | pascal_case }} } from '../hooks/use{{ name | pascal_case }}';
+import type { {{ name | pascal_case }} } from '../types/{{ name | snake_case }}';
+
+export default function {{ name | pascal_case }}ListPage() {
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const { data, isLoading, error } = use{{ name | pascal_case }}List(page, 20, search || undefined);
+  const deleteMutation = useDelete{{ name | pascal_case }}();
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    await deleteMutation.mutateAsync(id);
+    setConfirmDelete(null);
+  };
+
+  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (error) return <div className="p-4 text-red-500">Error loading {{ pluralName | lower }}</div>;
+
+  return (
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">{{ pluralName }}</h1>
+        <Link
+          to="/{{ route }}/new"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          New {{ name | pascal_case }}
+        </Link>
+      </div>
+
+      <input
+        type="text"
+        placeholder="Search {{ pluralName | lower }}..."
+        value={search}
+        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        className="border p-2 mb-4 w-full rounded"
+      />
+
+      <table className="w-full border-collapse border">
+        <thead>
+          <tr className="bg-gray-100">
+{% for field in fields %}
+{% if field.get('visibleInList', True) %}
+            <th className="border p-2 text-left">{{ field.get('name') }}</th>
+{% endif %}
+{% endfor %}
+            <th className="border p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data?.items.map((item: {{ name | pascal_case }}) => (
+            <tr key={item.id} className="hover:bg-gray-50">
+{% for field in fields %}
+{% if field.get('visibleInList', True) %}
+{% set f_type = field.get('type', 'string') %}
+{% set f_name = field.get('name') %}
+{% if f_type in ("boolean", "bool") %}
+              <td className="border p-2">{item.{{ f_name }} ? '\u2713' : '\u2717'}</td>
+{% elif f_type in ("datetime", "date") %}
+              <td className="border p-2">{new Date(item.{{ f_name }}).toLocaleDateString()}</td>
+{% else %}
+              <td className="border p-2">{item.{{ f_name }}}</td>
+{% endif %}
+{% endif %}
+{% endfor %}
+              <td className="border p-2">
+                <Link
+                  to={`/{{ route }}/${item.id}`}
+                  className="text-blue-600 hover:underline mr-2"
+                >
+                  View
+                </Link>
+                <Link
+                  to={`/{{ route }}/${item.id}/edit`}
+                  className="text-green-600 hover:underline mr-2"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={() => setConfirmDelete(item.id)}
+                  className="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded">
+            <p className="mb-4">Are you sure you want to delete this {{ name | lower }}?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleDelete(confirmDelete)}
+                className="bg-red-600 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="bg-gray-300 px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {data && (
+        <div className="flex justify-between items-center mt-4">
+          <span>
+            Page {data.page} of {data.total_pages} ({data.total} total)
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p: number) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage((p: number) => p + 1)}
+              disabled={page >= (data?.total_pages || 1)}
+              className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

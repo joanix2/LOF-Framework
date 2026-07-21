@@ -1,0 +1,23 @@
+from app.modules.{{ name | snake_case }}.model import {{ name | pascal_case }}
+from app.modules.{{ name | snake_case }}.schemas import (
+    {{ name | pascal_case }}Create,
+    {{ name | pascal_case }}Update,
+    {{ name | pascal_case }}Read,
+    {{ name | pascal_case }}List,
+    {{ name | pascal_case }}Page,
+)
+from app.modules.{{ name | snake_case }}.repository import {{ name | pascal_case }}Repository
+from app.modules.{{ name | snake_case }}.service import {{ name | pascal_case }}Service
+from app.modules.{{ name | snake_case }}.router import router as {{ name | snake_case }}_router
+
+__all__ = [
+    "{{ name | pascal_case }}",
+    "{{ name | pascal_case }}Create",
+    "{{ name | pascal_case }}Update",
+    "{{ name | pascal_case }}Read",
+    "{{ name | pascal_case }}List",
+    "{{ name | pascal_case }}Page",
+    "{{ name | pascal_case }}Repository",
+    "{{ name | pascal_case }}Service",
+    "{{ name | snake_case }}_router",
+]

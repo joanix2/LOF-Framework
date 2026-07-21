@@ -1,0 +1,18 @@
+{
+  "id": "mission-router",
+  "type": "entity-router",
+  "values": {
+    "name": "Mission",
+    "route": "mission",
+    "pluralName": "Missions",
+    "operations": [
+      "list",
+      "search",
+      "create",
+      "read",
+      "update",
+      "delete"
+    ]
+  },
+  "relations": []
+}

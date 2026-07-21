@@ -1,0 +1,10 @@
+{
+  "id": "client-hooks",
+  "type": "entity-hooks",
+  "values": {
+    "name": "Client",
+    "route": "client",
+    "pluralName": "Clients"
+  },
+  "relations": []
+}
