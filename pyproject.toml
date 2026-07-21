@@ -63,6 +63,10 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+"src/lof/admin/generators/*" = ["E501", "F841", "F541", "F821"]
+"src/lof/cli.py" = ["E501"]
+
 [tool.ruff.format]
 quote-style = "double"
 

@@ -1,0 +1,122 @@
+application:
+  name: LMP Admin
+
+roles:
+  - admin
+  - manager
+  - employee
+
+models:
+  Team:
+    label: Équipe
+    label_plural: Équipes
+    display_field: name
+
+    permissions:
+      create: [admin, manager]
+      read: [admin, manager, employee]
+      update: [admin, manager]
+      delete: [admin]
+
+    ui:
+      edition_mode: drawer
+
+    fields:
+      id:
+        type: uuid
+        primary_key: true
+        generated: true
+
+      name:
+        type: string
+        required: true
+        ui:
+          label: Nom
+          widget: text-input
+          list:
+            visible: true
+            searchable: true
+            sortable: true
+          form:
+            visible: true
+            section: general
+
+      active:
+        type: boolean
+        default: true
+        ui:
+          label: Active
+          widget: switch
+          list:
+            visible: true
+          form:
+            visible: true
+            section: general
+
+  Employee:
+    label: Employé
+    label_plural: Employés
+    display_field: full_name
+
+    permissions:
+      create: [admin, manager]
+      read: [admin, manager, employee]
+      update: [admin, manager]
+      delete: [admin]
+
+    fields:
+      id:
+        type: uuid
+        primary_key: true
+        generated: true
+
+      first_name:
+        type: string
+        required: true
+        ui:
+          label: Prénom
+          list:
+            visible: true
+            searchable: true
+          form:
+            visible: true
+            section: identity
+
+      last_name:
+        type: string
+        required: true
+        ui:
+          label: Nom
+          list:
+            visible: true
+            searchable: true
+          form:
+            visible: true
+            section: identity
+
+      team:
+        type: relation
+        target: Team
+        relation: many_to_one
+        required: false
+        ui:
+          label: Équipe
+          widget: autocomplete
+          display_field: name
+          list:
+            visible: true
+            filterable: true
+          form:
+            visible: true
+            section: assignment
+
+      active:
+        type: boolean
+        default: true
+        ui:
+          widget: switch
+          list:
+            visible: true
+          form:
+            visible: true
+            section: general
