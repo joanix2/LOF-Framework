@@ -22,6 +22,8 @@ class ProjectionExpander:
         for inst in self.registry.instances.values():
             if inst.type == "entity":
                 expanded.extend(self._expand_entity(inst))
+            elif inst.type == "application":
+                expanded.extend(self._expand_application(inst))
             else:
                 expanded.append(inst)
         return expanded
@@ -33,6 +35,8 @@ class ProjectionExpander:
         can_list = "list" in ops
 
         for proj_def in self.profile.projections:
+            if proj_def.get("scope", "entity") != "entity":
+                continue
             condition = proj_def.get("condition", "always")
             if not self._match_condition(condition, has_ops, can_list):
                 continue
@@ -52,6 +56,24 @@ class ProjectionExpander:
                     for r in entity_inst.values.get("relations", [])
                 ]
 
+            results.append(proj_inst)
+
+        return results
+
+    def _expand_application(self, app_inst: InstanceDefinition) -> list[InstanceDefinition]:
+        results: list[InstanceDefinition] = []
+
+        for proj_def in self.profile.projections:
+            if proj_def.get("scope", "entity") != "application":
+                continue
+
+            type_id = proj_def["type"]
+            proj_inst = InstanceDefinition(
+                id=type_id,
+                type=type_id,
+                values=dict(app_inst.values),
+                enabled=app_inst.enabled,
+            )
             results.append(proj_inst)
 
         return results

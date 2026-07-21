@@ -122,6 +122,70 @@
       "template": ".lof/templates/backend/service.py.j2",
       "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/service.py",
       "targetType": "python-module"
+    },
+    {
+      "type": "app-html",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/index.html.j2",
+      "outputPattern": "generated-project/apps/web/index.html",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-main",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/main.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/main.tsx",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-styles",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/index.css.j2",
+      "outputPattern": "generated-project/apps/web/src/index.css",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-package",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/package.json.j2",
+      "outputPattern": "generated-project/apps/web/package.json",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-tsconfig",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/tsconfig.json.j2",
+      "outputPattern": "generated-project/apps/web/tsconfig.json",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-vite-config",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/vite.config.ts.j2",
+      "outputPattern": "generated-project/apps/web/vite.config.ts",
+      "targetType": "typescript-module"
+    },
+    {
+      "type": "app-component",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/App.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/App.tsx",
+      "targetType": "react-component"
+    },
+    {
+      "type": "app-dockerfile",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/Dockerfile.j2",
+      "outputPattern": "generated-project/apps/web/Dockerfile",
+      "targetType": "typescript-module"
     }
   ],
   "closed_world_predicates": [
