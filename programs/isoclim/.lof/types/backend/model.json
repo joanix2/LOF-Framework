@@ -2,7 +2,7 @@
   "id": "model",
   "template": ".lof/templates/backend/model.py.j2",
   "targetType": "python-module",
-  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/model.py",
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/model.py",
   "parameters": {
     "name": {
       "type": "string",

@@ -1,8 +1,8 @@
 {
-  "id": "schema",
-  "template": ".lof/templates/backend/schemas.py.j2",
+  "id": "repository",
+  "template": ".lof/templates/backend/repository.py.j2",
   "targetType": "python-module",
-  "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/schemas.py",
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/repository.py",
   "parameters": {
     "name": {
       "type": "string",

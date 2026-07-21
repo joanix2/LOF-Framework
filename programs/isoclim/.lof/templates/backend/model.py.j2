@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, Boolean, DateTime, Text, Integer, Float, 
 from app.database import Base
 
 
-class {{ name | pascal_case }}(Base):
+class {{ id | pascal_case }}(Base):
     __tablename__ = "{{ tableName }}"
 {%- for field in fields %}
 {%- set f_name = field.get('name', '') | snake_case %}
@@ -36,4 +36,4 @@ class {{ name | pascal_case }}(Base):
 {%- endfor %}
 
     def __repr__(self) -> str:
-        return f"<{{ name | pascal_case }}(id={self.id})>"
+        return f"<{{ id | pascal_case }}(id={self.id})>"

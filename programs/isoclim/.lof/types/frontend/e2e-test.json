@@ -2,7 +2,7 @@
   "id": "e2e-test",
   "template": ".lof/templates/frontend/test_e2e.ts.j2",
   "targetType": "typescript-module",
-  "outputPattern": "generated-project/apps/web/e2e/{{ name | snake_case }}.spec.ts",
+  "outputPattern": "generated-project/apps/web/e2e/{{ id }}.spec.ts",
   "parameters": {
     "name": {
       "type": "string",

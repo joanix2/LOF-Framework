@@ -1,13 +1,13 @@
 import { useForm } from 'react-hook-form';
-import type { {{ name | pascal_case }}Create, {{ name | pascal_case }}Update } from '../types/{{ name | snake_case }}';
+import type { {{ id | pascal_case }}Create, {{ id | pascal_case }}Update } from '../types/{{ id }}';
 
-interface {{ name | pascal_case }}FormProps {
-  initialData?: {{ name | pascal_case }}Create;
-  onSubmit: (data: {{ name | pascal_case }}Create | {{ name | pascal_case }}Update) => void;
+interface {{ id | pascal_case }}FormProps {
+  initialData?: {{ id | pascal_case }}Create;
+  onSubmit: (data: {{ id | pascal_case }}Create | {{ id | pascal_case }}Update) => void;
   isSubmitting?: boolean;
 }
 
-export default function {{ name | pascal_case }}Form({ initialData, onSubmit, isSubmitting }: {{ name | pascal_case }}FormProps) {
+export default function {{ id | pascal_case }}Form({ initialData, onSubmit, isSubmitting }: {{ id | pascal_case }}FormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: initialData || {},
   });

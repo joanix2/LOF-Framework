@@ -10,7 +10,7 @@ test.describe('{{ pluralName }}', () => {
   });
 
   test('can navigate to create form', async ({ page }) => {
-    await page.getByText('New {{ name | pascal_case }}').click();
+    await page.getByText('New {{ id | pascal_case }}').click();
     await expect(page.url()).toContain('/{{ route }}/new');
   });
 

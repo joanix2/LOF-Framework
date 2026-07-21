@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 
-class {{ name | pascal_case }}Base(BaseModel):
+class {{ id | pascal_case }}Base(BaseModel):
 {%- for field in fields %}
 {%- set f_name = field.get('name', '') | snake_case %}
 {%- if f_name not in ("id", "created_at", "updated_at") %}
@@ -21,7 +21,7 @@ class {{ name | pascal_case }}Base(BaseModel):
 {%- endif %}
 {%- endfor %}
 
-class {{ name | pascal_case }}Create({{ name | pascal_case }}Base):
+class {{ id | pascal_case }}Create({{ id | pascal_case }}Base):
 {%- for field in fields %}
 {%- set f_required = field.get('required', False) %}
 {%- set f_generated = field.get('generated', False) %}
@@ -41,13 +41,13 @@ class {{ name | pascal_case }}Create({{ name | pascal_case }}Base):
 {%- endif %}
 {%- endfor %}
 
-class {{ name | pascal_case }}Read({{ name | pascal_case }}Base):
+class {{ id | pascal_case }}Read({{ id | pascal_case }}Base):
     id: str
     created_at: datetime
     updated_at: datetime | None = None
     model_config = {"from_attributes": True}
 
-class {{ name | pascal_case }}Update(BaseModel):
+class {{ id | pascal_case }}Update(BaseModel):
 {%- for field in fields %}
 {%- set f_name = field.get('name', '') | snake_case %}
 {%- if f_name not in ("id", "created_at", "updated_at") %}
@@ -65,7 +65,7 @@ class {{ name | pascal_case }}Update(BaseModel):
 {%- endif %}
 {%- endfor %}
 
-class {{ name | pascal_case }}List(BaseModel):
+class {{ id | pascal_case }}List(BaseModel):
     id: str
 {%- for field in fields %}
 {%- set f_name = field.get('name', '') | snake_case %}
@@ -86,8 +86,8 @@ class {{ name | pascal_case }}List(BaseModel):
 {%- endfor %}
     model_config = {"from_attributes": True}
 
-class {{ name | pascal_case }}Page(BaseModel):
-    items: list[{{ name | pascal_case }}List]
+class {{ id | pascal_case }}Page(BaseModel):
+    items: list[{{ id | pascal_case }}List]
     total: int
     page: int
     page_size: int

@@ -4,42 +4,42 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
-from app.modules.{{ name | snake_case }}.repository import {{ name | pascal_case }}Repository
-from app.modules.{{ name | snake_case }}.service import {{ name | pascal_case }}Service
-from app.modules.{{ name | snake_case }}.schemas import (
-    {{ name | pascal_case }}Create,
-    {{ name | pascal_case }}Update,
-    {{ name | pascal_case }}Read,
-    {{ name | pascal_case }}Page,
+from app.modules.{{ id }}.repository import {{ id | pascal_case }}Repository
+from app.modules.{{ id }}.service import {{ id | pascal_case }}Service
+from app.modules.{{ id }}.schemas import (
+    {{ id | pascal_case }}Create,
+    {{ id | pascal_case }}Update,
+    {{ id | pascal_case }}Read,
+    {{ id | pascal_case }}Page,
 )
 
 
 router = APIRouter(prefix="/{{ route }}", tags=["{{ pluralName }}"])
 
 
-def get_service(session: AsyncSession = Depends(get_session)) -> {{ name | pascal_case }}Service:
-    repository = {{ name | pascal_case }}Repository(session)
-    return {{ name | pascal_case }}Service(repository)
+def get_service(session: AsyncSession = Depends(get_session)) -> {{ id | pascal_case }}Service:
+    repository = {{ id | pascal_case }}Repository(session)
+    return {{ id | pascal_case }}Service(repository)
 
 
 {% if "create" in operations %}
-@router.post("", response_model={{ name | pascal_case }}Read, status_code=201)
+@router.post("", response_model={{ id | pascal_case }}Read, status_code=201)
 async def create_entity(
-    data: {{ name | pascal_case }}Create,
-    service: {{ name | pascal_case }}Service = Depends(get_service),
+    data: {{ id | pascal_case }}Create,
+    service: {{ id | pascal_case }}Service = Depends(get_service),
 ):
     return await service.create(data)
 {% endif %}
 
 {% if "list" in operations %}
-@router.get("", response_model={{ name | pascal_case }}Page)
+@router.get("", response_model={{ id | pascal_case }}Page)
 async def list_entities(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     sort_by: str | None = Query(None),
     sort_desc: bool = Query(False),
     search: str | None = Query(None),
-    service: {{ name | pascal_case }}Service = Depends(get_service),
+    service: {{ id | pascal_case }}Service = Depends(get_service),
 ):
     if search:
         return await service.search(query=search, page=page, page_size=page_size)
@@ -47,10 +47,10 @@ async def list_entities(
 {% endif %}
 
 {% if "read" in operations %}
-@router.get("/{entity_id}", response_model={{ name | pascal_case }}Read)
+@router.get("/{entity_id}", response_model={{ id | pascal_case }}Read)
 async def get_entity(
     entity_id: str,
-    service: {{ name | pascal_case }}Service = Depends(get_service),
+    service: {{ id | pascal_case }}Service = Depends(get_service),
 ):
     entity = await service.get(entity_id)
     if entity is None:
@@ -59,11 +59,11 @@ async def get_entity(
 {% endif %}
 
 {% if "update" in operations %}
-@router.patch("/{entity_id}", response_model={{ name | pascal_case }}Read)
+@router.patch("/{entity_id}", response_model={{ id | pascal_case }}Read)
 async def update_entity(
     entity_id: str,
-    data: {{ name | pascal_case }}Update,
-    service: {{ name | pascal_case }}Service = Depends(get_service),
+    data: {{ id | pascal_case }}Update,
+    service: {{ id | pascal_case }}Service = Depends(get_service),
 ):
     entity = await service.update(entity_id, data)
     if entity is None:
@@ -75,7 +75,7 @@ async def update_entity(
 @router.delete("/{entity_id}", status_code=204)
 async def delete_entity(
     entity_id: str,
-    service: {{ name | pascal_case }}Service = Depends(get_service),
+    service: {{ id | pascal_case }}Service = Depends(get_service),
 ):
     deleted = await service.delete(entity_id)
     if not deleted:

@@ -50,64 +50,78 @@
       "type": "model",
       "condition": "always",
       "template": ".lof/templates/backend/model.py.j2",
-      "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/model.py",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/model.py",
       "targetType": "python-module"
     },
     {
       "type": "schema",
       "condition": "always",
       "template": ".lof/templates/backend/schemas.py.j2",
-      "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/schemas.py",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/schemas.py",
       "targetType": "python-module"
     },
     {
       "type": "route",
       "condition": "has_operations",
       "template": ".lof/templates/backend/router.py.j2",
-      "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/router.py",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/router.py",
       "targetType": "python-module"
     },
     {
       "type": "api-test",
       "condition": "has_operations",
       "template": ".lof/templates/backend/test_entity.py.j2",
-      "outputPattern": "generated-project/apps/api/tests/modules/test_{{ name | snake_case }}.py",
+      "outputPattern": "generated-project/apps/api/tests/modules/test_{{ id }}.py",
       "targetType": "python-module"
     },
     {
       "type": "data-grid",
       "condition": "capability.list",
       "template": ".lof/templates/frontend/list_page.tsx.j2",
-      "outputPattern": "generated-project/apps/web/src/pages/{{ name | pascal_case }}ListPage.tsx",
+      "outputPattern": "generated-project/apps/web/src/pages/{{ id | pascal_case }}ListPage.tsx",
       "targetType": "react-component"
     },
     {
       "type": "form",
       "condition": "has_operations",
       "template": ".lof/templates/frontend/form.tsx.j2",
-      "outputPattern": "generated-project/apps/web/src/components/{{ name | pascal_case }}Form.tsx",
+      "outputPattern": "generated-project/apps/web/src/components/{{ id | pascal_case }}Form.tsx",
       "targetType": "react-component"
     },
     {
       "type": "hook",
       "condition": "has_operations",
       "template": ".lof/templates/frontend/hooks.ts.j2",
-      "outputPattern": "generated-project/apps/web/src/hooks/use{{ name | pascal_case }}.ts",
+      "outputPattern": "generated-project/apps/web/src/hooks/use{{ id | pascal_case }}.ts",
       "targetType": "typescript-module"
     },
     {
       "type": "type",
       "condition": "always",
       "template": ".lof/templates/frontend/types.ts.j2",
-      "outputPattern": "generated-project/apps/web/src/types/{{ name | snake_case }}.ts",
+      "outputPattern": "generated-project/apps/web/src/types/{{ id }}.ts",
       "targetType": "typescript-module"
     },
     {
       "type": "e2e-test",
       "condition": "capability.list",
       "template": ".lof/templates/frontend/test_e2e.ts.j2",
-      "outputPattern": "generated-project/apps/web/e2e/{{ name | snake_case }}.spec.ts",
+      "outputPattern": "generated-project/apps/web/e2e/{{ id }}.spec.ts",
       "targetType": "typescript-module"
+    },
+    {
+      "type": "repository",
+      "condition": "has_operations",
+      "template": ".lof/templates/backend/repository.py.j2",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/repository.py",
+      "targetType": "python-module"
+    },
+    {
+      "type": "service",
+      "condition": "has_operations",
+      "template": ".lof/templates/backend/service.py.j2",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/service.py",
+      "targetType": "python-module"
     }
   ],
   "closed_world_predicates": [

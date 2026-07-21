@@ -3,9 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
-import {{ name | pascal_case }}ListPage from '../src/pages/{{ name | pascal_case }}ListPage';
-import {{ name | pascal_case }}DetailPage from '../src/pages/{{ name | pascal_case }}DetailPage';
-import {{ name | pascal_case }}Form from '../src/components/{{ name | pascal_case }}Form';
+import {{ id | pascal_case }}ListPage from '../src/pages/{{ id | pascal_case }}ListPage';
+import {{ id | pascal_case }}DetailPage from '../src/pages/{{ id | pascal_case }}DetailPage';
+import {{ id | pascal_case }}Form from '../src/components/{{ id | pascal_case }}Form';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
@@ -19,33 +19,33 @@ function Wrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-describe('{{ name | pascal_case }}ListPage', () => {
+describe('{{ id | pascal_case }}ListPage', () => {
   beforeEach(() => {
     queryClient.clear();
   });
 
   it('renders the page title', () => {
-    render(<{{ name | pascal_case }}ListPage />, { wrapper: Wrapper });
+    render(<{{ id | pascal_case }}ListPage />, { wrapper: Wrapper });
     expect(screen.getByText('{{ pluralName }}')).toBeDefined();
   });
 
   it('shows loading state', () => {
-    render(<{{ name | pascal_case }}ListPage />, { wrapper: Wrapper });
+    render(<{{ id | pascal_case }}ListPage />, { wrapper: Wrapper });
     expect(screen.getByText('Loading...')).toBeDefined();
   });
 
   it('has a create button linking to new', () => {
-    render(<{{ name | pascal_case }}ListPage />, { wrapper: Wrapper });
-    const link = screen.getByText('New {{ name | pascal_case }}');
+    render(<{{ id | pascal_case }}ListPage />, { wrapper: Wrapper });
+    const link = screen.getByText('New {{ id | pascal_case }}');
     expect(link).toBeDefined();
     expect(link.getAttribute('href')).toBe('/{{ route }}/new');
   });
 });
 
-describe('{{ name | pascal_case }}Form', () => {
+describe('{{ id | pascal_case }}Form', () => {
   it('renders form fields', () => {
     const mockSubmit = vi.fn();
-    render(<{{ name | pascal_case }}Form onSubmit={mockSubmit} />, { wrapper: Wrapper });
+    render(<{{ id | pascal_case }}Form onSubmit={mockSubmit} />, { wrapper: Wrapper });
 {% for field in fields %}
 {% if field.get('visibleInForm', True) and field.get('name') != "id" %}
 {% if field.get('type') in ("boolean", "bool") %}
@@ -61,24 +61,24 @@ describe('{{ name | pascal_case }}Form', () => {
   it('submits form data', async () => {
     const mockSubmit = vi.fn();
     const user = userEvent.setup();
-    render(<{{ name | pascal_case }}Form onSubmit={mockSubmit} />, { wrapper: Wrapper });
+    render(<{{ id | pascal_case }}Form onSubmit={mockSubmit} />, { wrapper: Wrapper });
     await user.click(screen.getByText('Save'));
     expect(mockSubmit).toHaveBeenCalled();
   });
 });
 
-describe('{{ name | pascal_case }}DetailPage', () => {
+describe('{{ id | pascal_case }}DetailPage', () => {
   beforeEach(() => {
     queryClient.clear();
   });
 
   it('shows loading state', () => {
-    render(<{{ name | pascal_case }}DetailPage />, { wrapper: Wrapper });
+    render(<{{ id | pascal_case }}DetailPage />, { wrapper: Wrapper });
     expect(screen.getByText('Loading...')).toBeDefined();
   });
 
   it('has a back link', () => {
-    render(<{{ name | pascal_case }}DetailPage />, { wrapper: Wrapper });
+    render(<{{ id | pascal_case }}DetailPage />, { wrapper: Wrapper });
     const link = screen.getByText('Back');
     expect(link).toBeDefined();
     expect(link.getAttribute('href')).toBe('/{{ route }}');

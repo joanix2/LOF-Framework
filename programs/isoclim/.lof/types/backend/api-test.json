@@ -2,7 +2,7 @@
   "id": "api-test",
   "template": ".lof/templates/backend/test_entity.py.j2",
   "targetType": "python-module",
-  "outputPattern": "generated-project/apps/api/tests/modules/test_{{ name | snake_case }}.py",
+  "outputPattern": "generated-project/apps/api/tests/modules/test_{{ id }}.py",
   "parameters": {
     "name": {
       "type": "string",

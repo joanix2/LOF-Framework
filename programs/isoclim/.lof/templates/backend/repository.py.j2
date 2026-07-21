@@ -2,29 +2,29 @@ from uuid import UUID
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.{{ name | snake_case }}.model import {{ name | pascal_case }}
-from app.modules.{{ name | snake_case }}.schemas import (
-    {{ name | pascal_case }}Create,
-    {{ name | pascal_case }}Update,
-    {{ name | pascal_case }}Read,
-    {{ name | pascal_case }}List,
-    {{ name | pascal_case }}Page,
+from app.modules.{{ id }}.model import {{ id | pascal_case }}
+from app.modules.{{ id }}.schemas import (
+    {{ id | pascal_case }}Create,
+    {{ id | pascal_case }}Update,
+    {{ id | pascal_case }}Read,
+    {{ id | pascal_case }}List,
+    {{ id | pascal_case }}Page,
 )
 
 
-class {{ name | pascal_case }}Repository:
+class {{ id | pascal_case }}Repository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, data: {{ name | pascal_case }}Create) -> {{ name | pascal_case }}:
-        entity = {{ name | pascal_case }}(**data.model_dump())
+    async def create(self, data: {{ id | pascal_case }}Create) -> {{ id | pascal_case }}:
+        entity = {{ id | pascal_case }}(**data.model_dump())
         self.session.add(entity)
         await self.session.commit()
         await self.session.refresh(entity)
         return entity
 
-    async def get(self, entity_id: str) -> {{ name | pascal_case }} | None:
-        stmt = select({{ name | pascal_case }}).where({{ name | pascal_case }}.id == entity_id)
+    async def get(self, entity_id: str) -> {{ id | pascal_case }} | None:
+        stmt = select({{ id | pascal_case }}).where({{ id | pascal_case }}.id == entity_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -34,16 +34,16 @@ class {{ name | pascal_case }}Repository:
         page_size: int = 20,
         sort_by: str | None = None,
         sort_desc: bool = False,
-    ) -> {{ name | pascal_case }}Page:
-        stmt = select({{ name | pascal_case }})
-        total_stmt = select(func.count()).select_from({{ name | pascal_case }})
+    ) -> {{ id | pascal_case }}Page:
+        stmt = select({{ id | pascal_case }})
+        total_stmt = select(func.count()).select_from({{ id | pascal_case }})
 
         if sort_by:
-            col = getattr({{ name | pascal_case }}, sort_by, None)
+            col = getattr({{ id | pascal_case }}, sort_by, None)
             if col is not None:
                 stmt = stmt.order_by(col.desc() if sort_desc else col.asc())
         else:
-            stmt = stmt.order_by({{ name | pascal_case }}.created_at.desc())
+            stmt = stmt.order_by({{ id | pascal_case }}.created_at.desc())
 
         total_result = await self.session.execute(total_stmt)
         total = total_result.scalar() or 0
@@ -52,7 +52,7 @@ class {{ name | pascal_case }}Repository:
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())
 
-        return {{ name | pascal_case }}Page(
+        return {{ id | pascal_case }}Page(
             items=items,
             total=total,
             page=page,
@@ -60,7 +60,7 @@ class {{ name | pascal_case }}Repository:
             total_pages=max(1, -(-total // page_size)),
         )
 
-    async def update(self, entity_id: str, data: {{ name | pascal_case }}Update) -> {{ name | pascal_case }} | None:
+    async def update(self, entity_id: str, data: {{ id | pascal_case }}Update) -> {{ id | pascal_case }} | None:
         entity = await self.get(entity_id)
         if entity is None:
             return None
@@ -84,7 +84,7 @@ class {{ name | pascal_case }}Repository:
         query: str,
         page: int = 1,
         page_size: int = 20,
-    ) -> {{ name | pascal_case }}Page:
+    ) -> {{ id | pascal_case }}Page:
 {% set searchable_fields = [] %}
 {% for field in fields %}
 {% if field.get('searchable', False) %}
@@ -94,17 +94,17 @@ class {{ name | pascal_case }}Repository:
 {% if searchable_fields %}
         conditions = [
 {% for fname in searchable_fields %}
-            {{ name | pascal_case }}.{{ fname }}.ilike(f"%{query}%"),
+            {{ id | pascal_case }}.{{ fname }}.ilike(f"%{query}%"),
 {% endfor %}
         ]
-        stmt = select({{ name | pascal_case }}).where(or_(*conditions))
-        total_stmt = select(func.count()).select_from({{ name | pascal_case }}).where(or_(*conditions))
+        stmt = select({{ id | pascal_case }}).where(or_(*conditions))
+        total_stmt = select(func.count()).select_from({{ id | pascal_case }}).where(or_(*conditions))
 {% else %}
-        stmt = select({{ name | pascal_case }})
-        total_stmt = select(func.count()).select_from({{ name | pascal_case }})
+        stmt = select({{ id | pascal_case }})
+        total_stmt = select(func.count()).select_from({{ id | pascal_case }})
 {% endif %}
 
-        stmt = stmt.order_by({{ name | pascal_case }}.created_at.desc())
+        stmt = stmt.order_by({{ id | pascal_case }}.created_at.desc())
 
         total_result = await self.session.execute(total_stmt)
         total = total_result.scalar() or 0
@@ -113,7 +113,7 @@ class {{ name | pascal_case }}Repository:
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())
 
-        return {{ name | pascal_case }}Page(
+        return {{ id | pascal_case }}Page(
             items=items,
             total=total,
             page=page,

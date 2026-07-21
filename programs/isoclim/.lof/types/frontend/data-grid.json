@@ -2,7 +2,7 @@
   "id": "data-grid",
   "template": ".lof/templates/frontend/list_page.tsx.j2",
   "targetType": "react-component",
-  "outputPattern": "generated-project/apps/web/src/pages/{{ name | pascal_case }}ListPage.tsx",
+  "outputPattern": "generated-project/apps/web/src/pages/{{ id | pascal_case }}ListPage.tsx",
   "parameters": {
     "name": {
       "type": "string",

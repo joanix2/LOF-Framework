@@ -2,7 +2,7 @@
   "id": "hook",
   "template": ".lof/templates/frontend/hooks.ts.j2",
   "targetType": "typescript-module",
-  "outputPattern": "generated-project/apps/web/src/hooks/use{{ name | pascal_case }}.ts",
+  "outputPattern": "generated-project/apps/web/src/hooks/use{{ id | pascal_case }}.ts",
   "parameters": {
     "name": {
       "type": "string",

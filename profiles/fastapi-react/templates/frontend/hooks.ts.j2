@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { {{ name | pascal_case }}, {{ name | pascal_case }}Create, {{ name | pascal_case }}Update, {{ name | pascal_case }}Page } from '../types/{{ name | snake_case }}';
+import type { {{ id | pascal_case }}, {{ id | pascal_case }}Create, {{ id | pascal_case }}Update, {{ id | pascal_case }}Page } from '../types/{{ id }}';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
-export function use{{ name | pascal_case }}List(page = 1, pageSize = 20, search?: string) {
-  return useQuery<{{ name | pascal_case }}Page>({
-    queryKey: ['{{ name | snake_case }}', 'list', page, pageSize, search],
+export function use{{ id | pascal_case }}List(page = 1, pageSize = 20, search?: string) {
+  return useQuery<{{ id | pascal_case }}Page>({
+    queryKey: ['{{ id }}', 'list', page, pageSize, search],
     queryFn: async () => {
       const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
       if (search) params.set('search', search);
@@ -16,9 +16,9 @@ export function use{{ name | pascal_case }}List(page = 1, pageSize = 20, search?
   });
 }
 
-export function use{{ name | pascal_case }}(id: string) {
-  return useQuery<{{ name | pascal_case }}>({
-    queryKey: ['{{ name | snake_case }}', id],
+export function use{{ id | pascal_case }}(id: string) {
+  return useQuery<{{ id | pascal_case }}>({
+    queryKey: ['{{ id }}', id],
     queryFn: async () => {
       const res = await fetch(`${API_BASE}/{{ route }}/${id}`);
       if (!res.ok) throw new Error('Failed to fetch {{ name | lower }}');
@@ -28,10 +28,10 @@ export function use{{ name | pascal_case }}(id: string) {
   });
 }
 
-export function useCreate{{ name | pascal_case }}() {
+export function useCreate{{ id | pascal_case }}() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: {{ name | pascal_case }}Create) => {
+    mutationFn: async (data: {{ id | pascal_case }}Create) => {
       const res = await fetch(`${API_BASE}/{{ route }}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,15 +41,15 @@ export function useCreate{{ name | pascal_case }}() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['{{ id }}', 'list'] });
     },
   });
 }
 
-export function useUpdate{{ name | pascal_case }}() {
+export function useUpdate{{ id | pascal_case }}() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: {{ name | pascal_case }}Update }) => {
+    mutationFn: async ({ id, data }: { id: string; data: {{ id | pascal_case }}Update }) => {
       const res = await fetch(`${API_BASE}/{{ route }}/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -59,13 +59,13 @@ export function useUpdate{{ name | pascal_case }}() {
       return res.json();
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', 'list'] });
-      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['{{ id }}', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['{{ id }}', variables.id] });
     },
   });
 }
 
-export function useDelete{{ name | pascal_case }}() {
+export function useDelete{{ id | pascal_case }}() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
@@ -73,7 +73,7 @@ export function useDelete{{ name | pascal_case }}() {
       if (!res.ok) throw new Error('Failed to delete {{ name | lower }}');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['{{ name | snake_case }}', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['{{ id }}', 'list'] });
     },
   });
 }

@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { use{{ name | pascal_case }}, useDelete{{ name | pascal_case }} } from '../hooks/use{{ name | pascal_case }}';
+import { use{{ id | pascal_case }}, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}';
 
-export default function {{ name | pascal_case }}DetailPage() {
+export default function {{ id | pascal_case }}DetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { data, isLoading, error } = use{{ name | pascal_case }}(id || '');
-  const deleteMutation = useDelete{{ name | pascal_case }}();
+  const { data, isLoading, error } = use{{ id | pascal_case }}(id || '');
+  const deleteMutation = useDelete{{ id | pascal_case }}();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (isLoading) return <div className="p-4">Loading...</div>;
-  if (error || !data) return <div className="p-4 text-red-500">{{ name | pascal_case }} not found</div>;
+  if (error || !data) return <div className="p-4 text-red-500">{{ id | pascal_case }} not found</div>;
 
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{{ name | pascal_case }} Details</h1>
+        <h1 className="text-2xl font-bold">{{ id | pascal_case }} Details</h1>
         <div className="flex gap-2">
           <Link
             to={`/{{ route }}/${id}/edit`}

@@ -1,4 +1,4 @@
-export interface {{ name | pascal_case }} {
+export interface {{ id | pascal_case }} {
 {% for field in fields %}
 {% set f_type = field.get('type', 'string') %}
 {% set ts_type = "string" if f_type in ("uuid", "UUID", "string", "email", "url", "text", "enum", "datetime", "date") else "number" if f_type in ("integer", "int", "float", "decimal") else "boolean" if f_type in ("boolean", "bool") else "string" %}
@@ -6,7 +6,7 @@ export interface {{ name | pascal_case }} {
 {% endfor %}
 }
 
-export interface {{ name | pascal_case }}Create {
+export interface {{ id | pascal_case }}Create {
 {% for field in fields %}
 {% set f_name = field.get('name') %}
 {% if f_name != "id" %}
@@ -17,7 +17,7 @@ export interface {{ name | pascal_case }}Create {
 {% endfor %}
 }
 
-export interface {{ name | pascal_case }}Update {
+export interface {{ id | pascal_case }}Update {
 {% for field in fields %}
 {% set f_name = field.get('name') %}
 {% if f_name != "id" %}
@@ -28,8 +28,8 @@ export interface {{ name | pascal_case }}Update {
 {% endfor %}
 }
 
-export interface {{ name | pascal_case }}Page {
-  items: {{ name | pascal_case }}[];
+export interface {{ id | pascal_case }}Page {
+  items: {{ id | pascal_case }}[];
   total: number;
   page: number;
   page_size: number;

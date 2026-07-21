@@ -2,7 +2,7 @@
   "id": "route",
   "template": ".lof/templates/backend/router.py.j2",
   "targetType": "python-module",
-  "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/router.py",
+  "outputPattern": "generated-project/apps/api/src/app/modules/{{ id }}/router.py",
   "parameters": {
     "name": {
       "type": "string",

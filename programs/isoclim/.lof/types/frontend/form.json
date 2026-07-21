@@ -2,7 +2,7 @@
   "id": "form",
   "template": ".lof/templates/frontend/form.tsx.j2",
   "targetType": "react-component",
-  "outputPattern": "generated-project/apps/web/src/components/{{ name | pascal_case }}Form.tsx",
+  "outputPattern": "generated-project/apps/web/src/components/{{ id | pascal_case }}Form.tsx",
   "parameters": {
     "name": {
       "type": "string",
