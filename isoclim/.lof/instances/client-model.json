@@ -2,10 +2,13 @@
   "id": "client-model",
   "type": "entity-model",
   "values": {
+    "id": "client",
     "name": "Client",
     "pluralName": "Clients",
+    "description": "Entreprise cliente",
     "route": "client",
     "tableName": "client",
+    "displayField": "company_name",
     "fields": [
       {
         "name": "id",
@@ -151,6 +154,23 @@
         "default": true
       }
     ],
+    "relations": [],
+    "incoming_relations": [
+      {
+        "id": "inverse_commande_client",
+        "source": "commande",
+        "target": "client",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "client_id",
+        "target_display_field": "company_name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      }
+    ],
     "operations": [
       "create",
       "read",
@@ -159,7 +179,20 @@
       "list",
       "search"
     ],
-    "relations": []
+    "searchable_fields": [
+      "company_name"
+    ],
+    "grid_columns": [
+      "company_name",
+      "email",
+      "phone",
+      "siret"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

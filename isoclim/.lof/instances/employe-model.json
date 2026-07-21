@@ -2,10 +2,13 @@
   "id": "employe-model",
   "type": "entity-model",
   "values": {
+    "id": "employe",
     "name": "Employ\u00e9",
     "pluralName": "Employ\u00e9s",
+    "description": "Employ\u00e9 d'\u00e9quipe",
     "route": "employe",
     "tableName": "employe",
+    "displayField": "full_name",
     "fields": [
       {
         "name": "id",
@@ -131,14 +134,6 @@
         "default": true
       }
     ],
-    "operations": [
-      "create",
-      "read",
-      "update",
-      "delete",
-      "list",
-      "search"
-    ],
     "relations": [
       {
         "id": "employe_equipe",
@@ -155,7 +150,30 @@
         "detail_visible": true,
         "back_populates": "equipe_employes"
       }
-    ]
+    ],
+    "incoming_relations": [],
+    "operations": [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "list",
+      "search"
+    ],
+    "searchable_fields": [
+      "full_name"
+    ],
+    "grid_columns": [
+      "full_name",
+      "email",
+      "phone",
+      "role"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

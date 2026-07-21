@@ -2,9 +2,13 @@
   "id": "equipement-api-tests",
   "type": "entity-api-tests",
   "values": {
+    "id": "equipement",
     "name": "\u00c9quipement",
-    "route": "equipement",
     "pluralName": "\u00c9quipements",
+    "description": "\u00c9quipement de chantier",
+    "route": "equipement",
+    "tableName": "equipement",
+    "displayField": "name",
     "fields": [
       {
         "name": "id",
@@ -131,6 +135,24 @@
         "default": true
       }
     ],
+    "relations": [
+      {
+        "id": "equipement_mission",
+        "source": "equipement",
+        "target": "mission",
+        "kind": "many-to-one",
+        "source_field": "mission_id",
+        "target_field": "id",
+        "target_display_field": "title",
+        "required": false,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "mission_equipements"
+      }
+    ],
+    "incoming_relations": [],
     "operations": [
       "create",
       "read",
@@ -138,7 +160,21 @@
       "delete",
       "list",
       "search"
-    ]
+    ],
+    "searchable_fields": [
+      "name"
+    ],
+    "grid_columns": [
+      "name",
+      "type",
+      "serial_number",
+      "status"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

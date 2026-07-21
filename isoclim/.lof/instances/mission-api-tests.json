@@ -2,9 +2,13 @@
   "id": "mission-api-tests",
   "type": "entity-api-tests",
   "values": {
+    "id": "mission",
     "name": "Mission",
-    "route": "mission",
     "pluralName": "Missions",
+    "description": "Mission sur chantier",
+    "route": "mission",
+    "tableName": "mission",
+    "displayField": "title",
     "fields": [
       {
         "name": "id",
@@ -170,6 +174,68 @@
         "enum_ref": null
       }
     ],
+    "relations": [
+      {
+        "id": "mission_chantier",
+        "source": "mission",
+        "target": "chantier",
+        "kind": "many-to-one",
+        "source_field": "chantier_id",
+        "target_field": "id",
+        "target_display_field": "name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "chantier_missions"
+      },
+      {
+        "id": "mission_equipe",
+        "source": "mission",
+        "target": "equipe",
+        "kind": "many-to-one",
+        "source_field": "equipe_id",
+        "target_field": "id",
+        "target_display_field": "name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "equipe_missions"
+      }
+    ],
+    "incoming_relations": [
+      {
+        "id": "inverse_equipement_mission",
+        "source": "equipement",
+        "target": "mission",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "mission_id",
+        "target_display_field": "title",
+        "required": false,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      },
+      {
+        "id": "inverse_commentaire_mission_ref",
+        "source": "commentaire_mission",
+        "target": "mission",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "mission_id",
+        "target_display_field": "title",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      }
+    ],
     "operations": [
       "create",
       "read",
@@ -177,7 +243,20 @@
       "delete",
       "list",
       "search"
-    ]
+    ],
+    "searchable_fields": [
+      "title"
+    ],
+    "grid_columns": [
+      "title",
+      "status",
+      "priority"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

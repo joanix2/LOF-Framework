@@ -2,10 +2,13 @@
   "id": "equipement-model",
   "type": "entity-model",
   "values": {
+    "id": "equipement",
     "name": "\u00c9quipement",
     "pluralName": "\u00c9quipements",
+    "description": "\u00c9quipement de chantier",
     "route": "equipement",
     "tableName": "equipement",
+    "displayField": "name",
     "fields": [
       {
         "name": "id",
@@ -132,14 +135,6 @@
         "default": true
       }
     ],
-    "operations": [
-      "create",
-      "read",
-      "update",
-      "delete",
-      "list",
-      "search"
-    ],
     "relations": [
       {
         "id": "equipement_mission",
@@ -156,7 +151,30 @@
         "detail_visible": true,
         "back_populates": "mission_equipements"
       }
-    ]
+    ],
+    "incoming_relations": [],
+    "operations": [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "list",
+      "search"
+    ],
+    "searchable_fields": [
+      "name"
+    ],
+    "grid_columns": [
+      "name",
+      "type",
+      "serial_number",
+      "status"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

@@ -2,9 +2,13 @@
   "id": "commande-api-tests",
   "type": "entity-api-tests",
   "values": {
+    "id": "commande",
     "name": "Commande",
-    "route": "commande",
     "pluralName": "Commandes",
+    "description": "Commande client",
+    "route": "commande",
+    "tableName": "commande",
+    "displayField": "reference",
     "fields": [
       {
         "name": "id",
@@ -129,6 +133,39 @@
         "enum_ref": null
       }
     ],
+    "relations": [
+      {
+        "id": "commande_client",
+        "source": "commande",
+        "target": "client",
+        "kind": "many-to-one",
+        "source_field": "client_id",
+        "target_field": "id",
+        "target_display_field": "company_name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "client_commandes"
+      }
+    ],
+    "incoming_relations": [
+      {
+        "id": "inverse_chantier_commande",
+        "source": "chantier",
+        "target": "commande",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "commande_id",
+        "target_display_field": "reference",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      }
+    ],
     "operations": [
       "create",
       "read",
@@ -136,7 +173,20 @@
       "delete",
       "list",
       "search"
-    ]
+    ],
+    "searchable_fields": [
+      "reference"
+    ],
+    "grid_columns": [
+      "reference",
+      "status",
+      "total_amount"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

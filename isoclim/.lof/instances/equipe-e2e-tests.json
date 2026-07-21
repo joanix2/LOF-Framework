@@ -2,9 +2,13 @@
   "id": "equipe-e2e-tests",
   "type": "entity-e2e-tests",
   "values": {
+    "id": "equipe",
     "name": "\u00c9quipe",
-    "route": "equipe",
     "pluralName": "\u00c9quipes",
+    "description": "\u00c9quipe de travail",
+    "route": "equipe",
+    "tableName": "equipe",
+    "displayField": "name",
     "fields": [
       {
         "name": "id",
@@ -88,7 +92,58 @@
         "enum_ref": null,
         "default": true
       }
-    ]
+    ],
+    "relations": [],
+    "incoming_relations": [
+      {
+        "id": "inverse_employe_equipe",
+        "source": "employe",
+        "target": "equipe",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "equipe_id",
+        "target_display_field": "name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      },
+      {
+        "id": "inverse_mission_equipe",
+        "source": "mission",
+        "target": "equipe",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "equipe_id",
+        "target_display_field": "name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      }
+    ],
+    "operations": [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "list",
+      "search"
+    ],
+    "searchable_fields": [
+      "name"
+    ],
+    "grid_columns": [
+      "name",
+      "active"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

@@ -2,7 +2,13 @@
   "id": "commentaire_mission-schemas",
   "type": "entity-schemas",
   "values": {
+    "id": "commentaire_mission",
     "name": "Commentaire",
+    "pluralName": "Commentaires",
+    "description": "Commentaire sur une mission",
+    "route": "commentaire-mission",
+    "tableName": "commentaire_mission",
+    "displayField": "content_preview",
     "fields": [
       {
         "name": "id",
@@ -66,8 +72,39 @@
         "max_length": 100
       }
     ],
-    "pluralName": "Commentaires",
-    "route": "commentaire-mission"
+    "relations": [
+      {
+        "id": "commentaire_mission_ref",
+        "source": "commentaire_mission",
+        "target": "mission",
+        "kind": "many-to-one",
+        "source_field": "mission_id",
+        "target_field": "id",
+        "target_display_field": "title",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "mission_commentaires"
+      }
+    ],
+    "incoming_relations": [],
+    "operations": [
+      "create",
+      "read",
+      "delete",
+      "list"
+    ],
+    "searchable_fields": [],
+    "grid_columns": [
+      "author_name"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": false
   },
   "relations": []
 }

@@ -2,7 +2,13 @@
   "id": "chantier-schemas",
   "type": "entity-schemas",
   "values": {
+    "id": "chantier",
     "name": "Chantier",
+    "pluralName": "Chantiers",
+    "description": "Chantier de construction",
+    "route": "chantier",
+    "tableName": "chantier",
+    "displayField": "name",
     "fields": [
       {
         "name": "id",
@@ -127,8 +133,60 @@
         "default": "planned"
       }
     ],
-    "pluralName": "Chantiers",
-    "route": "chantier"
+    "relations": [
+      {
+        "id": "chantier_commande",
+        "source": "chantier",
+        "target": "commande",
+        "kind": "many-to-one",
+        "source_field": "commande_id",
+        "target_field": "id",
+        "target_display_field": "reference",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true,
+        "back_populates": "commande_chantiers"
+      }
+    ],
+    "incoming_relations": [
+      {
+        "id": "inverse_mission_chantier",
+        "source": "mission",
+        "target": "chantier",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "chantier_id",
+        "target_display_field": "name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      }
+    ],
+    "operations": [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "list",
+      "search"
+    ],
+    "searchable_fields": [
+      "name"
+    ],
+    "grid_columns": [
+      "name",
+      "start_date",
+      "end_date"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": true
   },
   "relations": []
 }

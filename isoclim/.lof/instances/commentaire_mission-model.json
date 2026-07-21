@@ -2,10 +2,13 @@
   "id": "commentaire_mission-model",
   "type": "entity-model",
   "values": {
+    "id": "commentaire_mission",
     "name": "Commentaire",
     "pluralName": "Commentaires",
+    "description": "Commentaire sur une mission",
     "route": "commentaire-mission",
     "tableName": "commentaire_mission",
+    "displayField": "content_preview",
     "fields": [
       {
         "name": "id",
@@ -69,12 +72,6 @@
         "max_length": 100
       }
     ],
-    "operations": [
-      "create",
-      "read",
-      "delete",
-      "list"
-    ],
     "relations": [
       {
         "id": "commentaire_mission_ref",
@@ -91,7 +88,23 @@
         "detail_visible": true,
         "back_populates": "mission_commentaires"
       }
-    ]
+    ],
+    "incoming_relations": [],
+    "operations": [
+      "create",
+      "read",
+      "delete",
+      "list"
+    ],
+    "searchable_fields": [],
+    "grid_columns": [
+      "author_name"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "navigation_visible": false
   },
   "relations": []
 }
