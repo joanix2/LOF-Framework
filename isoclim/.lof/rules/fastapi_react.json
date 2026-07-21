@@ -1,0 +1,516 @@
+[
+  {
+    "id": "comment-implies-read",
+    "description": "Comment \u2192 read",
+    "mode": "certain",
+    "category": "permission",
+    "when": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "comment",
+          "Resource"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "read",
+          "Resource"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "create-implies-read",
+    "description": "Create \u2192 read",
+    "mode": "certain",
+    "category": "permission",
+    "when": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "create",
+          "Resource"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "read",
+          "Resource"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "update-implies-read",
+    "description": "Update \u2192 read",
+    "mode": "certain",
+    "category": "permission",
+    "when": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "update",
+          "Resource"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "read",
+          "Resource"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "validate-implies-read-update",
+    "description": "Validate \u2192 read+update",
+    "mode": "certain",
+    "category": "permission",
+    "when": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "validate",
+          "Resource"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "read",
+          "Resource"
+        ]
+      },
+      {
+        "predicate": "permission",
+        "vars": [
+          "Role",
+          "update",
+          "Resource"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "permission-implies-operation",
+    "description": "Permission \u2192 operation",
+    "mode": "certain",
+    "category": "operation",
+    "when": [
+      {
+        "predicate": "permission",
+        "vars": [
+          "_",
+          "Action",
+          "Resource"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "Resource",
+          "Action"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "entity-implies-crud",
+    "description": "Entity \u2192 CRUD",
+    "mode": "default",
+    "category": "operation",
+    "when": [
+      {
+        "predicate": "entity",
+        "vars": [
+          "E"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "create"
+        ]
+      },
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "read"
+        ]
+      },
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "update"
+        ]
+      },
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "list"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "list-implies-search",
+    "description": "List \u2192 search",
+    "mode": "default",
+    "category": "operation",
+    "when": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "list"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "search"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "many-to-one-inverse",
+    "description": "many-to-one inverse",
+    "mode": "certain",
+    "category": "relation",
+    "when": [
+      {
+        "predicate": "many_to_one",
+        "vars": [
+          "Source",
+          "Target"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "one_to_many",
+        "vars": [
+          "Target",
+          "Source"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "entity-requires-model",
+    "description": "Entity \u2192 SQLAlchemy",
+    "mode": "certain",
+    "category": "projection",
+    "when": [
+      {
+        "predicate": "entity",
+        "vars": [
+          "E"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "requires_projection",
+        "vars": [
+          "E",
+          "sqlalchemy_model"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "entity-requires-schemas",
+    "description": "Entity \u2192 Pydantic",
+    "mode": "certain",
+    "category": "projection",
+    "when": [
+      {
+        "predicate": "entity",
+        "vars": [
+          "E"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "requires_projection",
+        "vars": [
+          "E",
+          "pydantic_schemas"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "entity-requires-typescript",
+    "description": "Entity \u2192 TS types",
+    "mode": "certain",
+    "category": "projection",
+    "when": [
+      {
+        "predicate": "entity",
+        "vars": [
+          "E"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "requires_projection",
+        "vars": [
+          "E",
+          "typescript_types"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "operation-requires-router",
+    "description": "Operation \u2192 router",
+    "mode": "certain",
+    "category": "projection",
+    "when": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "_"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "requires_projection",
+        "vars": [
+          "E",
+          "fastapi_router"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "list-requires-list-page",
+    "description": "List \u2192 React list page",
+    "mode": "certain",
+    "category": "projection",
+    "when": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "list"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "requires_projection",
+        "vars": [
+          "E",
+          "react_list_page"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "create-requires-form",
+    "description": "Create \u2192 React form",
+    "mode": "certain",
+    "category": "projection",
+    "when": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "create"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "requires_projection",
+        "vars": [
+          "E",
+          "react_form"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "read-requires-detail",
+    "description": "Read \u2192 React detail",
+    "mode": "certain",
+    "category": "projection",
+    "when": [
+      {
+        "predicate": "has_operation",
+        "vars": [
+          "E",
+          "read"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "requires_projection",
+        "vars": [
+          "E",
+          "react_detail_page"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "enum-uses-select",
+    "description": "Enum \u2192 select",
+    "mode": "certain",
+    "category": "ui",
+    "when": [
+      {
+        "predicate": "field_type",
+        "vars": [
+          "F",
+          "enum"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "form_widget",
+        "vars": [
+          "F",
+          "select"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "boolean-uses-checkbox",
+    "description": "Bool \u2192 checkbox",
+    "mode": "certain",
+    "category": "ui",
+    "when": [
+      {
+        "predicate": "field_type",
+        "vars": [
+          "F",
+          "boolean"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "form_widget",
+        "vars": [
+          "F",
+          "checkbox"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "text-uses-textarea",
+    "description": "Text \u2192 textarea",
+    "mode": "certain",
+    "category": "ui",
+    "when": [
+      {
+        "predicate": "field_type",
+        "vars": [
+          "F",
+          "text"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "form_widget",
+        "vars": [
+          "F",
+          "textarea"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "date-uses-datepicker",
+    "description": "Date \u2192 datepicker",
+    "mode": "certain",
+    "category": "ui",
+    "when": [
+      {
+        "predicate": "field_type",
+        "vars": [
+          "F",
+          "datetime"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "form_widget",
+        "vars": [
+          "F",
+          "datepicker"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "email-uses-email",
+    "description": "Email \u2192 email input",
+    "mode": "certain",
+    "category": "ui",
+    "when": [
+      {
+        "predicate": "field_type",
+        "vars": [
+          "F",
+          "email"
+        ]
+      }
+    ],
+    "then": [
+      {
+        "predicate": "form_widget",
+        "vars": [
+          "F",
+          "email_input"
+        ]
+      }
+    ]
+  }
+]

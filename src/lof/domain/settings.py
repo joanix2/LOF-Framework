@@ -24,6 +24,7 @@ class ReasoningSettings(BaseModel):
     max_iterations: int = 100
     default_profile: str | None = None
     hypothesis_confidence_threshold: float = 0.5
+    rules_dir: str = ".lof/rules"
 
 
 class SolverSettings(BaseModel):
@@ -38,7 +39,6 @@ class CompilationSettings(BaseModel):
     patches_dir: str = ".lof/patches"
     targets_dir: str = ".lof/targets"
     templates_dir: str = ".lof/templates"
-    gold_dir: str = ".lof/gold/instances"
     dry_run: bool = False
     max_artifacts: int = 500
 
@@ -46,6 +46,7 @@ class CompilationSettings(BaseModel):
 class ValidationSettings(BaseModel):
     strict: bool = True
     diagnostics_dir: str = ".lof/diagnostics"
+    constraints_dir: str = ".lof/constraints"
 
 
 class BenchmarkSettings(BaseModel):
