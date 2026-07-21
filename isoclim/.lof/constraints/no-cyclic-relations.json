@@ -1,0 +1,17 @@
+{
+  "id": "no-cyclic-relations",
+  "type": "acyclic-relation",
+  "description": "Les relations entre mod\u00e8les ne doivent pas former de cycle.",
+  "severity": "error",
+  "parameters": {
+    "kinds": [
+      "many-to-one",
+      "one-to-one"
+    ]
+  },
+  "diagnostic": {
+    "code": "CYCLIC_RELATION",
+    "message": "Cycle d\u00e9tect\u00e9 dans les relations.",
+    "hint": "V\u00e9rifier les relations inverses."
+  }
+}

@@ -20,11 +20,11 @@ class SemanticValidationEngine:
     def build_builtin_constraints(self) -> list[ConstraintDefinition]:
         constraints: list[ConstraintDefinition] = []
 
-        profile_path = Path.cwd() / "profiles" / "fastapi-react" / "profile.json"
-        if profile_path.exists():
-            import json
-            data = json.loads(profile_path.read_text())
-            for cd in data.get("builtin_constraints", []):
+        constraints_dir = Path.cwd() / ".lof" / "constraints"
+        if constraints_dir.exists():
+            for f in sorted(constraints_dir.glob("*.json")):
+                import json
+                cd = json.loads(f.read_text())
                 constraints.append(ConstraintDefinition(
                     id=cd["id"], type=cd["type"],
                     severity=cd.get("severity", "error"),
