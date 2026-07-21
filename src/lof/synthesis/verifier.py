@@ -11,8 +11,7 @@ from lof.synthesis.models import (
 
 
 class CandidateVerifier(Protocol):
-    def verify(self, candidate: Candidate, problem: SynthesisProblem) -> VerificationResult:
-        ...
+    def verify(self, candidate: Candidate, problem: SynthesisProblem) -> VerificationResult: ...
 
 
 class SchemaVerifier:

@@ -104,10 +104,16 @@ class TestJsonlStore:
 
     def test_find_similar(self, tmp_path: Path):
         store = JsonlCounterExampleStore(tmp_path / "ce.jsonl")
-        store.append(CounterExample(inputs={"x": 1}, expected_output="2", actual_output="3",
-                                     diagnostic="lint error"))
-        store.append(CounterExample(inputs={"y": 2}, expected_output="4", actual_output="5",
-                                     diagnostic="type error"))
+        store.append(
+            CounterExample(
+                inputs={"x": 1}, expected_output="2", actual_output="3", diagnostic="lint error"
+            )
+        )
+        store.append(
+            CounterExample(
+                inputs={"y": 2}, expected_output="4", actual_output="5", diagnostic="type error"
+            )
+        )
         results = store.find_similar(CounterExampleQuery(kind="lint"))
         assert len(results) == 1
         assert "lint" in results[0].diagnostic

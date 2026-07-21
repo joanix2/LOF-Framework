@@ -81,9 +81,7 @@ class Project:
 
         smt = self.validate_smt()
         smt_passed = smt.status == "sat"
-        report.steps.append(
-            StepResult(step="smt", passed=smt_passed, details=smt.diagnostics)
-        )
+        report.steps.append(StepResult(step="smt", passed=smt_passed, details=smt.diagnostics))
         if not smt_passed:
             return report
 
@@ -114,9 +112,7 @@ class Project:
         manifest = manifest_mgr.load()
         if manifest.artifacts:
             hashes_ok = all(len(a.hash) == 16 for a in manifest.artifacts)
-            report.steps.append(
-                StepResult(step="manifest_integrity", passed=hashes_ok)
-            )
+            report.steps.append(StepResult(step="manifest_integrity", passed=hashes_ok))
 
         report.all_passed = all(s.passed for s in report.steps)
         return report

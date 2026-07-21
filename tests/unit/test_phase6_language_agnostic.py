@@ -65,9 +65,14 @@ class TestAstAdapterRegistry:
         registry = get_adapter_registry()
 
         class DummyAdapter(AstAdapter):
-            def parse(self, source): return source
-            def unparse(self, tree): return str(tree)
-            def apply_operation(self, tree, op, ts=None): return tree
+            def parse(self, source):
+                return source
+
+            def unparse(self, tree):
+                return str(tree)
+
+            def apply_operation(self, tree, op, ts=None):
+                return tree
 
         registry.register("dummy", DummyAdapter())
         assert registry.get("dummy") is not None

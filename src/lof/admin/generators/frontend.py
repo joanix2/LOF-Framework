@@ -172,13 +172,11 @@ def generate_form(model: AdminModel) -> str:
                 f'      <label><input type="checkbox" {{...register("{f.name}")}} /> {label}</label>'
             )
         elif widget == "select" and f.enum_values:
-            fields_jsx.append(
-                f'      <select {{...register("{f.name}")}}>'
-            )
+            fields_jsx.append(f'      <select {{...register("{f.name}")}}>')
             fields_jsx.append(f'        <option value="">-- {label} --</option>')
             for v in f.enum_values:
                 fields_jsx.append(f'        <option value="{v}">{v}</option>')
-            fields_jsx.append(f'      </select>')
+            fields_jsx.append(f"      </select>")
         elif widget == "number-input":
             fields_jsx.append(
                 f'      <input type="number" {{...register("{f.name}")}} placeholder="{label}" />'
@@ -190,13 +188,9 @@ def generate_form(model: AdminModel) -> str:
                 f'placeholder="{label}" />'
             )
         elif widget == "autocomplete":
-            fields_jsx.append(
-                f'      <input {{...register("{f.name}")}} placeholder="{label}" />'
-            )
+            fields_jsx.append(f'      <input {{...register("{f.name}")}} placeholder="{label}" />')
         else:
-            fields_jsx.append(
-                f'      <input {{...register("{f.name}")}} placeholder="{label}" />'
-            )
+            fields_jsx.append(f'      <input {{...register("{f.name}")}} placeholder="{label}" />')
 
     lines = [
         "import { useForm } from 'react-hook-form';",
@@ -257,7 +251,7 @@ def generate_list_page(model: AdminModel) -> str:
         "      <button onClick={() => { setEditId(undefined); setOpen(true); }}>",
         f"        Nouveau {model.label}",
         "      </button>",
-        "      <" + model.name + 'DataGrid onEdit={(id) => { setEditId(id); setOpen(true); }} />',
+        "      <" + model.name + "DataGrid onEdit={(id) => { setEditId(id); setOpen(true); }} />",
         "      {open && (",
         "        <div className='drawer'>",
         f"          <{model.name}Form",

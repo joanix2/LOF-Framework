@@ -7,10 +7,10 @@ def generate_model(model: AdminModel) -> str:
     lines = [
         "from datetime import date, datetime",
         "from uuid import UUID, uuid4",
-        'from sqlalchemy import (Column, String, Integer, Float, Boolean,',
-        '    Date, DateTime, Enum, Text, ForeignKey)',
-        'from sqlalchemy.orm import relationship, declarative_base',
-        'from sqlalchemy.dialects.postgresql import UUID as SA_UUID',
+        "from sqlalchemy import (Column, String, Integer, Float, Boolean,",
+        "    Date, DateTime, Enum, Text, ForeignKey)",
+        "from sqlalchemy.orm import relationship, declarative_base",
+        "from sqlalchemy.dialects.postgresql import UUID as SA_UUID",
         "",
         "Base = declarative_base()",
         "",
@@ -22,11 +22,15 @@ def generate_model(model: AdminModel) -> str:
         if f.name == "id":
             lines.append(f"    id = Column(SA_UUID, primary_key=True, default=uuid4)")
         elif f.type == "string":
-            lines.append(f"    {f.name} = Column(String(255){', nullable=False' if f.required else ''})")
+            lines.append(
+                f"    {f.name} = Column(String(255){', nullable=False' if f.required else ''})"
+            )
         elif f.type == "text":
             lines.append(f"    {f.name} = Column(Text{', nullable=False' if f.required else ''})")
         elif f.type == "integer":
-            lines.append(f"    {f.name} = Column(Integer{', nullable=False' if f.required else ''})")
+            lines.append(
+                f"    {f.name} = Column(Integer{', nullable=False' if f.required else ''})"
+            )
         elif f.type == "float":
             lines.append(f"    {f.name} = Column(Float{', nullable=False' if f.required else ''})")
         elif f.type == "boolean":
@@ -35,10 +39,14 @@ def generate_model(model: AdminModel) -> str:
         elif f.type == "date":
             lines.append(f"    {f.name} = Column(Date{', nullable=False' if f.required else ''})")
         elif f.type == "datetime":
-            lines.append(f"    {f.name} = Column(DateTime{', nullable=False' if f.required else ''})")
+            lines.append(
+                f"    {f.name} = Column(DateTime{', nullable=False' if f.required else ''})"
+            )
         elif f.type == "enum":
             vals = ", ".join(f'"{v}"' for v in f.enum_values)
-            lines.append(f"    {f.name} = Column(Enum({vals}){', nullable=False' if f.required else ''})")
+            lines.append(
+                f"    {f.name} = Column(Enum({vals}){', nullable=False' if f.required else ''})"
+            )
     return "\n".join(lines)
 
 

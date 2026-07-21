@@ -112,6 +112,7 @@ class TestArtifactPathValidation:
 class TestCompilerDefaults:
     def test_compiler_default_filter_none(self):
         from lof.compilation.compiler import Compiler
+
         c = Compiler(Path.cwd())
         assert c.instance_filter is None
         assert c.type_filter is None

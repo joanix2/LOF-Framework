@@ -29,9 +29,7 @@ class DatalogEngine:
         for rule in rules:
             for c in rule.when:
                 self._rule_index[c.predicate].append(rule)
-        self._stats: dict[str, RuleStats] = {
-            rule.id: RuleStats(rule_id=rule.id) for rule in rules
-        }
+        self._stats: dict[str, RuleStats] = {rule.id: RuleStats(rule_id=rule.id) for rule in rules}
 
     @property
     def stats(self) -> list[RuleStats]:

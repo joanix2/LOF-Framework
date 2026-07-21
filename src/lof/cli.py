@@ -143,7 +143,9 @@ def _start_processes(
 @app.command()
 def dev(
     print_commands: bool = typer.Option(
-        False, "--print-commands", "-p",
+        False,
+        "--print-commands",
+        "-p",
         help="Print commands instead of running",
     ),
 ):
@@ -159,6 +161,7 @@ def dev(
 
     if manifest_path.exists():
         import json
+
         manifest = json.loads(manifest_path.read_text())
         for a in manifest.get("artifacts", []):
             dev_cmd = a.get("dev_command")
@@ -174,7 +177,9 @@ def dev(
     api_dir = gen / "apps" / "api"
     web_dir = gen / "apps" / "web"
     if api_dir.exists():
-        commands.append(("API", str(api_dir), ["uvicorn", "app.main:app", "--reload", "--port", "8000"]))  # noqa: E501
+        commands.append(
+            ("API", str(api_dir), ["uvicorn", "app.main:app", "--reload", "--port", "8000"])
+        )  # noqa: E501
     if web_dir.exists():
         commands.append(("Web", str(web_dir), ["npm", "run", "dev"]))
 
@@ -363,6 +368,7 @@ def diff() -> None:
     old_map = {a.output: a.hash for a in old.artifacts}
     new_map = {}
     from lof.utils.hashing import compute_hash
+
     for a in report.artifacts_generated:
         new_map[a] = compute_hash(a)
 

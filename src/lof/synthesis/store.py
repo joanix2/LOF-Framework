@@ -21,11 +21,9 @@ class CounterExampleQuery:
 
 
 class CounterExampleStore(Protocol):
-    def append(self, counterexample: CounterExample) -> None:
-        ...
+    def append(self, counterexample: CounterExample) -> None: ...
 
-    def find_similar(self, query: CounterExampleQuery) -> Sequence[CounterExample]:
-        ...
+    def find_similar(self, query: CounterExampleQuery) -> Sequence[CounterExample]: ...
 
 
 class JsonlCounterExampleStore:
@@ -46,6 +44,7 @@ class JsonlCounterExampleStore:
                     data = json.loads(line)
                     if "created_at" in data:
                         from datetime import datetime
+
                         data["created_at"] = datetime.fromisoformat(data["created_at"])
                     self._entries.append(CounterExample(**data))
 
@@ -61,8 +60,7 @@ class JsonlCounterExampleStore:
 
     def _is_duplicate(self, ce: CounterExample) -> bool:
         for existing in self._entries:
-            if (existing.inputs == ce.inputs
-                    and existing.expected_output == ce.expected_output):
+            if existing.inputs == ce.inputs and existing.expected_output == ce.expected_output:
                 return True
         return False
 

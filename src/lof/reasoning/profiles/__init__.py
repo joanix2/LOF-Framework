@@ -17,7 +17,8 @@ def _get_registry() -> ProfileRegistry:
             "mobile-field", "0.1", "React Native + Expo mobile field app", MOBILE_FIELD_RULES
         )
         _PROFILE_REGISTRY.register(
-            "admin-crud", "0.1",
+            "admin-crud",
+            "0.1",
             "Admin CRUD from JSON DSL types (FastAPI + React)",
             ADMIN_CRUD_RULES,
         )

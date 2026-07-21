@@ -11,9 +11,17 @@ class EnumerativeCandidateGenerator:
 
     def __init__(self, primitives: list[str] | None = None):
         self.primitives = primitives or [
-            "add", "sub", "mul", "div",
-            "eq", "lt", "gt",
-            "if", "and", "or", "not",
+            "add",
+            "sub",
+            "mul",
+            "div",
+            "eq",
+            "lt",
+            "gt",
+            "if",
+            "and",
+            "or",
+            "not",
         ]
 
     def generate(

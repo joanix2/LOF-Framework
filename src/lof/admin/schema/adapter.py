@@ -17,32 +17,64 @@ class AdminField:
 
     @property
     def ts_type(self) -> str:
-        mapping = {"string": "string", "text": "string", "integer": "number",
-                    "float": "number", "boolean": "boolean", "date": "string",
-                    "datetime": "string", "enum": "string", "uuid": "string", "relation": "string"}
+        mapping = {
+            "string": "string",
+            "text": "string",
+            "integer": "number",
+            "float": "number",
+            "boolean": "boolean",
+            "date": "string",
+            "datetime": "string",
+            "enum": "string",
+            "uuid": "string",
+            "relation": "string",
+        }
         return mapping.get(self.type, "string")
 
     @property
     def py_type(self) -> str:
-        mapping = {"string": "str", "text": "str", "integer": "int",
-                    "float": "float", "boolean": "bool", "date": "date",
-                    "datetime": "datetime", "enum": "str", "uuid": "UUID", "relation": "str"}
+        mapping = {
+            "string": "str",
+            "text": "str",
+            "integer": "int",
+            "float": "float",
+            "boolean": "bool",
+            "date": "date",
+            "datetime": "datetime",
+            "enum": "str",
+            "uuid": "UUID",
+            "relation": "str",
+        }
         return mapping.get(self.type, "str")
 
     @property
     def widget(self) -> str:
         if self.is_relation:
             return "autocomplete"
-        defaults = {"boolean": "switch", "enum": "select", "text": "textarea",
-                     "string": "text-input", "integer": "number-input",
-                     "float": "number-input", "date": "date-picker", "datetime": "datetime-picker"}
+        defaults = {
+            "boolean": "switch",
+            "enum": "select",
+            "text": "textarea",
+            "string": "text-input",
+            "integer": "number-input",
+            "float": "number-input",
+            "date": "date-picker",
+            "datetime": "datetime-picker",
+        }
         return defaults.get(self.type, "text-input")
 
     @property
     def sql_type(self) -> str:
-        mapping = {"string": "String", "text": "Text", "integer": "Integer",
-                    "float": "Float", "boolean": "Boolean", "date": "Date",
-                    "datetime": "DateTime", "uuid": "SA_UUID"}
+        mapping = {
+            "string": "String",
+            "text": "Text",
+            "integer": "Integer",
+            "float": "Float",
+            "boolean": "Boolean",
+            "date": "Date",
+            "datetime": "DateTime",
+            "uuid": "SA_UUID",
+        }
         if self.type == "enum":
             vals = ", ".join(f'"{v}"' for v in self.enum_values)
             return f"Enum({vals})"

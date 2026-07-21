@@ -12,18 +12,14 @@ from lof.reasoning.models import (
 class TestNegation:
     def test_negated_condition_matches_negative_fact(self):
         engine = DatalogEngine([])
-        fact = Fact(
-            predicate="broken", args=("x",), status="asserted", polarity="negative"
-        )
+        fact = Fact(predicate="broken", args=("x",), status="asserted", polarity="negative")
         cond = Condition(predicate="broken", vars=["x"], negated=True)
         result = engine._match_condition(cond, fact, {})
         assert result is not None
 
     def test_negated_condition_rejects_positive_fact(self):
         engine = DatalogEngine([])
-        fact = Fact(
-            predicate="broken", args=("x",), status="asserted", polarity="positive"
-        )
+        fact = Fact(predicate="broken", args=("x",), status="asserted", polarity="positive")
         cond = Condition(predicate="broken", vars=["x"], negated=True)
         result = engine._match_condition(cond, fact, {})
         assert result is None
