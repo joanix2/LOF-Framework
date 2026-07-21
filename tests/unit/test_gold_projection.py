@@ -9,8 +9,8 @@ from lof.gold.json_loader import load_gold_application
 from lof.gold.projection import EntityProjector
 from lof.models.gold_models import GoldCapabilities, ModelDef, AttributeDef, GoldRelation
 
-LIBRARY_JSON = Path(__file__).resolve().parent.parent / "fixtures" / "json" / "library.json"
-ISOCLIM_JSON = Path(__file__).resolve().parent.parent / "fixtures" / "json" / "isoclim.json"
+LIBRARY_JSON = Path(__file__).resolve().parent.parent.parent / "programs" / "library" / "library.json"
+ISOCLIM_JSON = Path(__file__).resolve().parent.parent.parent / "programs" / "isoclim" / "isoclim.json"
 
 
 def test_project_entity():
