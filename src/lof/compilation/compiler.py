@@ -97,6 +97,22 @@ class Compiler:
         if self.type_filter:
             instances = [i for i in instances if i.type == self.type_filter]
 
+        # Expand entity instances into projections
+        from lof.gold.profile import Profile
+        profile_path = self.root / "profiles" / "fastapi-react" / "profile.json"
+        profile = None
+        if profile_path.exists():
+            profile = Profile.load(profile_path)
+        if profile:
+            from lof.compilation.projection_expander import ProjectionExpander
+            expander = ProjectionExpander(self.registry, profile)
+            try:
+                instances = expander.expand()
+            except Exception as e:
+                report.errors.append(f"Projection expansion failed: {e}")
+                report.success = False
+                return report
+
         staging_id = uuid.uuid4().hex[:12]
         staging_root = self.root / ".lof" / "staging" / staging_id
         manifest_manager = ManifestManager(self.root)

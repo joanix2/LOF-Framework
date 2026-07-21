@@ -1,6 +1,6 @@
 {
-  "id": "equipe-list-page",
-  "type": "entity-list-page",
+  "id": "equipe",
+  "type": "entity",
   "values": {
     "id": "equipe",
     "name": "\u00c9quipe",

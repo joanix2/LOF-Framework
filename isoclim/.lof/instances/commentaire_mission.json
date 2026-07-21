@@ -1,6 +1,6 @@
 {
-  "id": "commentaire_mission-schemas",
-  "type": "entity-schemas",
+  "id": "commentaire_mission",
+  "type": "entity",
   "values": {
     "id": "commentaire_mission",
     "name": "Commentaire",
@@ -106,5 +106,21 @@
     ],
     "navigation_visible": false
   },
-  "relations": []
+  "relations": [
+    {
+      "id": "commentaire_mission_ref",
+      "source": "commentaire_mission",
+      "target": "mission-model",
+      "kind": "many-to-one",
+      "source_field": "mission_id",
+      "target_field": "id",
+      "target_display_field": "title",
+      "required": true,
+      "nullable": true,
+      "on_delete": "restrict",
+      "list_visible": true,
+      "detail_visible": true,
+      "back_populates": "mission_commentaires"
+    }
+  ]
 }

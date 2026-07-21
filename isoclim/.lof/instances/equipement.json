@@ -1,6 +1,6 @@
 {
-  "id": "equipement-types",
-  "type": "entity-types",
+  "id": "equipement",
+  "type": "entity",
   "values": {
     "id": "equipement",
     "name": "\u00c9quipement",
@@ -176,5 +176,21 @@
     ],
     "navigation_visible": true
   },
-  "relations": []
+  "relations": [
+    {
+      "id": "equipement_mission",
+      "source": "equipement",
+      "target": "mission-model",
+      "kind": "many-to-one",
+      "source_field": "mission_id",
+      "target_field": "id",
+      "target_display_field": "title",
+      "required": false,
+      "nullable": true,
+      "on_delete": "restrict",
+      "list_visible": true,
+      "detail_visible": true,
+      "back_populates": "mission_equipements"
+    }
+  ]
 }

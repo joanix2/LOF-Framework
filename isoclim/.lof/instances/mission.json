@@ -1,6 +1,6 @@
 {
-  "id": "mission-schemas",
-  "type": "entity-schemas",
+  "id": "mission",
+  "type": "entity",
   "values": {
     "id": "mission",
     "name": "Mission",
@@ -258,5 +258,36 @@
     ],
     "navigation_visible": true
   },
-  "relations": []
+  "relations": [
+    {
+      "id": "mission_chantier",
+      "source": "mission",
+      "target": "chantier-model",
+      "kind": "many-to-one",
+      "source_field": "chantier_id",
+      "target_field": "id",
+      "target_display_field": "name",
+      "required": true,
+      "nullable": true,
+      "on_delete": "restrict",
+      "list_visible": true,
+      "detail_visible": true,
+      "back_populates": "chantier_missions"
+    },
+    {
+      "id": "mission_equipe",
+      "source": "mission",
+      "target": "equipe-model",
+      "kind": "many-to-one",
+      "source_field": "equipe_id",
+      "target_field": "id",
+      "target_display_field": "name",
+      "required": true,
+      "nullable": true,
+      "on_delete": "restrict",
+      "list_visible": true,
+      "detail_visible": true,
+      "back_populates": "equipe_missions"
+    }
+  ]
 }

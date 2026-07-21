@@ -1,8 +1,4 @@
-"""Generates Gold instances from projected entity context.
-
-Passes the FULL entity context to every projection template.
-Templates decide what to use — no if/elif chains on type_id.
-"""
+"""Generates one Gold instance per entity — projections are derived by the compiler."""
 
 import json
 from pathlib import Path
@@ -26,54 +22,17 @@ class GoldInstanceGenerator:
         for entity in self.application.entities:
             ctx = self.projector.project(entity, self.application.entities)
 
-            projections = self._build_projections(entity, ctx)
-
-            for suffix, type_id, values in projections:
-                instance = {
-                    "id": f"{entity.id}-{suffix}",
-                    "type": type_id,
-                    "values": values,
-                    "relations": [],
-                }
-                path = inst_dir / f"{entity.id}-{suffix}.json"
-                path.write_text(json.dumps(instance, indent=2))
-                written.append(path)
-
-        return written
-
-    def _build_projections(self, entity, ctx: dict) -> list[tuple[str, str, dict]]:
-        if self.profile:
-            return self._profile_projections(entity, ctx)
-        return self._default_projections(ctx)
-
-    def _profile_projections(self, entity, ctx: dict) -> list[tuple[str, str, dict]]:
-        result = []
-        for proj_def in self.profile.projections:
-            condition = proj_def.get("condition", "always")
-            if not self.profile.condition_matches(condition, entity.capabilities):
-                continue
-            type_id = proj_def["type"]
-            suffix = type_id.replace("entity-", "")
-            values = dict(ctx)
-            if type_id == "entity-model":
-                values["relations"] = [
+            instance = {
+                "id": entity.id,
+                "type": "entity",
+                "values": ctx,
+                "relations": [
                     {**r, "target": f"{r['target']}-model"}
                     for r in ctx.get("relations", [])
-                ]
-            result.append((suffix, type_id, values))
-        return result
+                ],
+            }
+            path = inst_dir / f"{entity.id}.json"
+            path.write_text(json.dumps(instance, indent=2))
+            written.append(path)
 
-    def _default_projections(self, ctx: dict) -> list[tuple[str, str, dict]]:
-        ctx = dict(ctx)
-        ctx["relations"] = [
-            {**r, "target": f"{r['target']}-model"}
-            for r in ctx.get("relations", [])
-        ]
-        return [
-            ("model", "entity-model", ctx),
-            ("schemas", "entity-schemas", ctx),
-            ("router", "entity-router", ctx),
-            ("types", "entity-types", ctx),
-            ("hooks", "entity-hooks", ctx),
-            ("list-page", "entity-list-page", ctx),
-        ]
+        return written

@@ -1,14 +1,14 @@
 {
-  "id": "equipe-api-tests",
-  "type": "entity-api-tests",
+  "id": "client",
+  "type": "entity",
   "values": {
-    "id": "equipe",
-    "name": "\u00c9quipe",
-    "pluralName": "\u00c9quipes",
-    "description": "\u00c9quipe de travail",
-    "route": "equipe",
-    "tableName": "equipe",
-    "displayField": "name",
+    "id": "client",
+    "name": "Client",
+    "pluralName": "Clients",
+    "description": "Entreprise cliente",
+    "route": "client",
+    "tableName": "client",
+    "displayField": "company_name",
     "fields": [
       {
         "name": "id",
@@ -31,9 +31,9 @@
         "enum_ref": null
       },
       {
-        "name": "name",
+        "name": "company_name",
         "type": "string",
-        "label": "name",
+        "label": "company_name",
         "required": true,
         "primary": false,
         "nullable": true,
@@ -49,12 +49,73 @@
         "read_only": false,
         "generated": false,
         "enum_ref": null,
-        "max_length": 100
+        "max_length": 200
       },
       {
-        "name": "description",
+        "name": "email",
+        "type": "email",
+        "label": "email",
+        "required": false,
+        "primary": false,
+        "nullable": true,
+        "unique": false,
+        "searchable": false,
+        "sortable": false,
+        "filterable": false,
+        "list_visible": true,
+        "detail_visible": true,
+        "form_visible": true,
+        "create_visible": true,
+        "edit_visible": true,
+        "read_only": false,
+        "generated": false,
+        "enum_ref": null
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "label": "phone",
+        "required": false,
+        "primary": false,
+        "nullable": true,
+        "unique": false,
+        "searchable": false,
+        "sortable": false,
+        "filterable": false,
+        "list_visible": true,
+        "detail_visible": true,
+        "form_visible": true,
+        "create_visible": true,
+        "edit_visible": true,
+        "read_only": false,
+        "generated": false,
+        "enum_ref": null
+      },
+      {
+        "name": "siret",
+        "type": "string",
+        "label": "siret",
+        "required": false,
+        "primary": false,
+        "nullable": true,
+        "unique": true,
+        "searchable": false,
+        "sortable": false,
+        "filterable": false,
+        "list_visible": true,
+        "detail_visible": true,
+        "form_visible": true,
+        "create_visible": true,
+        "edit_visible": true,
+        "read_only": false,
+        "generated": false,
+        "enum_ref": null,
+        "max_length": 14
+      },
+      {
+        "name": "address",
         "type": "text",
-        "label": "description",
+        "label": "address",
         "required": false,
         "primary": false,
         "nullable": true,
@@ -96,27 +157,13 @@
     "relations": [],
     "incoming_relations": [
       {
-        "id": "inverse_employe_equipe",
-        "source": "employe",
-        "target": "equipe",
+        "id": "inverse_commande_client",
+        "source": "commande",
+        "target": "client",
         "kind": "one-to-many",
         "source_field": "id",
-        "target_field": "equipe_id",
-        "target_display_field": "name",
-        "required": true,
-        "nullable": true,
-        "on_delete": "restrict",
-        "list_visible": true,
-        "detail_visible": true
-      },
-      {
-        "id": "inverse_mission_equipe",
-        "source": "mission",
-        "target": "equipe",
-        "kind": "one-to-many",
-        "source_field": "id",
-        "target_field": "equipe_id",
-        "target_display_field": "name",
+        "target_field": "client_id",
+        "target_display_field": "company_name",
         "required": true,
         "nullable": true,
         "on_delete": "restrict",
@@ -133,11 +180,13 @@
       "search"
     ],
     "searchable_fields": [
-      "name"
+      "company_name"
     ],
     "grid_columns": [
-      "name",
-      "active"
+      "company_name",
+      "email",
+      "phone",
+      "siret"
     ],
     "audit_fields": [
       "created_at",

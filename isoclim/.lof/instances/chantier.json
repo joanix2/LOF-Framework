@@ -1,14 +1,14 @@
 {
-  "id": "employe-list-page",
-  "type": "entity-list-page",
+  "id": "chantier",
+  "type": "entity",
   "values": {
-    "id": "employe",
-    "name": "Employ\u00e9",
-    "pluralName": "Employ\u00e9s",
-    "description": "Employ\u00e9 d'\u00e9quipe",
-    "route": "employe",
-    "tableName": "employe",
-    "displayField": "full_name",
+    "id": "chantier",
+    "name": "Chantier",
+    "pluralName": "Chantiers",
+    "description": "Chantier de construction",
+    "route": "chantier",
+    "tableName": "chantier",
+    "displayField": "name",
     "fields": [
       {
         "name": "id",
@@ -31,9 +31,9 @@
         "enum_ref": null
       },
       {
-        "name": "full_name",
+        "name": "name",
         "type": "string",
-        "label": "full_name",
+        "label": "name",
         "required": true,
         "primary": false,
         "nullable": true,
@@ -52,9 +52,49 @@
         "max_length": 200
       },
       {
-        "name": "email",
-        "type": "email",
-        "label": "email",
+        "name": "address",
+        "type": "text",
+        "label": "address",
+        "required": false,
+        "primary": false,
+        "nullable": true,
+        "unique": false,
+        "searchable": false,
+        "sortable": false,
+        "filterable": false,
+        "list_visible": false,
+        "detail_visible": true,
+        "form_visible": true,
+        "create_visible": true,
+        "edit_visible": true,
+        "read_only": false,
+        "generated": false,
+        "enum_ref": null
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "label": "start_date",
+        "required": false,
+        "primary": false,
+        "nullable": true,
+        "unique": false,
+        "searchable": false,
+        "sortable": true,
+        "filterable": false,
+        "list_visible": true,
+        "detail_visible": true,
+        "form_visible": true,
+        "create_visible": true,
+        "edit_visible": true,
+        "read_only": false,
+        "generated": false,
+        "enum_ref": null
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "label": "end_date",
         "required": false,
         "primary": false,
         "nullable": true,
@@ -72,29 +112,9 @@
         "enum_ref": null
       },
       {
-        "name": "phone",
-        "type": "phone",
-        "label": "phone",
-        "required": false,
-        "primary": false,
-        "nullable": true,
-        "unique": false,
-        "searchable": false,
-        "sortable": false,
-        "filterable": false,
-        "list_visible": true,
-        "detail_visible": true,
-        "form_visible": true,
-        "create_visible": true,
-        "edit_visible": true,
-        "read_only": false,
-        "generated": false,
-        "enum_ref": null
-      },
-      {
-        "name": "role",
+        "name": "status",
         "type": "enum",
-        "label": "role",
+        "label": "status",
         "required": false,
         "primary": false,
         "nullable": true,
@@ -110,48 +130,42 @@
         "read_only": false,
         "generated": false,
         "enum_ref": null,
-        "default": "worker"
-      },
-      {
-        "name": "active",
-        "type": "boolean",
-        "label": "active",
-        "required": false,
-        "primary": false,
-        "nullable": true,
-        "unique": false,
-        "searchable": false,
-        "sortable": false,
-        "filterable": false,
-        "list_visible": true,
-        "detail_visible": true,
-        "form_visible": true,
-        "create_visible": true,
-        "edit_visible": true,
-        "read_only": false,
-        "generated": false,
-        "enum_ref": null,
-        "default": true
+        "default": "planned"
       }
     ],
     "relations": [
       {
-        "id": "employe_equipe",
-        "source": "employe",
-        "target": "equipe",
+        "id": "chantier_commande",
+        "source": "chantier",
+        "target": "commande",
         "kind": "many-to-one",
-        "source_field": "equipe_id",
+        "source_field": "commande_id",
         "target_field": "id",
-        "target_display_field": "name",
+        "target_display_field": "reference",
         "required": true,
         "nullable": true,
         "on_delete": "restrict",
         "list_visible": true,
         "detail_visible": true,
-        "back_populates": "equipe_employes"
+        "back_populates": "commande_chantiers"
       }
     ],
-    "incoming_relations": [],
+    "incoming_relations": [
+      {
+        "id": "inverse_mission_chantier",
+        "source": "mission",
+        "target": "chantier",
+        "kind": "one-to-many",
+        "source_field": "id",
+        "target_field": "chantier_id",
+        "target_display_field": "name",
+        "required": true,
+        "nullable": true,
+        "on_delete": "restrict",
+        "list_visible": true,
+        "detail_visible": true
+      }
+    ],
     "operations": [
       "create",
       "read",
@@ -161,13 +175,12 @@
       "search"
     ],
     "searchable_fields": [
-      "full_name"
+      "name"
     ],
     "grid_columns": [
-      "full_name",
-      "email",
-      "phone",
-      "role"
+      "name",
+      "start_date",
+      "end_date"
     ],
     "audit_fields": [
       "created_at",
@@ -175,5 +188,21 @@
     ],
     "navigation_visible": true
   },
-  "relations": []
+  "relations": [
+    {
+      "id": "chantier_commande",
+      "source": "chantier",
+      "target": "commande-model",
+      "kind": "many-to-one",
+      "source_field": "commande_id",
+      "target_field": "id",
+      "target_display_field": "reference",
+      "required": true,
+      "nullable": true,
+      "on_delete": "restrict",
+      "list_visible": true,
+      "detail_visible": true,
+      "back_populates": "commande_chantiers"
+    }
+  ]
 }
