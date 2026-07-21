@@ -290,6 +290,14 @@
       "template": ".lof/templates/frontend/src/components/ui/textarea.tsx.j2",
       "outputPattern": "generated-project/apps/web/src/components/ui/textarea.tsx",
       "targetType": "react-component"
+    },
+    {
+      "type": "app-data-table",
+      "scope": "application",
+      "condition": "always",
+      "template": ".lof/templates/frontend/src/components/data-table.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/components/data-table.tsx",
+      "targetType": "react-component"
     }
   ],
   "closed_world_predicates": [

@@ -1,13 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import type { ColumnDef } from '@tanstack/react-table'
 import { use{{ id | pascal_case }}List, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}'
 import type { {{ id | pascal_case }} } from '../types/{{ id }}'
+import { DataTable } from '../components/data-table'
 import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '../components/ui/table'
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter,
   DialogHeader, DialogTitle,
@@ -16,6 +13,8 @@ import {
 export default function {{ id | pascal_case }}ListPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [sortField, setSortField] = useState<string | undefined>()
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | undefined>()
   const { data, isLoading, error } = use{{ id | pascal_case }}List(page, 20, search || undefined)
   const deleteMutation = useDelete{{ id | pascal_case }}()
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
@@ -30,6 +29,41 @@ export default function {{ id | pascal_case }}ListPage() {
     }
   }
 
+  const columns = useMemo<ColumnDef<{{ id | pascal_case }}>[]>(() => [
+{% for field in fields %}
+{% if field.get('list_visible', True) %}
+{% set f_type = field.get('type', 'string') %}
+{% set f_name = field.get('name') %}
+    {
+      accessorKey: '{{ f_name }}',
+      header: '{{ f_name | capitalize }}',
+{% if f_type in ("boolean", "bool") %}
+      cell: ({ row }) => row.original.{{ f_name }} ? '\u2713' : '\u2717',
+{% elif f_type in ("datetime", "date") %}
+      cell: ({ row }) => new Date(row.original.{{ f_name }}).toLocaleDateString(),
+{% endif %}
+    },
+{% endif %}
+{% endfor %}
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <div className="flex gap-1 justify-end">
+          <Link to={`/{{ route }}/${row.original.id}`}>
+            <Button variant="outline" size="sm">View</Button>
+          </Link>
+          <Link to={`/{{ route }}/${row.original.id}/edit`}>
+            <Button variant="secondary" size="sm">Edit</Button>
+          </Link>
+          <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(row.original.id)}>
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+  ], [])
+
   if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Loading...</div>
   if (error) return <div className="text-destructive p-4">Error loading {{ pluralName | lower }}</div>
 
@@ -42,92 +76,14 @@ export default function {{ id | pascal_case }}ListPage() {
         </Link>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle>Search</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Input
-            placeholder="Search {{ pluralName | lower }}..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            className="max-w-sm"
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-{% for field in fields %}
-{% if field.get('list_visible', True) %}
-                <TableHead>{{ field.get('name') }}</TableHead>
-{% endif %}
-{% endfor %}
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.items.map((item: {{ id | pascal_case }}) => (
-                <TableRow key={item.id}>
-{% for field in fields %}
-{% if field.get('list_visible', True) %}
-{% set f_type = field.get('type', 'string') %}
-{% set f_name = field.get('name') %}
-{% if f_type in ("boolean", "bool") %}
-                  <TableCell>{item.{{ f_name }} ? '\u2713' : '\u2717'}</TableCell>
-{% elif f_type in ("datetime", "date") %}
-                  <TableCell>{new Date(item.{{ f_name }}).toLocaleDateString()}</TableCell>
-{% else %}
-                  <TableCell>{item.{{ f_name }}}</TableCell>
-{% endif %}
-{% endif %}
-{% endfor %}
-                  <TableCell className="text-right">
-                    <Link to={`/{{ route }}/${item.id}`}>
-                      <Button variant="outline" size="sm" className="mr-2">View</Button>
-                    </Link>
-                    <Link to={`/{{ route }}/${item.id}/edit`}>
-                      <Button variant="secondary" size="sm" className="mr-2">Edit</Button>
-                    </Link>
-                    <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(item.id)}>
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {data && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Page {data.page} of {data.total_pages} ({data.total} total)
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p: number) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p: number) => p + 1)}
-              disabled={page >= (data?.total_pages || 1)}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      )}
+      <DataTable<{{ id | pascal_case }}>
+        columns={columns}
+        data={data?.items || []}
+        total={data?.total}
+        searchColumn={search ? undefined : undefined}
+        searchPlaceholder="Search {{ pluralName | lower }}..."
+        toolbar={undefined}
+      />
 
       <Dialog open={!!confirmDelete} onOpenChange={(o) => { if (!o) setConfirmDelete(null); setDeleteError(null) }}>
         <DialogContent>
