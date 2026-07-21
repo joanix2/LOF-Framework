@@ -1,0 +1,15 @@
+{
+  "id": "app-ui-textarea",
+  "template": ".lof/templates/frontend/src/components/ui/textarea.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/components/ui/textarea.tsx",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

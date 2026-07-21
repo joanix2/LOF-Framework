@@ -1,0 +1,15 @@
+{
+  "id": "app-utils",
+  "template": ".lof/templates/frontend/src/lib/utils.ts.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/src/lib/utils.ts",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

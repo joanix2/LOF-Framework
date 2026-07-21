@@ -1,0 +1,15 @@
+{
+  "id": "app-data-table",
+  "template": ".lof/templates/frontend/src/components/data-table.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/components/data-table.tsx",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

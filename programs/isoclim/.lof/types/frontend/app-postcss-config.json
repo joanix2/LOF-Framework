@@ -1,0 +1,15 @@
+{
+  "id": "app-postcss-config",
+  "template": ".lof/templates/frontend/postcss.config.js.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/postcss.config.js",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

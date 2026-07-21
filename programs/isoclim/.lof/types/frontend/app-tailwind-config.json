@@ -1,0 +1,15 @@
+{
+  "id": "app-tailwind-config",
+  "template": ".lof/templates/frontend/tailwind.config.js.j2",
+  "targetType": "typescript-module",
+  "outputPattern": "generated-project/apps/web/tailwind.config.js",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

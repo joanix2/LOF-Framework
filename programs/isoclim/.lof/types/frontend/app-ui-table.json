@@ -1,0 +1,15 @@
+{
+  "id": "app-ui-table",
+  "template": ".lof/templates/frontend/src/components/ui/table.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/components/ui/table.tsx",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

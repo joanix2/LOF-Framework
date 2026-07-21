@@ -1,0 +1,15 @@
+{
+  "id": "app-ui-button",
+  "template": ".lof/templates/frontend/src/components/ui/button.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/components/ui/button.tsx",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}

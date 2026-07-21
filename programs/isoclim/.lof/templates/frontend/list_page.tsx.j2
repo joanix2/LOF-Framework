@@ -1,140 +1,107 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { use{{ id | pascal_case }}List, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}';
-import type { {{ id | pascal_case }} } from '../types/{{ id }}';
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import type { ColumnDef } from '@tanstack/react-table'
+import { use{{ id | pascal_case }}List, useDelete{{ id | pascal_case }} } from '../hooks/use{{ id | pascal_case }}'
+import type { {{ id | pascal_case }} } from '../types/{{ id }}'
+import { DataTable } from '../components/data-table'
+import { Button } from '../components/ui/button'
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle,
+} from '../components/ui/dialog'
 
 export default function {{ id | pascal_case }}ListPage() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const { data, isLoading, error } = use{{ id | pascal_case }}List(page, 20, search || undefined);
-  const deleteMutation = useDelete{{ id | pascal_case }}();
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [sortField, setSortField] = useState<string | undefined>()
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | undefined>()
+  const { data, isLoading, error } = use{{ id | pascal_case }}List(page, 20, search || undefined)
+  const deleteMutation = useDelete{{ id | pascal_case }}()
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
-    await deleteMutation.mutateAsync(id);
-    setConfirmDelete(null);
-  };
+    try {
+      await deleteMutation.mutateAsync(id)
+      setConfirmDelete(null)
+    } catch (e) {
+      setDeleteError('Failed to delete')
+    }
+  }
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
-  if (error) return <div className="p-4 text-red-500">Error loading {{ pluralName | lower }}</div>;
-
-  return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{{ pluralName }}</h1>
-        <Link
-          to="/{{ route }}/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          New {{ id | pascal_case }}
-        </Link>
-      </div>
-
-      <input
-        type="text"
-        placeholder="Search {{ pluralName | lower }}..."
-        value={search}
-        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-        className="border p-2 mb-4 w-full rounded"
-      />
-
-      <table className="w-full border-collapse border">
-        <thead>
-          <tr className="bg-gray-100">
-{% for field in fields %}
-{% if field.get('list_visible', True) %}
-            <th className="border p-2 text-left">{{ field.get('name') }}</th>
-{% endif %}
-{% endfor %}
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.items.map((item: {{ id | pascal_case }}) => (
-            <tr key={item.id} className="hover:bg-gray-50">
+  const columns = useMemo<ColumnDef<{{ id | pascal_case }}>[]>(() => [
 {% for field in fields %}
 {% if field.get('list_visible', True) %}
 {% set f_type = field.get('type', 'string') %}
 {% set f_name = field.get('name') %}
+    {
+      accessorKey: '{{ f_name }}',
+      header: '{{ f_name | capitalize }}',
 {% if f_type in ("boolean", "bool") %}
-              <td className="border p-2">{item.{{ f_name }} ? '\u2713' : '\u2717'}</td>
+      cell: ({ row }) => row.original.{{ f_name }} ? '\u2713' : '\u2717',
 {% elif f_type in ("datetime", "date") %}
-              <td className="border p-2">{new Date(item.{{ f_name }}).toLocaleDateString()}</td>
-{% else %}
-              <td className="border p-2">{item.{{ f_name }}}</td>
+      cell: ({ row }) => new Date(row.original.{{ f_name }}).toLocaleDateString(),
 {% endif %}
+    },
 {% endif %}
 {% endfor %}
-              <td className="border p-2">
-                <Link
-                  to={`/{{ route }}/${item.id}`}
-                  className="text-blue-600 hover:underline mr-2"
-                >
-                  View
-                </Link>
-                <Link
-                  to={`/{{ route }}/${item.id}/edit`}
-                  className="text-green-600 hover:underline mr-2"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => setConfirmDelete(item.id)}
-                  className="text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {confirmDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded">
-            <p className="mb-4">Are you sure you want to delete this {{ name | lower }}?</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleDelete(confirmDelete)}
-                className="bg-red-600 text-white px-4 py-2 rounded"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <div className="flex gap-1 justify-end">
+          <Link to={`/{{ route }}/${row.original.id}`}>
+            <Button variant="outline" size="sm">View</Button>
+          </Link>
+          <Link to={`/{{ route }}/${row.original.id}/edit`}>
+            <Button variant="secondary" size="sm">Edit</Button>
+          </Link>
+          <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(row.original.id)}>
+            Delete
+          </Button>
         </div>
-      )}
+      ),
+    },
+  ], [])
 
-      {data && (
-        <div className="flex justify-between items-center mt-4">
-          <span>
-            Page {data.page} of {data.total_pages} ({data.total} total)
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPage((p: number) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setPage((p: number) => p + 1)}
-              disabled={page >= (data?.total_pages || 1)}
-              className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+  if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Loading...</div>
+  if (error) return <div className="text-destructive p-4">Error loading {{ pluralName | lower }}</div>
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">{{ pluralName }}</h1>
+        <Link to="/{{ route }}/new">
+          <Button>New {{ id | pascal_case }}</Button>
+        </Link>
+      </div>
+
+      <DataTable<{{ id | pascal_case }}>
+        columns={columns}
+        data={data?.items || []}
+        total={data?.total}
+        searchColumn={search ? undefined : undefined}
+        searchPlaceholder="Search {{ pluralName | lower }}..."
+        toolbar={undefined}
+      />
+
+      <Dialog open={!!confirmDelete} onOpenChange={(o) => { if (!o) setConfirmDelete(null); setDeleteError(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this {{ name | lower }}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => handleDelete(confirmDelete!)} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
+  )
 }

@@ -1,0 +1,15 @@
+{
+  "id": "app-ui-label",
+  "template": ".lof/templates/frontend/src/components/ui/label.tsx.j2",
+  "targetType": "react-component",
+  "outputPattern": "generated-project/apps/web/src/components/ui/label.tsx",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    }
+  }
+}
