@@ -34,8 +34,11 @@ class DatalogEngine:
         for rule in rules:
             for c in rule.when:
                 self._rule_index[c.predicate].append(rule)
-        self._closed_world = (profile.closed_world_predicates if profile
-                              else {"requires_projection", "requires_endpoint", "form_widget"})
+        self._closed_world = (
+            profile.closed_world_predicates
+            if profile
+            else {"requires_projection", "requires_endpoint", "form_widget"}
+        )
         self._stats: dict[str, RuleStats] = {rule.id: RuleStats(rule_id=rule.id) for rule in rules}
 
     @property

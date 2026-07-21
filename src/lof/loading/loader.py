@@ -22,8 +22,10 @@ class Loader:
     def load_type(self, path: str | Path) -> TypeDefinition:
         data = self.load_json(path)
         _map = {
-            "dependsOn": "depends_on", "targetType": "target_type",
-            "interfaceSource": "interface_source", "outputPattern": "output_pattern",
+            "dependsOn": "depends_on",
+            "targetType": "target_type",
+            "interfaceSource": "interface_source",
+            "outputPattern": "output_pattern",
             "contextQuery": "context_query",
         }
         for old, new in _map.items():

@@ -2,9 +2,8 @@
 
 import json
 from pathlib import Path
-from typing import Any
 
-from lof.reasoning.models import Condition, Conclusion, Rule
+from lof.reasoning.models import Conclusion, Condition, Rule
 
 
 class RuleLoader:

@@ -56,7 +56,6 @@ class Compiler:
         graph_diag = graph_validator.validate(graph)
         errors.extend(graph_diag.errors)
 
-
         return errors
 
     def validate_semantic(self) -> list[str]:
@@ -99,12 +98,14 @@ class Compiler:
 
         # Expand entity instances into projections
         from lof.gold.profile import Profile
+
         profile_path = self.root / "profiles" / "fastapi-react" / "profile.json"
         profile = None
         if profile_path.exists():
             profile = Profile.load(profile_path)
         if profile:
             from lof.compilation.projection_expander import ProjectionExpander
+
             expander = ProjectionExpander(self.registry, profile)
             try:
                 instances = expander.expand()

@@ -7,18 +7,26 @@ from pathlib import Path
 from lof.gold.instance_generator import GoldInstanceGenerator
 from lof.gold.json_loader import load_gold_application
 from lof.gold.projection import EntityProjector
-from lof.models.gold_models import GoldCapabilities, ModelDef, AttributeDef, GoldRelation
+from lof.models.gold_models import AttributeDef, GoldCapabilities, GoldRelation, ModelDef
 
-LIBRARY_JSON = Path(__file__).resolve().parent.parent.parent / "programs" / "library" / "library.json"
-ISOCLIM_JSON = Path(__file__).resolve().parent.parent.parent / "programs" / "isoclim" / "isoclim.json"
+LIBRARY_JSON = (
+    Path(__file__).resolve().parent.parent.parent / "programs" / "library" / "library.json"
+)
+ISOCLIM_JSON = (
+    Path(__file__).resolve().parent.parent.parent / "programs" / "isoclim" / "isoclim.json"
+)
 
 
 def test_project_entity():
-    ent = ModelDef(id="client", name="Client", fields=[
-        AttributeDef(id="id", type="uuid", primary=True, generated=True, list_visible=False),
-        AttributeDef(id="name", type="string", required=True, searchable=True),
-        AttributeDef(id="email", type="email", required=True, unique=True),
-    ])
+    ent = ModelDef(
+        id="client",
+        name="Client",
+        fields=[
+            AttributeDef(id="id", type="uuid", primary=True, generated=True, list_visible=False),
+            AttributeDef(id="name", type="string", required=True, searchable=True),
+            AttributeDef(id="email", type="email", required=True, unique=True),
+        ],
+    )
     ctx = EntityProjector().project(ent)
     assert ctx["name"] == "Client"
     assert len(ctx["fields"]) == 3
@@ -38,11 +46,20 @@ def test_project_entity_with_operations():
 
 
 def test_project_relation_many_to_one():
-    book = ModelDef(id="book", relations=[
-        GoldRelation(id="book_author", source="book", target="author",
-                     kind="many-to-one", source_field="author_id",
-                     target_display_field="name", required=True),
-    ])
+    book = ModelDef(
+        id="book",
+        relations=[
+            GoldRelation(
+                id="book_author",
+                source="book",
+                target="author",
+                kind="many-to-one",
+                source_field="author_id",
+                target_display_field="name",
+                required=True,
+            ),
+        ],
+    )
     ctx = EntityProjector().project(book, [ModelDef(id="author"), book])
     assert len(ctx["relations"]) == 1
     assert ctx["relations"][0]["kind"] == "many-to-one"
@@ -51,21 +68,35 @@ def test_project_relation_many_to_one():
 
 def test_project_incoming_relation():
     author = ModelDef(id="author")
-    book = ModelDef(id="book", relations=[
-        GoldRelation(id="book_author", source="book", target="author",
-                     kind="many-to-one", back_populates="author_books"),
-    ])
+    book = ModelDef(
+        id="book",
+        relations=[
+            GoldRelation(
+                id="book_author",
+                source="book",
+                target="author",
+                kind="many-to-one",
+                back_populates="author_books",
+            ),
+        ],
+    )
     ctx = EntityProjector().project(author, [author, book])
     assert len(ctx["incoming_relations"]) == 1
     assert ctx["incoming_relations"][0]["kind"] == "one-to-many"
 
 
 def test_field_types_preserved():
-    ent = ModelDef(id="t", fields=[
-        AttributeDef(id="s", type="string"), AttributeDef(id="i", type="integer"),
-        AttributeDef(id="b", type="boolean"), AttributeDef(id="d", type="date"),
-        AttributeDef(id="e", type="email"), AttributeDef(id="m", type="money"),
-    ])
+    ent = ModelDef(
+        id="t",
+        fields=[
+            AttributeDef(id="s", type="string"),
+            AttributeDef(id="i", type="integer"),
+            AttributeDef(id="b", type="boolean"),
+            AttributeDef(id="d", type="date"),
+            AttributeDef(id="e", type="email"),
+            AttributeDef(id="m", type="money"),
+        ],
+    )
     ctx = EntityProjector().project(ent)
     types = {f["name"]: f["type"] for f in ctx["fields"]}
     assert types["s"] == "string"

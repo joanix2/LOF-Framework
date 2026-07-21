@@ -5,7 +5,9 @@ from pathlib import Path
 from lof.graph.instance_graph import InstanceGraph
 from lof.loading.registry import Registry
 from lof.validation.smt.constraint_definition import (
-    ConstraintDefinition, DiagnosticDefinition, SolverResult,
+    ConstraintDefinition,
+    DiagnosticDefinition,
+    SolverResult,
 )
 from lof.validation.smt.context import ConstraintContext
 from lof.validation.smt.solver import Z3SemanticSolver
@@ -24,18 +26,22 @@ class SemanticValidationEngine:
         if constraints_dir.exists():
             for f in sorted(constraints_dir.glob("*.json")):
                 import json
+
                 cd = json.loads(f.read_text())
-                constraints.append(ConstraintDefinition(
-                    id=cd["id"], type=cd["type"],
-                    severity=cd.get("severity", "error"),
-                    parameters=cd.get("parameters", {}),
-                    diagnostic=DiagnosticDefinition(
-                        code=cd.get("diagnostic", {}).get("code", "UNKNOWN"),
-                        message=cd.get("diagnostic", {}).get("message", ""),
-                        hint=cd.get("diagnostic", {}).get("hint"),
-                    ),
-                    description=cd.get("description"),
-                ))
+                constraints.append(
+                    ConstraintDefinition(
+                        id=cd["id"],
+                        type=cd["type"],
+                        severity=cd.get("severity", "error"),
+                        parameters=cd.get("parameters", {}),
+                        diagnostic=DiagnosticDefinition(
+                            code=cd.get("diagnostic", {}).get("code", "UNKNOWN"),
+                            message=cd.get("diagnostic", {}).get("message", ""),
+                            hint=cd.get("diagnostic", {}).get("hint"),
+                        ),
+                        description=cd.get("description"),
+                    )
+                )
 
         return constraints
 
@@ -49,14 +55,22 @@ class SemanticValidationEngine:
     def validate_with_json_diagnostics(self, output_dir: Path | None = None) -> SolverResult:
         result = self.validate()
         if output_dir:
-            import json, datetime
+            import datetime
+            import json
+
             diag_dir = output_dir / ".lof" / "diagnostics"
             diag_dir.mkdir(parents=True, exist_ok=True)
             diag_file = diag_dir / "latest.json"
-            diag_file.write_text(json.dumps({
-                "status": result.status,
-                "timestamp": datetime.datetime.now().isoformat(),
-                "summary": f"{len(result.diagnostics)} violation(s).",
-                "violations": [d.model_dump() for d in result.diagnostics],
-            }, indent=2, ensure_ascii=False))
+            diag_file.write_text(
+                json.dumps(
+                    {
+                        "status": result.status,
+                        "timestamp": datetime.datetime.now().isoformat(),
+                        "summary": f"{len(result.diagnostics)} violation(s).",
+                        "violations": [d.model_dump() for d in result.diagnostics],
+                    },
+                    indent=2,
+                    ensure_ascii=False,
+                )
+            )
         return result

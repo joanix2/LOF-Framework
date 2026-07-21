@@ -499,3 +499,21 @@ def bench_run(
     report_dir.mkdir(exist_ok=True)
     (report_dir / "latest.json").write_text(json.dumps(report.model_dump(), indent=2, default=str))
     console.print("\n[blue]Report:[/blue] reports/latest.json")
+
+
+@app.command()
+def heal(
+    max_iterations: int = typer.Option(10, "--max-iter", "-m", help="Max healing iterations"),
+) -> None:
+    """Self-healing loop: compile → lint → test → repeat until stable."""
+    from lof.commands.heal import heal_project
+
+    result = heal_project(Path.cwd(), max_iterations)
+    errors = result.get("errors", [])
+    test_fail = result.get("test_failures", 0)
+    if errors or test_fail > 0:
+        console.print(
+            f"[yellow]Healing incomplete: {len(errors)} error(s), {test_fail} test(s) failing[/yellow]"
+        )
+        raise typer.Exit(1)
+    console.print("[green]Project is fully coherent.[/green]")

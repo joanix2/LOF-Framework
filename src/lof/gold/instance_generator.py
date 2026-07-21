@@ -27,8 +27,7 @@ class GoldInstanceGenerator:
                 "type": "entity",
                 "values": ctx,
                 "relations": [
-                    {**r, "target": f"{r['target']}-model"}
-                    for r in ctx.get("relations", [])
+                    {**r, "target": f"{r['target']}-model"} for r in ctx.get("relations", [])
                 ],
             }
             path = inst_dir / f"{entity.id}.json"

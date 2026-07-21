@@ -8,5 +8,12 @@ from lof.silver.models import (
     SilverRelation,
 )
 
-__all__ = ['SpacyExtractor', 'SilverGraph', 'SilverClaim', 'SilverEntity',
-    'SilverRelation', 'SilverContradiction', 'ProvenanceRef']
+__all__ = [
+    "SpacyExtractor",
+    "SilverGraph",
+    "SilverClaim",
+    "SilverEntity",
+    "SilverRelation",
+    "SilverContradiction",
+    "ProvenanceRef",
+]

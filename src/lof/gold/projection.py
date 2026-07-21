@@ -28,15 +28,23 @@ class EntityProjector:
         fields = []
         for f in entity.fields:
             fd = {
-                "name": f.id, "type": f.type, "label": f.label or f.id,
-                "required": f.required, "primary": f.primary,
-                "nullable": f.nullable, "unique": f.unique,
-                "searchable": f.searchable, "sortable": f.sortable,
+                "name": f.id,
+                "type": f.type,
+                "label": f.label or f.id,
+                "required": f.required,
+                "primary": f.primary,
+                "nullable": f.nullable,
+                "unique": f.unique,
+                "searchable": f.searchable,
+                "sortable": f.sortable,
                 "filterable": f.filterable,
-                "list_visible": f.list_visible, "detail_visible": f.detail_visible,
+                "list_visible": f.list_visible,
+                "detail_visible": f.detail_visible,
                 "form_visible": f.form_visible,
-                "create_visible": f.create_visible, "edit_visible": f.edit_visible,
-                "read_only": f.read_only, "generated": f.generated,
+                "create_visible": f.create_visible,
+                "edit_visible": f.edit_visible,
+                "read_only": f.read_only,
+                "generated": f.generated,
                 "enum_ref": f.enum_ref,
             }
             if f.default is not None:
@@ -60,14 +68,18 @@ class EntityProjector:
         rels = []
         for r in entity.relations:
             rd = {
-                "id": r.id, "source": r.source, "target": r.target,
+                "id": r.id,
+                "source": r.source,
+                "target": r.target,
                 "kind": r.kind,
                 "source_field": r.source_field or self._fk_name(r.target),
                 "target_field": r.target_field or self._display_field(),
                 "target_display_field": r.target_display_field or self._display_field(),
-                "required": r.required, "nullable": r.nullable,
+                "required": r.required,
+                "nullable": r.nullable,
                 "on_delete": r.on_delete,
-                "list_visible": r.list_visible, "detail_visible": r.detail_visible,
+                "list_visible": r.list_visible,
+                "detail_visible": r.detail_visible,
             }
             if r.back_populates:
                 rd["back_populates"] = r.back_populates
@@ -79,10 +91,16 @@ class EntityProjector:
                 operations.append(op)
 
         profile = self.profile
-        inv = profile.inverse_relation_kinds if profile else {
-            "many-to-one": "one-to-many", "one-to-one": "one-to-one",
-            "one-to-many": "many-to-one", "many-to-many": "many-to-many",
-        }
+        inv = (
+            profile.inverse_relation_kinds
+            if profile
+            else {
+                "many-to-one": "one-to-many",
+                "one-to-one": "one-to-one",
+                "one-to-many": "many-to-one",
+                "many-to-many": "many-to-many",
+            }
+        )
 
         incoming = []
         for other in all_ents:
@@ -91,25 +109,31 @@ class EntityProjector:
             for r in other.relations:
                 if r.target == entity.id:
                     inv_kind = inv.get(r.kind, r.kind)
-                    incoming.append({
-                        "id": f"inverse_{r.id}",
-                        "source": other.id, "target": entity.id,
-                        "kind": inv_kind,
-                        "source_field": r.target_field,
-                        "target_field": r.source_field or self._fk_name(r.target),
-                        "target_display_field": r.target_display_field or self._display_field(),
-                        "required": r.required, "nullable": r.nullable,
-                        "on_delete": r.on_delete,
-                        "list_visible": r.list_visible,
-                        "detail_visible": r.detail_visible,
-                    })
+                    incoming.append(
+                        {
+                            "id": f"inverse_{r.id}",
+                            "source": other.id,
+                            "target": entity.id,
+                            "kind": inv_kind,
+                            "source_field": r.target_field,
+                            "target_field": r.source_field or self._fk_name(r.target),
+                            "target_display_field": r.target_display_field or self._display_field(),
+                            "required": r.required,
+                            "nullable": r.nullable,
+                            "on_delete": r.on_delete,
+                            "list_visible": r.list_visible,
+                            "detail_visible": r.detail_visible,
+                        }
+                    )
 
         audit_f = []
         if profile:
             for af in profile.default_audit_fields():
                 audit_f.append(af)
 
-        grid_cols = entity.grid.columns or [f.id for f in entity.fields[:5] if getattr(f, "list_visible", True)]  # noqa: E501
+        grid_cols = entity.grid.columns or [
+            f.id for f in entity.fields[:5] if getattr(f, "list_visible", True)
+        ]  # noqa: E501
         searchable = [f.id for f in entity.fields if f.searchable]
         plural = entity.plural_name
         if not plural:
