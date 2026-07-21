@@ -1,0 +1,34 @@
+{
+  "id": "entity-api-tests",
+  "template": ".lof/templates/backend/test_entity.py.j2",
+  "targetType": "python-module",
+  "outputPattern": "generated-project/apps/api/tests/modules/test_{{ name | snake_case }}.py",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "route": {
+      "type": "string",
+      "required": true
+    },
+    "pluralName": {
+      "type": "string",
+      "required": true
+    },
+    "fields": {
+      "type": "array"
+    },
+    "operations": {
+      "type": "array",
+      "default": [
+        "create",
+        "read",
+        "update",
+        "delete",
+        "list",
+        "search"
+      ]
+    }
+  }
+}

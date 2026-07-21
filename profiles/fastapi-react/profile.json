@@ -75,6 +75,16 @@
       "type": "entity-list-page",
       "condition": "capability.list",
       "template": ".lof/templates/frontend/list_page.tsx.j2"
+    },
+    {
+      "type": "entity-api-tests",
+      "condition": "has_operations",
+      "template": ".lof/templates/backend/test_entity.py.j2"
+    },
+    {
+      "type": "entity-e2e-tests",
+      "condition": "capability.list",
+      "template": ".lof/templates/frontend/test_e2e.ts.j2"
     }
   ],
   "closed_world_predicates": [

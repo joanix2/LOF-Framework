@@ -93,6 +93,15 @@ class GoldInstanceGenerator:
                     "pluralName": ctx.get("pluralName", ctx["name"] + "s"),
                     "route": ctx.get("route", ctx["name"])}
 
+        if type_id == "entity-api-tests":
+            return {"name": ctx["name"], "route": ctx["route"],
+                    "pluralName": ctx["pluralName"], "fields": ctx["fields"],
+                    "operations": ctx["operations"]}
+
+        if type_id == "entity-e2e-tests":
+            return {"name": ctx["name"], "route": ctx["route"],
+                    "pluralName": ctx["pluralName"], "fields": ctx["fields"]}
+
         return base
 
     def _default_projections(self, ctx: dict, entity) -> list[tuple[str, str, dict]]:
