@@ -133,9 +133,12 @@ class Pipeline:
     def _get_language(self, td: TypeDefinition) -> str:
         if td.target_type:
             tgt = self.registry.get_target(td.target_type)
-            if tgt:
+            if tgt and tgt.language:
                 return tgt.language
-        return "python"
+        raise ValueError(
+            f"Cannot determine language for type '{td.id}': "
+            f"no target or target has no language defined"
+        )
 
     def _resolve_output_path(
         self, td: TypeDefinition, ctx: dict[str, Any], instance: InstanceDefinition

@@ -105,34 +105,11 @@ def doctor():
         console.print("[yellow]ℹ[/yellow] Not a LOF project (no lof.toml)")
 
 
-@app.command()
-def dev(
-    print_commands: bool = typer.Option(
-        False, "--print-commands", "-p",
-        help="Print commands instead of running",
-    ),
-):
-    """Start development servers for the generated project."""
+def _start_processes(
+    commands: list[tuple[str, str, list[str]]],
+    print_commands: bool = False,
+) -> None:
     import subprocess
-
-    root = Path.cwd()
-    gen = root / "generated"
-    if not gen.exists():
-        console.print("[red]No generated/ directory. Run 'lof compile' first.[/red]")
-        raise typer.Exit(1)
-
-    api_dir = gen / "apps" / "api"
-    web_dir = gen / "apps" / "web"
-    commands = []
-
-    if api_dir.exists():
-        commands.append(("API", str(api_dir), ["uvicorn", "app.main:app", "--reload", "--port", "8000"]))  # noqa: E501
-    if web_dir.exists():
-        commands.append(("Web", str(web_dir), ["npm", "run", "dev"]))
-
-    if not commands:
-        console.print("[yellow]No known services found in generated/[/yellow]")
-        raise typer.Exit(1)
 
     if print_commands:
         for name, cwd, cmd in commands:
@@ -145,7 +122,6 @@ def dev(
             console.print(f"[green]Starting {name}...[/green]  cd {cwd} && {' '.join(cmd)}")
             p = subprocess.Popen(cmd, cwd=cwd)
             processes.append(p)
-
         for p in processes:
             p.wait()
     except KeyboardInterrupt:
@@ -162,6 +138,51 @@ def dev(
         for p in processes:
             p.terminate()
         raise typer.Exit(1)
+
+
+@app.command()
+def dev(
+    print_commands: bool = typer.Option(
+        False, "--print-commands", "-p",
+        help="Print commands instead of running",
+    ),
+):
+    """Start development servers for the generated project."""
+    root = Path.cwd()
+    gen = root / "generated"
+    if not gen.exists():
+        console.print("[red]No generated/ directory. Run 'lof compile' first.[/red]")
+        raise typer.Exit(1)
+
+    manifest_path = gen / "manifest.json"
+    commands: list[tuple[str, str, list[str]]] = []
+
+    if manifest_path.exists():
+        import json
+        manifest = json.loads(manifest_path.read_text())
+        for a in manifest.get("artifacts", []):
+            dev_cmd = a.get("dev_command")
+            if dev_cmd:
+                name = a.get("instance", "service")
+                out = a.get("output", "")
+                cwd = str(gen / Path(out).parent)
+                commands.append((name, cwd, dev_cmd.split()))
+        if commands:
+            _start_processes(commands, print_commands)
+            return
+
+    api_dir = gen / "apps" / "api"
+    web_dir = gen / "apps" / "web"
+    if api_dir.exists():
+        commands.append(("API", str(api_dir), ["uvicorn", "app.main:app", "--reload", "--port", "8000"]))  # noqa: E501
+    if web_dir.exists():
+        commands.append(("Web", str(web_dir), ["npm", "run", "dev"]))
+
+    if not commands:
+        console.print("[yellow]No known services found in generated/[/yellow]")
+        raise typer.Exit(1)
+
+    _start_processes(commands, print_commands)
 
 
 @app.command()

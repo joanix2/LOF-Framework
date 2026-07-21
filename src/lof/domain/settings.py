@@ -22,7 +22,7 @@ class GraphSettings(BaseModel):
 
 class ReasoningSettings(BaseModel):
     max_iterations: int = 100
-    default_profile: str = "fastapi-react"
+    default_profile: str | None = None
     hypothesis_confidence_threshold: float = 0.5
 
 

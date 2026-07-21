@@ -361,7 +361,6 @@ version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
-    { name = "libcst" },
     { name = "networkx" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -374,6 +373,7 @@ dependencies = [
 [package.optional-dependencies]
 all = [
     { name = "click" },
+    { name = "libcst" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "ruff" },
@@ -389,14 +389,18 @@ ner = [
     { name = "click" },
     { name = "spacy" },
 ]
+python-ast = [
+    { name = "libcst" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "click", marker = "extra == 'ner'", specifier = ">=8.1" },
     { name = "jinja2", specifier = ">=3.1,<4.0" },
-    { name = "libcst", specifier = ">=1.0,<2.0" },
+    { name = "libcst", marker = "extra == 'python-ast'", specifier = ">=1.0,<2.0" },
     { name = "lof-framework", extras = ["dev"], marker = "extra == 'all'" },
     { name = "lof-framework", extras = ["ner"], marker = "extra == 'all'" },
+    { name = "lof-framework", extras = ["python-ast"], marker = "extra == 'all'" },
     { name = "networkx", specifier = ">=3.0,<4.0" },
     { name = "pydantic", specifier = ">=2.0,<3.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.0,<2.0" },
@@ -411,7 +415,7 @@ requires-dist = [
     { name = "typer", specifier = ">=0.12,<1.0" },
     { name = "z3-solver", specifier = ">=5.0,<6.0" },
 ]
-provides-extras = ["ner", "dev", "all"]
+provides-extras = ["ner", "python-ast", "dev", "all"]
 
 [[package]]
 name = "markdown-it-py"
