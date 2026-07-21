@@ -17,7 +17,7 @@ class {{ id | pascal_case }}(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 {%- elif f_name in ("updated_at",) and field.get('generated') %}
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-{%- elif f_type in ("string", "email", "url") %}
+{%- elif f_type in ("string", "email", "url", "phone") %}
     {{ f_name }} = Column(String(255), nullable={% if f_nullable %}True{% else %}False{% endif %}{%- if field.get('unique', False) %}, unique=True{% endif %}{%- if field.get('index', False) %}, index=True{% endif %})
 {%- elif f_type == "text" %}
     {{ f_name }} = Column(Text, nullable={% if f_nullable %}True{% else %}False{% endif %})

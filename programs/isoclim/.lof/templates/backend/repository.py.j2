@@ -43,7 +43,7 @@ class {{ id | pascal_case }}Repository:
             if col is not None:
                 stmt = stmt.order_by(col.desc() if sort_desc else col.asc())
         else:
-            stmt = stmt.order_by({{ id | pascal_case }}.created_at.desc())
+            stmt = stmt.order_by({{ id | pascal_case }}.id.desc())
 
         total_result = await self.session.execute(total_stmt)
         total = total_result.scalar() or 0
