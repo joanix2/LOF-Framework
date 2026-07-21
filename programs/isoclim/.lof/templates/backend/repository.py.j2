@@ -17,7 +17,7 @@ class {{ id | pascal_case }}Repository:
         self.session = session
 
     async def create(self, data: {{ id | pascal_case }}Create) -> {{ id | pascal_case }}:
-        entity = {{ id | pascal_case }}(**data.model_dump())
+        entity = {{ id | pascal_case }}(**data.model_dump(exclude_unset=True))
         self.session.add(entity)
         await self.session.commit()
         await self.session.refresh(entity)
@@ -104,7 +104,7 @@ class {{ id | pascal_case }}Repository:
         total_stmt = select(func.count()).select_from({{ id | pascal_case }})
 {% endif %}
 
-        stmt = stmt.order_by({{ id | pascal_case }}.created_at.desc())
+        stmt = stmt.order_by({{ id | pascal_case }}.id.desc())
 
         total_result = await self.session.execute(total_stmt)
         total = total_result.scalar() or 0

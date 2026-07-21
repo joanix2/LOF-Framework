@@ -42,7 +42,7 @@ export default function {{ id | pascal_case }}ListPage() {
         <thead>
           <tr className="bg-gray-100">
 {% for field in fields %}
-{% if field.get('visibleInList', True) %}
+{% if field.get('list_visible', True) %}
             <th className="border p-2 text-left">{{ field.get('name') }}</th>
 {% endif %}
 {% endfor %}
@@ -53,7 +53,7 @@ export default function {{ id | pascal_case }}ListPage() {
           {data?.items.map((item: {{ id | pascal_case }}) => (
             <tr key={item.id} className="hover:bg-gray-50">
 {% for field in fields %}
-{% if field.get('visibleInList', True) %}
+{% if field.get('list_visible', True) %}
 {% set f_type = field.get('type', 'string') %}
 {% set f_name = field.get('name') %}
 {% if f_type in ("boolean", "bool") %}

@@ -21,7 +21,7 @@ class TestCreate{{ id | pascal_case }}:
             "{{ f_name }}": "test@example.com",
 {%- elif f_type in ("integer", "int") %}
             "{{ f_name }}": 1,
-{%- elif f_type in ("float", "decimal") %}
+{%- elif f_type in ("float", "decimal", "money") %}
             "{{ f_name }}": 1.0,
 {%- elif f_type in ("boolean", "bool") %}
             "{{ f_name }}": True,
@@ -29,6 +29,8 @@ class TestCreate{{ id | pascal_case }}:
             "{{ f_name }}": "00000000-0000-0000-0000-000000000000",
 {%- elif f_type in ("datetime", "date") %}
             "{{ f_name }}": "2024-01-01T00:00:00",
+{%- elif f_type == "phone" %}
+            "{{ f_name }}": "+33123456789",
 {%- endif %}
 {%- endif %}
 {%- endfor %}
@@ -66,7 +68,7 @@ class TestList{{ id | pascal_case }}:
 
     @pytest.mark.asyncio
     async def test_list_{{ id }}_sorting(self, async_client: AsyncClient):
-        response = await async_client.get("/api/v1/{{ route }}?sort_by=created_at&sort_desc=true")
+        response = await async_client.get("/api/v1/{{ route }}?sort_by=id&sort_desc=true")
         assert response.status_code == 200
 {%- endif %}
 
@@ -130,8 +132,22 @@ class Test{{ id | pascal_case }}Integration:
 {%- set f_generated = field.get('generated', False) %}
 {%- if f_required and f_name not in ("id", "created_at", "updated_at") and not f_generated %}
 {%- set f_type = field.get('type') %}
-{%- if f_type == "email" %}
+{%- if f_type in ("string", "url", "text", "enum") %}
+            "{{ f_name }}": "test-{{ f_name }}",
+{%- elif f_type == "email" %}
             "{{ f_name }}": "test@example.com",
+{%- elif f_type in ("integer", "int") %}
+            "{{ f_name }}": 1,
+{%- elif f_type in ("float", "decimal", "money") %}
+            "{{ f_name }}": 1.0,
+{%- elif f_type in ("boolean", "bool") %}
+            "{{ f_name }}": True,
+{%- elif f_type == "uuid" %}
+            "{{ f_name }}": "00000000-0000-0000-0000-000000000000",
+{%- elif f_type in ("datetime", "date") %}
+            "{{ f_name }}": "2024-01-01T00:00:00",
+{%- elif f_type == "phone" %}
+            "{{ f_name }}": "+33123456789",
 {%- else %}
             "{{ f_name }}": "test-{{ f_name }}",
 {%- endif %}

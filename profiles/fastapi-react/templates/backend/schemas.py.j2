@@ -8,16 +8,17 @@ class {{ id | pascal_case }}Base(BaseModel):
 {%- if f_name not in ("id", "created_at", "updated_at") %}
 {%- set f_type = field.get('type', 'string') %}
 {%- set f_required = field.get('required', False) %}
+{%- set f_nullable = field.get('nullable', True) %}
 {%- if f_type == "uuid" %}{%- set py_type = "str" %}
 {%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("string", "text", "enum", "phone", "url") %}{%- set py_type = "str" %}
 {%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("float", "decimal", "money") %}{%- set py_type = "float" %}
 {%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
 {%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
 {%- else %}{%- set py_type = "str" %}
 {%- endif %}
-    {{ f_name }}: {{ py_type }}{% if not f_required %} | None = None{% endif %}
+    {{ f_name }}: {{ py_type }}{% if not f_required or f_nullable %} | None = None{% endif %}
 {%- endif %}
 {%- endfor %}
 
@@ -30,9 +31,9 @@ class {{ id | pascal_case }}Create({{ id | pascal_case }}Base):
 {%- set f_type = field.get('type', 'string') %}
 {%- if f_type == "uuid" %}{%- set py_type = "str" %}
 {%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("string", "text", "enum", "phone", "url") %}{%- set py_type = "str" %}
 {%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("float", "decimal", "money") %}{%- set py_type = "float" %}
 {%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
 {%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
 {%- else %}{%- set py_type = "str" %}
@@ -43,14 +44,9 @@ class {{ id | pascal_case }}Create({{ id | pascal_case }}Base):
 
 class {{ id | pascal_case }}Read({{ id | pascal_case }}Base):
     id: str
-{%- for field in fields %}
-{%- set f_name = field.get('name', '') | snake_case %}
-{%- if f_name in ("created_at", "updated_at") %}
-{%- set f_type = field.get('type', 'datetime') %}
-{%- if f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
-{%- else %}{%- set py_type = "str" %}
-{%- endif %}
-    {{ f_name }}: {{ py_type }}{% if f_name == "updated_at" %} | None = None{% endif %}
+{%- for af in audit_fields %}
+{%- if af in ("created_at", "updated_at") %}
+    {{ af }}: datetime{% if af == "updated_at" %} | None = None{% endif %}
 {%- endif %}
 {%- endfor %}
     model_config = {"from_attributes": True}
@@ -60,16 +56,17 @@ class {{ id | pascal_case }}Update(BaseModel):
 {%- set f_name = field.get('name', '') | snake_case %}
 {%- if f_name not in ("id", "created_at", "updated_at") %}
 {%- set f_type = field.get('type', 'string') %}
+{%- set f_nullable = field.get('nullable', True) %}
 {%- if f_type == "uuid" %}{%- set py_type = "str" %}
 {%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("string", "text", "enum", "phone", "url") %}{%- set py_type = "str" %}
 {%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("float", "decimal", "money") %}{%- set py_type = "float" %}
 {%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
 {%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
 {%- else %}{%- set py_type = "str" %}
 {%- endif %}
-    {{ f_name }}: {{ py_type }} | None = None
+    {{ f_name }}: {{ py_type }}{% if f_nullable %} | None = None{% else %} | None = None{% endif %}
 {%- endif %}
 {%- endfor %}
 
@@ -77,19 +74,20 @@ class {{ id | pascal_case }}List(BaseModel):
     id: str
 {%- for field in fields %}
 {%- set f_name = field.get('name', '') | snake_case %}
-{%- set f_visible = field.get('visibleInList', True) %}
+{%- set f_visible = field.get('list_visible', True) %}
 {%- if f_visible and f_name != "id" %}
 {%- set f_type = field.get('type', 'string') %}
+{%- set f_nullable = field.get('nullable', True) %}
 {%- if f_type == "uuid" %}{%- set py_type = "str" %}
 {%- elif f_type == "email" %}{%- set py_type = "EmailStr" %}
-{%- elif f_type in ("string", "text", "enum") %}{%- set py_type = "str" %}
+{%- elif f_type in ("string", "text", "enum", "phone", "url") %}{%- set py_type = "str" %}
 {%- elif f_type in ("integer", "int") %}{%- set py_type = "int" %}
-{%- elif f_type in ("float", "decimal") %}{%- set py_type = "float" %}
+{%- elif f_type in ("float", "decimal", "money") %}{%- set py_type = "float" %}
 {%- elif f_type in ("boolean", "bool") %}{%- set py_type = "bool" %}
 {%- elif f_type in ("datetime", "date") %}{%- set py_type = "datetime" %}
 {%- else %}{%- set py_type = "str" %}
 {%- endif %}
-    {{ f_name }}: {{ py_type }}
+    {{ f_name }}: {{ py_type }}{% if f_nullable %} | None = None{% endif %}
 {%- endif %}
 {%- endfor %}
     model_config = {"from_attributes": True}
