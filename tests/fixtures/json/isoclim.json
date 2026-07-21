@@ -1,0 +1,151 @@
+{
+  "id": "isoclim",
+  "name": "ISOCLIM",
+  "profile": "fastapi-react",
+  "entities": [
+    {
+      "id": "client", "name": "Client", "plural_name": "Clients",
+      "description": "Entreprise cliente", "display_field": "company_name",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "company_name", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 200},
+        {"id": "email", "type": "email", "list_visible": true},
+        {"id": "phone", "type": "phone", "list_visible": true},
+        {"id": "siret", "type": "string", "unique": true, "max_length": 14},
+        {"id": "address", "type": "text", "form_visible": true, "list_visible": false},
+        {"id": "active", "type": "boolean", "default": true, "list_visible": true}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true},
+      "audit": {"created_at": true, "updated_at": true},
+      "navigation": {"visible": true, "label": "Clients", "order": 10}
+    },
+    {
+      "id": "commande", "name": "Commande", "plural_name": "Commandes",
+      "description": "Commande client", "display_field": "reference",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "reference", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 50},
+        {"id": "description", "type": "text", "form_visible": true, "list_visible": false},
+        {"id": "status", "type": "enum", "default": "draft", "list_visible": true, "sortable": true},
+        {"id": "total_amount", "type": "money", "list_visible": true, "sortable": true},
+        {"id": "date", "type": "date", "list_visible": true, "sortable": true}
+      ],
+      "relations": [
+        {"id": "commande_client", "source": "commande", "target": "client", "kind": "many-to-one",
+         "source_field": "client_id", "target_display_field": "company_name", "required": true, "back_populates": "client_commandes"}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true},
+      "audit": {"created_at": true, "updated_at": true},
+      "navigation": {"visible": true, "label": "Commandes", "order": 20}
+    },
+    {
+      "id": "chantier", "name": "Chantier", "plural_name": "Chantiers",
+      "description": "Chantier de construction", "display_field": "name",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "name", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 200},
+        {"id": "address", "type": "text", "form_visible": true, "list_visible": false},
+        {"id": "start_date", "type": "date", "list_visible": true, "sortable": true},
+        {"id": "end_date", "type": "date", "list_visible": true},
+        {"id": "status", "type": "enum", "default": "planned", "list_visible": true, "sortable": true}
+      ],
+      "relations": [
+        {"id": "chantier_commande", "source": "chantier", "target": "commande", "kind": "many-to-one",
+         "source_field": "commande_id", "target_display_field": "reference", "required": true, "back_populates": "commande_chantiers"}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true},
+      "audit": {"created_at": true, "updated_at": true},
+      "navigation": {"visible": true, "label": "Chantiers", "order": 30}
+    },
+    {
+      "id": "equipe", "name": "Équipe", "plural_name": "Équipes",
+      "description": "Équipe de travail", "display_field": "name",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "name", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 100},
+        {"id": "description", "type": "text", "form_visible": true, "list_visible": false},
+        {"id": "active", "type": "boolean", "default": true, "list_visible": true}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true},
+      "audit": {"created_at": true, "updated_at": true},
+      "navigation": {"visible": true, "label": "Équipes", "order": 40}
+    },
+    {
+      "id": "employe", "name": "Employé", "plural_name": "Employés",
+      "description": "Employé d'équipe", "display_field": "full_name",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "full_name", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 200},
+        {"id": "email", "type": "email", "list_visible": true},
+        {"id": "phone", "type": "phone", "list_visible": true},
+        {"id": "role", "type": "enum", "default": "worker", "list_visible": true, "sortable": true},
+        {"id": "active", "type": "boolean", "default": true, "list_visible": true}
+      ],
+      "relations": [
+        {"id": "employe_equipe", "source": "employe", "target": "equipe", "kind": "many-to-one",
+         "source_field": "equipe_id", "target_display_field": "name", "required": true, "back_populates": "equipe_employes"}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true},
+      "audit": {"created_at": true, "updated_at": true},
+      "navigation": {"visible": true, "label": "Employés", "order": 50}
+    },
+    {
+      "id": "mission", "name": "Mission", "plural_name": "Missions",
+      "description": "Mission sur chantier", "display_field": "title",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "title", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 200},
+        {"id": "description", "type": "text", "form_visible": true, "list_visible": false},
+        {"id": "status", "type": "enum", "default": "planned", "list_visible": true, "sortable": true},
+        {"id": "priority", "type": "enum", "default": "medium", "list_visible": true, "sortable": true},
+        {"id": "start_date", "type": "date", "list_visible": true},
+        {"id": "end_date", "type": "date", "list_visible": true},
+        {"id": "blocking_reason", "type": "text", "form_visible": true, "list_visible": false}
+      ],
+      "relations": [
+        {"id": "mission_chantier", "source": "mission", "target": "chantier", "kind": "many-to-one",
+         "source_field": "chantier_id", "target_display_field": "name", "required": true, "back_populates": "chantier_missions"},
+        {"id": "mission_equipe", "source": "mission", "target": "equipe", "kind": "many-to-one",
+         "source_field": "equipe_id", "target_display_field": "name", "required": true, "back_populates": "equipe_missions"}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true},
+      "audit": {"created_at": true, "updated_at": true},
+      "navigation": {"visible": true, "label": "Missions", "order": 60}
+    },
+    {
+      "id": "equipement", "name": "Équipement", "plural_name": "Équipements",
+      "description": "Équipement de chantier", "display_field": "name",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "name", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 200},
+        {"id": "type", "type": "enum", "default": "tool", "list_visible": true, "sortable": true},
+        {"id": "serial_number", "type": "string", "unique": true, "list_visible": true},
+        {"id": "status", "type": "enum", "default": "available", "list_visible": true, "sortable": true},
+        {"id": "active", "type": "boolean", "default": true, "list_visible": true}
+      ],
+      "relations": [
+        {"id": "equipement_mission", "source": "equipement", "target": "mission", "kind": "many-to-one",
+         "source_field": "mission_id", "target_display_field": "title", "nullable": true, "back_populates": "mission_equipements"}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true},
+      "audit": {"created_at": true, "updated_at": true},
+      "navigation": {"visible": true, "label": "Équipements", "order": 70}
+    },
+    {
+      "id": "commentaire_mission", "name": "Commentaire", "plural_name": "Commentaires",
+      "description": "Commentaire sur une mission", "display_field": "content_preview",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "content", "type": "text", "required": true, "form_visible": true, "list_visible": false},
+        {"id": "author_name", "type": "string", "required": true, "list_visible": true, "max_length": 100}
+      ],
+      "relations": [
+        {"id": "commentaire_mission_ref", "source": "commentaire_mission", "target": "mission", "kind": "many-to-one",
+         "source_field": "mission_id", "target_display_field": "title", "required": true, "back_populates": "mission_commentaires"}
+      ],
+      "capabilities": {"create": true, "read": true, "delete": true, "list": true, "search": false, "update": false},
+      "audit": {"created_at": true, "updated_at": false},
+      "navigation": {"visible": false}
+    }
+  ]
+}

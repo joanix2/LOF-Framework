@@ -1,0 +1,48 @@
+{
+  "id": "library",
+  "name": "Library Management",
+  "profile": "fastapi-react",
+  "entities": [
+    {
+      "id": "author", "name": "Author", "plural_name": "Authors",
+      "description": "Book author", "display_field": "name",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "name", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 200},
+        {"id": "biography", "type": "text", "form_visible": true, "list_visible": false},
+        {"id": "birth_date", "type": "date", "form_visible": true, "list_visible": false},
+        {"id": "active", "type": "boolean", "default": true, "list_visible": true}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true}
+    },
+    {
+      "id": "book", "name": "Book", "plural_name": "Books",
+      "description": "Published book", "display_field": "title",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "title", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 300},
+        {"id": "isbn", "type": "string", "unique": true, "list_visible": true, "max_length": 20},
+        {"id": "publication_year", "type": "integer", "list_visible": true, "sortable": true, "minimum": 1000, "maximum": 2100},
+        {"id": "pages", "type": "integer", "list_visible": true, "minimum": 1},
+        {"id": "price", "type": "money", "list_visible": true, "minimum": 0}
+      ],
+      "relations": [
+        {"id": "book_author", "source": "book", "target": "author", "kind": "many-to-one",
+         "source_field": "author_id", "target_display_field": "name", "required": true, "back_populates": "author_books"},
+        {"id": "book_category", "source": "book", "target": "category", "kind": "many-to-one",
+         "source_field": "category_id", "target_display_field": "name", "nullable": true, "back_populates": "category_books"}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true}
+    },
+    {
+      "id": "category", "name": "Category", "plural_name": "Categories",
+      "description": "Book category", "display_field": "name",
+      "fields": [
+        {"id": "id", "type": "uuid", "primary": true, "generated": true, "list_visible": false, "form_visible": false},
+        {"id": "name", "type": "string", "required": true, "searchable": true, "sortable": true, "max_length": 100},
+        {"id": "description", "type": "text", "form_visible": true, "list_visible": false}
+      ],
+      "capabilities": {"create": true, "read": true, "update": true, "delete": true, "list": true, "search": true}
+    }
+  ]
+}

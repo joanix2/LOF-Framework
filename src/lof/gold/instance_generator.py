@@ -21,7 +21,7 @@ class GoldInstanceGenerator:
 
         for entity in self.application.entities:
             ctx = self.projector.project(entity, self.application.entities)
-            n, r, pl, rt, tb = ctx["name"], ctx["route"], ctx["pluralName"], ctx["route"], ctx["tableName"]
+            n, pl, rt, tb = ctx["name"], ctx["pluralName"], ctx["route"], ctx["tableName"]  # noqa: E501
             fds, ops = ctx["fields"], ctx["operations"]
 
             model_relations = [

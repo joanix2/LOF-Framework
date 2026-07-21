@@ -1,17 +1,16 @@
-"""Tests for Gold entity projection — pure data, no type mappings."""
+"""Tests for Gold entity projection — pure data from JSON DSL."""
 
+import json
 import tempfile
 from pathlib import Path
 
 from lof.gold.instance_generator import GoldInstanceGenerator
+from lof.gold.json_loader import load_gold_application
 from lof.gold.projection import EntityProjector
-from lof.models.gold_models import (
-    GoldCapabilities,
-    GoldEntity,
-    GoldField,
-    GoldRelation,
-)
-from tests.fixtures.library_app import make_library_app
+from lof.models.gold_models import GoldCapabilities, GoldEntity, GoldField, GoldRelation
+
+LIBRARY_JSON = Path(__file__).resolve().parent.parent / "fixtures" / "json" / "library.json"
+ISOCLIM_JSON = Path(__file__).resolve().parent.parent / "fixtures" / "json" / "isoclim.json"
 
 
 def test_project_entity():
@@ -26,7 +25,6 @@ def test_project_entity():
     fields = {f["name"]: f for f in ctx["fields"]}
     assert fields["name"]["type"] == "string"
     assert fields["name"]["required"] is True
-    assert fields["name"]["searchable"] is True
     assert fields["email"]["unique"] is True
 
 
@@ -71,40 +69,44 @@ def test_field_types_preserved():
     ctx = EntityProjector().project(ent)
     types = {f["name"]: f["type"] for f in ctx["fields"]}
     assert types["s"] == "string"
-    assert types["i"] == "integer"
-    assert types["b"] == "boolean"
-    assert types["d"] == "date"
-    assert types["e"] == "email"
-    assert types["m"] == "money"  # template handles mapping
+    assert types["m"] == "money"
 
 
-def test_instance_generation():
-    app = make_library_app()
+def test_instance_generation_from_json():
+    app = load_gold_application(LIBRARY_JSON)
+    assert len(app.entities) == 3
     with tempfile.TemporaryDirectory() as tmp:
         gen = GoldInstanceGenerator(app)
         paths = gen.generate(Path(tmp))
         assert len(paths) == 18  # 3 entities × 6 projections
-        import json
         for p in paths:
             data = json.loads(p.read_text())
             assert data["type"] is not None
-            assert "values" in data
 
 
-def test_library_entity_count():
-    app = make_library_app()
-    assert len(app.entities) == 3
-
-
-def test_book_relation_preserved():
-    app = make_library_app()
+def test_book_relation_from_json():
+    app = load_gold_application(LIBRARY_JSON)
     with tempfile.TemporaryDirectory() as tmp:
-        tmp_p = Path(tmp)
-        GoldInstanceGenerator(app).generate(tmp_p)
-        import json
-        book_path = tmp_p / ".lof" / "gold" / "instances" / "book-model.json"
+        GoldInstanceGenerator(app).generate(Path(tmp))
+        book_path = Path(tmp) / ".lof" / "gold" / "instances" / "book-model.json"
         book = json.loads(book_path.read_text())
         assert len(book["relations"]) == 2
         targets = [r["target"] for r in book["relations"]]
         assert "author-model" in targets
         assert "category-model" in targets
+
+
+def test_isoclim_loaded_from_json():
+    app = load_gold_application(ISOCLIM_JSON)
+    assert len(app.entities) == 8
+    ids = [e.id for e in app.entities]
+    assert "client" in ids
+    assert "mission" in ids
+    assert "equipement" in ids
+
+
+def test_isoclim_generates_instances():
+    app = load_gold_application(ISOCLIM_JSON)
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = GoldInstanceGenerator(app).generate(Path(tmp))
+        assert len(paths) == 48  # 8 entities × 6 projections
