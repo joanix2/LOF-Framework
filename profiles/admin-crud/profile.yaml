@@ -1,7 +1,0 @@
-id: admin-crud
-name: Admin CRUD Interface
-version: 0.1.0
-description: Generic admin CRUD interface from DSL model definitions
-dsl_format: yaml
-backend_framework: fastapi
-frontend_framework: react

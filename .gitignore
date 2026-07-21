@@ -6,20 +6,12 @@ __pycache__/
 venv/
 *.egg
 
-# Node
-node_modules/
-.pnpm-store/
-
 # Build
-bazel-*
 dist/
 build/
 
 # Generated
-generated/
-!generated/.gitkeep
 generated-project/
-!.gitkeep
 
 # IDE
 .vscode/
@@ -40,4 +32,11 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Local caches
+.ruff_cache/
 graphify-out/
+.agentkanban/
+reports/
+.lof/cache/
+.lof/staging/

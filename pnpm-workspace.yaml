@@ -1,4 +1,0 @@
-packages:
-  - "."
-  - "interfaces/typescript/*"
-  - "custom/typescript/*"

@@ -1,7 +1,0 @@
-{
-  "id": "expo-service",
-  "language": "typescript",
-  "extension": ".ts",
-  "validators": ["tsc"],
-  "astAdapter": null
-}
