@@ -90,8 +90,9 @@ def test_book_relation_from_json():
         GoldInstanceGenerator(app).generate(Path(tmp))
         book_path = Path(tmp) / ".lof" / "gold" / "instances" / "book-model.json"
         book = json.loads(book_path.read_text())
-        assert len(book["relations"]) == 2
-        targets = [r["target"] for r in book["relations"]]
+        rels = book["values"].get("relations", [])
+        assert len(rels) == 2
+        targets = [r["target"] for r in rels]
         assert "author-model" in targets
         assert "category-model" in targets
 

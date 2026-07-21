@@ -1,34 +1,29 @@
-"""Projection layer: transforms GoldEntity → template context.
+"""Entity projection — pure data transformation, no hardcoded mappings.
 
-No hardcoded type mappings. Templates handle language specifics via Jinja.
-Python only builds the data structure and the computational graph.
+All naming conventions, inverse relation kinds, and defaults
+come from the active Profile configuration.
 """
 
 from typing import Any
 
-from lof.models.gold_models import GoldEntity
+from lof.gold.profile import Profile
+from lof.models.gold_models import GoldCapabilities, GoldEntity
+
+
+def _has_operation(caps: GoldCapabilities, op: str) -> bool:
+    return getattr(caps, op, False)
 
 
 class EntityProjector:
-    def project(self, entity: GoldEntity, all_entities: list[GoldEntity] | None = None) -> dict[str, Any]:  # noqa: E501
-        all_ents = all_entities or [entity]
-        operations = []
-        caps = entity.capabilities
-        if caps.list:
-            operations.append("list")
-        if caps.search:
-            operations.append("search")
-        if caps.create:
-            operations.append("create")
-        if caps.read:
-            operations.append("read")
-        if caps.update:
-            operations.append("update")
-        if caps.delete:
-            operations.append("delete")
+    def __init__(self, profile: Profile | None = None):
+        self.profile = profile
 
-        route = entity.id.lower().replace("_", "-")
-        table = entity.id.lower().replace("-", "_")
+    def project(self, entity: GoldEntity, all_entities=None) -> dict[str, Any]:
+        all_ents = all_entities or [entity]
+        caps = entity.capabilities
+
+        route = self._name("route", entity.id)
+        table = self._name("table", entity.id)
 
         fields = []
         for f in entity.fields:
@@ -62,70 +57,90 @@ class EntityProjector:
                 fd["description"] = f.description
             fields.append(fd)
 
-        relations = []
+        rels = []
         for r in entity.relations:
             rd = {
                 "id": r.id, "source": r.source, "target": r.target,
                 "kind": r.kind,
-                "source_field": r.source_field or f"{r.target}_id",
-                "target_field": r.target_field,
-                "target_display_field": r.target_display_field or "id",
+                "source_field": r.source_field or self._fk_name(r.target),
+                "target_field": r.target_field or self._display_field(),
+                "target_display_field": r.target_display_field or self._display_field(),
                 "required": r.required, "nullable": r.nullable,
                 "on_delete": r.on_delete,
                 "list_visible": r.list_visible, "detail_visible": r.detail_visible,
             }
             if r.back_populates:
                 rd["back_populates"] = r.back_populates
-            relations.append(rd)
+            rels.append(rd)
 
-        incoming_relations = self._compute_incoming(entity, all_ents)
+        operations = []
+        for op in ["create", "read", "update", "delete", "list", "search"]:
+            if _has_operation(caps, op):
+                operations.append(op)
 
-        audit_fields = []
-        if entity.audit.created_at:
-            audit_fields.append("created_at")
-        if entity.audit.updated_at:
-            audit_fields.append("updated_at")
-
-        grid_columns = entity.grid.columns or [f.id for f in entity.fields[:5] if f.list_visible]
-        searchable = [f.id for f in entity.fields if f.searchable]
-
-        return {
-            "id": entity.id,
-            "name": entity.name or entity.id.capitalize(),
-            "pluralName": entity.plural_name or f"{entity.name}s",
-            "description": entity.description,
-            "route": route,
-            "tableName": table,
-            "displayField": entity.display_field,
-            "fields": fields,
-            "relations": relations,
-            "incoming_relations": incoming_relations,
-            "operations": operations,
-            "searchable_fields": searchable,
-            "grid_columns": grid_columns,
-            "audit_fields": audit_fields,
-            "navigation_visible": entity.navigation.visible,
+        profile = self.profile
+        inv = profile.inverse_relation_kinds if profile else {
+            "many-to-one": "one-to-many", "one-to-one": "one-to-one",
+            "one-to-many": "many-to-one", "many-to-many": "many-to-many",
         }
 
-    def _compute_incoming(self, entity: GoldEntity, all_ents: list[GoldEntity]) -> list[dict[str, Any]]:  # noqa: E501
         incoming = []
-        inv_kind = {"many-to-one": "one-to-many", "one-to-one": "one-to-one",
-                     "one-to-many": "many-to-one", "many-to-many": "many-to-many"}
         for other in all_ents:
             if other.id == entity.id:
                 continue
             for r in other.relations:
                 if r.target == entity.id:
+                    inv_kind = inv.get(r.kind, r.kind)
                     incoming.append({
                         "id": f"inverse_{r.id}",
                         "source": other.id, "target": entity.id,
-                        "kind": inv_kind.get(r.kind, r.kind),
+                        "kind": inv_kind,
                         "source_field": r.target_field,
-                        "target_field": r.source_field,
-                        "target_display_field": r.target_display_field,
+                        "target_field": r.source_field or self._fk_name(r.target),
+                        "target_display_field": r.target_display_field or self._display_field(),
                         "required": r.required, "nullable": r.nullable,
                         "on_delete": r.on_delete,
                         "list_visible": r.list_visible,
                         "detail_visible": r.detail_visible,
                     })
-        return incoming
+
+        audit_f = []
+        if profile:
+            for af in profile.default_audit_fields():
+                audit_f.append(af)
+
+        grid_cols = entity.grid.columns or [f.id for f in entity.fields[:5] if getattr(f, "list_visible", True)]  # noqa: E501
+        searchable = [f.id for f in entity.fields if f.searchable]
+        plural = entity.plural_name
+        if not plural:
+            plural = entity.name + "s" if entity.name else entity.id + "s"
+
+        return {
+            "id": entity.id,
+            "name": entity.name or entity.id.capitalize(),
+            "pluralName": plural,
+            "description": entity.description,
+            "route": route,
+            "tableName": table,
+            "displayField": entity.display_field,
+            "fields": fields,
+            "relations": rels,
+            "incoming_relations": incoming,
+            "operations": operations,
+            "searchable_fields": searchable,
+            "grid_columns": grid_cols,
+            "audit_fields": audit_f,
+            "navigation_visible": entity.navigation.visible,
+        }
+
+    def _name(self, key: str, entity_id: str) -> str:
+        p = self.profile
+        if p:
+            return p.naming_convention(key, entity_id)
+        return entity_id.lower()
+
+    def _fk_name(self, target: str) -> str:
+        return f"{target}_id"
+
+    def _display_field(self) -> str:
+        return "id"

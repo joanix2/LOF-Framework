@@ -1,8 +1,12 @@
-"""Datalog engine with semi-naive evaluation, negation, indexing, and statistics."""
+"""Datalog engine with semi-naive evaluation, negation, indexing, and statistics.
+
+Closed-world predicates come from the active Profile config.
+"""
 
 import time
 from collections import defaultdict
 
+from lof.gold.profile import Profile
 from lof.reasoning.models import (
     Conclusion,
     Condition,
@@ -23,12 +27,15 @@ CLOSED_WORLD_PREDICATES = {
 
 
 class DatalogEngine:
-    def __init__(self, rules: list[Rule]):
+    def __init__(self, rules: list[Rule], profile: Profile | None = None):
         self.rules = rules
+        self.profile = profile
         self._rule_index: dict[str, list[Rule]] = defaultdict(list)
         for rule in rules:
             for c in rule.when:
                 self._rule_index[c.predicate].append(rule)
+        self._closed_world = (profile.closed_world_predicates if profile
+                              else {"requires_projection", "requires_endpoint", "form_widget"})
         self._stats: dict[str, RuleStats] = {rule.id: RuleStats(rule_id=rule.id) for rule in rules}
 
     @property
@@ -287,10 +294,10 @@ class DatalogEngine:
             rule_id=rule.id,
             source_facts=list(source_keys),
             bronze_ids=list(bronze_ids),
-            explanation=f"Inferred by rule '{rule.id}': {rule.description}"
-            if rule.description
-            else None,
-            world="closed" if conclusion.predicate in CLOSED_WORLD_PREDICATES else "open",
+            explanation=(
+                f"Inferred by rule '{rule.id}': {rule.description}" if rule.description else None
+            ),
+            world="closed" if conclusion.predicate in self._closed_world else "open",
         )
 
     def _detect_contradictions(self, fact_map: dict[str, Fact]) -> list[str]:

@@ -1,0 +1,80 @@
+{
+  "id": "fastapi-react",
+  "version": "0.2.0",
+  "description": "FastAPI backend + React frontend with full CRUD",
+
+  "inverse_relation_kinds": {
+    "many-to-one": "one-to-many",
+    "one-to-one": "one-to-one",
+    "one-to-many": "many-to-one",
+    "many-to-many": "many-to-many"
+  },
+
+  "naming": {
+    "route": "kebab",
+    "table": "snake",
+    "foreign_key": "{target}_id",
+    "target_display_field": "id",
+    "plural": "append_s"
+  },
+
+  "defaults": {
+    "operations": ["create", "read", "update", "delete", "list", "search"],
+    "audit_fields": ["created_at", "updated_at"],
+    "auto_id_field": {"name": "id", "type": "uuid", "primary": true, "generated": true},
+    "capabilities": {
+      "create": true, "read": true, "update": true, "delete": true,
+      "list": true, "search": true, "pagination": true, "export": false
+    }
+  },
+
+  "projections": [
+    {"type": "entity-model",     "condition": "always",          "template": ".lof/templates/backend/model.py.j2"},
+    {"type": "entity-schemas",   "condition": "always",          "template": ".lof/templates/backend/schemas.py.j2"},
+    {"type": "entity-router",    "condition": "has_operations",  "template": ".lof/templates/backend/router.py.j2"},
+    {"type": "entity-types",     "condition": "always",          "template": ".lof/templates/frontend/types.ts.j2"},
+    {"type": "entity-hooks",     "condition": "has_operations",  "template": ".lof/templates/frontend/hooks.ts.j2"},
+    {"type": "entity-list-page", "condition": "capability.list", "template": ".lof/templates/frontend/list_page.tsx.j2"}
+  ],
+
+  "closed_world_predicates": [
+    "has_operation", "field_type", "requires_projection",
+    "requires_endpoint", "form_widget"
+  ],
+
+  "verb_normalization": {
+    "voir": "read", "consulter": "read", "lire": "read", "afficher": "read",
+    "créer": "create", "creer": "create", "ajouter": "create", "nouveau": "create",
+    "modifier": "update", "éditer": "update", "editer": "update", "changer": "update",
+    "supprimer": "delete", "effacer": "delete", "retirer": "delete", "enlever": "delete",
+    "lister": "list", "afficher_tous": "list",
+    "commenter": "comment", "répondre": "comment", "repondre": "comment",
+    "valider": "validate", "approuver": "validate", "confirmer": "validate",
+    "chercher": "search", "rechercher": "search", "trouver": "search"
+  },
+
+  "widget_mapping": {
+    "enum": "select",
+    "boolean": "checkbox",
+    "bool": "checkbox",
+    "text": "textarea",
+    "datetime": "datepicker",
+    "date": "datepicker",
+    "email": "email_input"
+  },
+
+  "builtin_constraints": [
+    {"id": "unique-api-route", "type": "unique-property", "severity": "error",
+     "parameters": {"property": "route", "scope": "type"},
+     "diagnostic": {"code": "DUPLICATE_API_ROUTE", "message": "Deux instances utilisent la même route API.",
+                    "hint": "Renommer une route ou fusionner les ressources."}},
+    {"id": "unique-table-name", "type": "unique-property", "severity": "error",
+     "parameters": {"property": "tableName", "scope": "type"},
+     "diagnostic": {"code": "DUPLICATE_TABLE_NAME", "message": "Deux instances utilisent le même nom de table.",
+                    "hint": "Vérifier les noms de tables dans les définitions d'entités."}},
+    {"id": "acyclic-relations", "type": "acyclic-relation", "severity": "error",
+     "parameters": {"kinds": ["many-to-one", "one-to-one"]},
+     "diagnostic": {"code": "CYCLIC_RELATION", "message": "Cycle détecté dans les relations.",
+                    "hint": "Vérifier les relations inverses et les dépendances."}}
+  ]
+}
