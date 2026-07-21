@@ -1,7 +1,7 @@
 services:
   api:
     build: apps/api
-    ports: ["8000:8000"]
+    ports: ["8001:8000"]
     environment:
       - DATABASE_URL=postgresql+asyncpg://isoclim:isoclim@db:5432/isoclim
       - PYTHONPATH=/app/src
@@ -12,12 +12,12 @@ services:
 
   web:
     build: apps/web
-    ports: ["5173:5173"]
+    ports: ["5174:5173"]
     volumes:
       - ./apps/web/src:/app/src
     depends_on: [api]
     environment:
-      - VITE_API_URL=http://localhost:8000/api/v1
+      - VITE_API_URL=http://localhost:8001/api/v1
 
   db:
     image: postgres:16-alpine
