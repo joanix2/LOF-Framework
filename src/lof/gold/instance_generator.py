@@ -14,8 +14,10 @@ class GoldInstanceGenerator:
 
     def generate(self, output_dir: Path) -> list[Path]:
         written = []
-        gold_dir = output_dir / "data" / "gold" / "instances"
+        gold_dir = output_dir / ".lof" / "gold" / "instances"
         gold_dir.mkdir(parents=True, exist_ok=True)
+        inst_dir = output_dir / ".lof" / "instances"
+        inst_dir.mkdir(parents=True, exist_ok=True)
 
         for entity in self.application.entities:
             ctx = self.projector.project(entity, self.application.entities)
@@ -58,6 +60,9 @@ class GoldInstanceGenerator:
                 }
                 path = gold_dir / f"{entity.id}-{suffix}.json"
                 path.write_text(json.dumps(instance, indent=2))
+                # Also copy to .lof/instances/ for the compiler
+                inst_path = inst_dir / f"{entity.id}-{suffix}.json"
+                inst_path.write_text(json.dumps(instance, indent=2))
                 written.append(path)
 
         return written

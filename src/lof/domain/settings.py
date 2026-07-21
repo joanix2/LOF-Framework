@@ -33,11 +33,12 @@ class SolverSettings(BaseModel):
 
 class CompilationSettings(BaseModel):
     output_dir: str = "generated-project"
-    types_dir: str = "definitions/types"
-    instances_dir: str = "instances"
-    patches_dir: str = "patches"
-    targets_dir: str = "definitions/targets"
-    templates_dir: str = "templates"
+    types_dir: str = ".lof/types"
+    instances_dir: str = ".lof/instances"
+    patches_dir: str = ".lof/patches"
+    targets_dir: str = ".lof/targets"
+    templates_dir: str = ".lof/templates"
+    gold_dir: str = ".lof/gold/instances"
     dry_run: bool = False
     max_artifacts: int = 500
 
