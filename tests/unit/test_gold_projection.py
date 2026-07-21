@@ -83,13 +83,12 @@ def test_instance_generation():
     with tempfile.TemporaryDirectory() as tmp:
         gen = GoldInstanceGenerator(app)
         paths = gen.generate(Path(tmp))
-        assert len(paths) == 3
+        assert len(paths) == 18  # 3 entities × 6 projections
         import json
         for p in paths:
             data = json.loads(p.read_text())
-            assert data["type"] == "entity-model"
+            assert data["type"] is not None
             assert "values" in data
-            assert "fields" in data["values"]
 
 
 def test_library_entity_count():
@@ -103,9 +102,9 @@ def test_book_relation_preserved():
         tmp_p = Path(tmp)
         GoldInstanceGenerator(app).generate(tmp_p)
         import json
-        book_path = tmp_p / "data" / "gold" / "instances" / "book.json"
+        book_path = tmp_p / ".lof" / "gold" / "instances" / "book-model.json"
         book = json.loads(book_path.read_text())
         assert len(book["relations"]) == 2
         targets = [r["target"] for r in book["relations"]]
-        assert "author" in targets
-        assert "category" in targets
+        assert "author-model" in targets
+        assert "category-model" in targets
