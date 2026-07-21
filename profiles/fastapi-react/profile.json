@@ -2,14 +2,12 @@
   "id": "fastapi-react",
   "version": "0.2.0",
   "description": "FastAPI backend + React frontend with full CRUD",
-
   "inverse_relation_kinds": {
     "many-to-one": "one-to-many",
     "one-to-one": "one-to-one",
     "one-to-many": "many-to-one",
     "many-to-many": "many-to-many"
   },
-
   "naming": {
     "route": "kebab",
     "table": "snake",
@@ -17,42 +15,104 @@
     "target_display_field": "id",
     "plural": "append_s"
   },
-
   "defaults": {
-    "operations": ["create", "read", "update", "delete", "list", "search"],
-    "audit_fields": ["created_at", "updated_at"],
-    "auto_id_field": {"name": "id", "type": "uuid", "primary": true, "generated": true},
+    "operations": [
+      "create",
+      "read",
+      "update",
+      "delete",
+      "list",
+      "search"
+    ],
+    "audit_fields": [
+      "created_at",
+      "updated_at"
+    ],
+    "auto_id_field": {
+      "name": "id",
+      "type": "uuid",
+      "primary": true,
+      "generated": true
+    },
     "capabilities": {
-      "create": true, "read": true, "update": true, "delete": true,
-      "list": true, "search": true, "pagination": true, "export": false
+      "create": true,
+      "read": true,
+      "update": true,
+      "delete": true,
+      "list": true,
+      "search": true,
+      "pagination": true,
+      "export": false
     }
   },
-
   "projections": [
-    {"type": "entity-model",     "condition": "always",          "template": ".lof/templates/backend/model.py.j2"},
-    {"type": "entity-schemas",   "condition": "always",          "template": ".lof/templates/backend/schemas.py.j2"},
-    {"type": "entity-router",    "condition": "has_operations",  "template": ".lof/templates/backend/router.py.j2"},
-    {"type": "entity-types",     "condition": "always",          "template": ".lof/templates/frontend/types.ts.j2"},
-    {"type": "entity-hooks",     "condition": "has_operations",  "template": ".lof/templates/frontend/hooks.ts.j2"},
-    {"type": "entity-list-page", "condition": "capability.list", "template": ".lof/templates/frontend/list_page.tsx.j2"}
+    {
+      "type": "entity-model",
+      "condition": "always",
+      "template": ".lof/templates/backend/model.py.j2"
+    },
+    {
+      "type": "entity-schemas",
+      "condition": "always",
+      "template": ".lof/templates/backend/schemas.py.j2"
+    },
+    {
+      "type": "entity-router",
+      "condition": "has_operations",
+      "template": ".lof/templates/backend/router.py.j2"
+    },
+    {
+      "type": "entity-types",
+      "condition": "always",
+      "template": ".lof/templates/frontend/types.ts.j2"
+    },
+    {
+      "type": "entity-hooks",
+      "condition": "has_operations",
+      "template": ".lof/templates/frontend/hooks.ts.j2"
+    },
+    {
+      "type": "entity-list-page",
+      "condition": "capability.list",
+      "template": ".lof/templates/frontend/list_page.tsx.j2"
+    }
   ],
-
   "closed_world_predicates": [
-    "has_operation", "field_type", "requires_projection",
-    "requires_endpoint", "form_widget"
+    "has_operation",
+    "field_type",
+    "requires_projection",
+    "requires_endpoint",
+    "form_widget"
   ],
-
   "verb_normalization": {
-    "voir": "read", "consulter": "read", "lire": "read", "afficher": "read",
-    "créer": "create", "creer": "create", "ajouter": "create", "nouveau": "create",
-    "modifier": "update", "éditer": "update", "editer": "update", "changer": "update",
-    "supprimer": "delete", "effacer": "delete", "retirer": "delete", "enlever": "delete",
-    "lister": "list", "afficher_tous": "list",
-    "commenter": "comment", "répondre": "comment", "repondre": "comment",
-    "valider": "validate", "approuver": "validate", "confirmer": "validate",
-    "chercher": "search", "rechercher": "search", "trouver": "search"
+    "voir": "read",
+    "consulter": "read",
+    "lire": "read",
+    "afficher": "read",
+    "cr\u00e9er": "create",
+    "creer": "create",
+    "ajouter": "create",
+    "nouveau": "create",
+    "modifier": "update",
+    "\u00e9diter": "update",
+    "editer": "update",
+    "changer": "update",
+    "supprimer": "delete",
+    "effacer": "delete",
+    "retirer": "delete",
+    "enlever": "delete",
+    "lister": "list",
+    "afficher_tous": "list",
+    "commenter": "comment",
+    "r\u00e9pondre": "comment",
+    "repondre": "comment",
+    "valider": "validate",
+    "approuver": "validate",
+    "confirmer": "validate",
+    "chercher": "search",
+    "rechercher": "search",
+    "trouver": "search"
   },
-
   "widget_mapping": {
     "enum": "select",
     "boolean": "checkbox",
@@ -62,19 +122,712 @@
     "date": "datepicker",
     "email": "email_input"
   },
-
   "builtin_constraints": [
-    {"id": "unique-api-route", "type": "unique-property", "severity": "error",
-     "parameters": {"property": "route", "scope": "type"},
-     "diagnostic": {"code": "DUPLICATE_API_ROUTE", "message": "Deux instances utilisent la même route API.",
-                    "hint": "Renommer une route ou fusionner les ressources."}},
-    {"id": "unique-table-name", "type": "unique-property", "severity": "error",
-     "parameters": {"property": "tableName", "scope": "type"},
-     "diagnostic": {"code": "DUPLICATE_TABLE_NAME", "message": "Deux instances utilisent le même nom de table.",
-                    "hint": "Vérifier les noms de tables dans les définitions d'entités."}},
-    {"id": "acyclic-relations", "type": "acyclic-relation", "severity": "error",
-     "parameters": {"kinds": ["many-to-one", "one-to-one"]},
-     "diagnostic": {"code": "CYCLIC_RELATION", "message": "Cycle détecté dans les relations.",
-                    "hint": "Vérifier les relations inverses et les dépendances."}}
-  ]
+    {
+      "id": "unique-api-route",
+      "type": "unique-property",
+      "severity": "error",
+      "parameters": {
+        "property": "route",
+        "scope": "type"
+      },
+      "diagnostic": {
+        "code": "DUPLICATE_API_ROUTE",
+        "message": "Deux instances utilisent la m\u00eame route API.",
+        "hint": "Renommer une route ou fusionner les ressources."
+      }
+    },
+    {
+      "id": "unique-table-name",
+      "type": "unique-property",
+      "severity": "error",
+      "parameters": {
+        "property": "tableName",
+        "scope": "type"
+      },
+      "diagnostic": {
+        "code": "DUPLICATE_TABLE_NAME",
+        "message": "Deux instances utilisent le m\u00eame nom de table.",
+        "hint": "V\u00e9rifier les noms de tables dans les d\u00e9finitions d'entit\u00e9s."
+      }
+    },
+    {
+      "id": "acyclic-relations",
+      "type": "acyclic-relation",
+      "severity": "error",
+      "parameters": {
+        "kinds": [
+          "many-to-one",
+          "one-to-one"
+        ]
+      },
+      "diagnostic": {
+        "code": "CYCLIC_RELATION",
+        "message": "Cycle d\u00e9tect\u00e9 dans les relations.",
+        "hint": "V\u00e9rifier les relations inverses et les d\u00e9pendances."
+      }
+    }
+  ],
+  "schema": {
+    "$defs": {
+      "AuditConfig": {
+        "properties": {
+          "created_at": {
+            "default": true,
+            "title": "Created At",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "default": true,
+            "title": "Updated At",
+            "type": "boolean"
+          },
+          "created_by": {
+            "default": false,
+            "title": "Created By",
+            "type": "boolean"
+          },
+          "updated_by": {
+            "default": false,
+            "title": "Updated By",
+            "type": "boolean"
+          }
+        },
+        "title": "AuditConfig",
+        "type": "object"
+      },
+      "EnumValue": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "order": {
+            "default": 0,
+            "title": "Order",
+            "type": "integer"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Color"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "EnumValue",
+        "type": "object"
+      },
+      "FormConfig": {
+        "properties": {
+          "sections": {
+            "items": {
+              "$ref": "#/$defs/FormSection"
+            },
+            "title": "Sections",
+            "type": "array"
+          }
+        },
+        "title": "FormConfig",
+        "type": "object"
+      },
+      "FormSection": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "FormSection",
+        "type": "object"
+      },
+      "GoldCapabilities": {
+        "properties": {
+          "create": {
+            "default": true,
+            "title": "Create",
+            "type": "boolean"
+          },
+          "read": {
+            "default": true,
+            "title": "Read",
+            "type": "boolean"
+          },
+          "update": {
+            "default": true,
+            "title": "Update",
+            "type": "boolean"
+          },
+          "delete": {
+            "default": true,
+            "title": "Delete",
+            "type": "boolean"
+          },
+          "list": {
+            "default": true,
+            "title": "List",
+            "type": "boolean"
+          },
+          "search": {
+            "default": true,
+            "title": "Search",
+            "type": "boolean"
+          },
+          "pagination": {
+            "default": true,
+            "title": "Pagination",
+            "type": "boolean"
+          },
+          "export": {
+            "default": false,
+            "title": "Export",
+            "type": "boolean"
+          }
+        },
+        "title": "GoldCapabilities",
+        "type": "object"
+      },
+      "GoldEntity": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "plural_name": {
+            "default": "",
+            "title": "Plural Name",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "display_field": {
+            "default": "id",
+            "title": "Display Field",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/$defs/GoldField"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "enums": {
+            "items": {
+              "$ref": "#/$defs/GoldEnum"
+            },
+            "title": "Enums",
+            "type": "array"
+          },
+          "relations": {
+            "items": {
+              "$ref": "#/$defs/GoldRelation"
+            },
+            "title": "Relations",
+            "type": "array"
+          },
+          "capabilities": {
+            "$ref": "#/$defs/GoldCapabilities"
+          },
+          "grid": {
+            "$ref": "#/$defs/GridConfig"
+          },
+          "forms": {
+            "$ref": "#/$defs/FormConfig"
+          },
+          "audit": {
+            "$ref": "#/$defs/AuditConfig"
+          },
+          "navigation": {
+            "$ref": "#/$defs/NavigationConfig"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "GoldEntity",
+        "type": "object"
+      },
+      "GoldEnum": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/$defs/EnumValue"
+            },
+            "title": "Values",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "GoldEnum",
+        "type": "object"
+      },
+      "GoldField": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "type": {
+            "default": "string",
+            "title": "Type",
+            "type": "string"
+          },
+          "required": {
+            "default": false,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "unique": {
+            "default": false,
+            "title": "Unique",
+            "type": "boolean"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "searchable": {
+            "default": false,
+            "title": "Searchable",
+            "type": "boolean"
+          },
+          "sortable": {
+            "default": false,
+            "title": "Sortable",
+            "type": "boolean"
+          },
+          "filterable": {
+            "default": false,
+            "title": "Filterable",
+            "type": "boolean"
+          },
+          "list_visible": {
+            "default": true,
+            "title": "List Visible",
+            "type": "boolean"
+          },
+          "detail_visible": {
+            "default": true,
+            "title": "Detail Visible",
+            "type": "boolean"
+          },
+          "form_visible": {
+            "default": true,
+            "title": "Form Visible",
+            "type": "boolean"
+          },
+          "create_visible": {
+            "default": true,
+            "title": "Create Visible",
+            "type": "boolean"
+          },
+          "edit_visible": {
+            "default": true,
+            "title": "Edit Visible",
+            "type": "boolean"
+          },
+          "read_only": {
+            "default": false,
+            "title": "Read Only",
+            "type": "boolean"
+          },
+          "generated": {
+            "default": false,
+            "title": "Generated",
+            "type": "boolean"
+          },
+          "indexed": {
+            "default": false,
+            "title": "Indexed",
+            "type": "boolean"
+          },
+          "default": {
+            "default": null,
+            "title": "Default"
+          },
+          "min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min"
+          },
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max"
+          },
+          "min_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Length"
+          },
+          "max_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Length"
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern"
+          },
+          "placeholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Placeholder"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "enum_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Enum Ref"
+          },
+          "primary": {
+            "default": false,
+            "title": "Primary",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "GoldField",
+        "type": "object"
+      },
+      "GoldRelation": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "one-to-one",
+              "many-to-one",
+              "one-to-many",
+              "many-to-many"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "source_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Field"
+          },
+          "target_field": {
+            "default": "id",
+            "title": "Target Field",
+            "type": "string"
+          },
+          "target_display_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Target Display Field"
+          },
+          "required": {
+            "default": false,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "on_delete": {
+            "default": "restrict",
+            "title": "On Delete",
+            "type": "string"
+          },
+          "back_populates": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Back Populates"
+          },
+          "form_widget": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Form Widget"
+          },
+          "list_visible": {
+            "default": true,
+            "title": "List Visible",
+            "type": "boolean"
+          },
+          "detail_visible": {
+            "default": true,
+            "title": "Detail Visible",
+            "type": "boolean"
+          },
+          "eager_loading": {
+            "default": false,
+            "title": "Eager Loading",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "target",
+          "kind"
+        ],
+        "title": "GoldRelation",
+        "type": "object"
+      },
+      "GridConfig": {
+        "properties": {
+          "default_sort_field": {
+            "default": "created_at",
+            "title": "Default Sort Field",
+            "type": "string"
+          },
+          "default_sort_direction": {
+            "default": "desc",
+            "title": "Default Sort Direction",
+            "type": "string"
+          },
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "filters": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Filters",
+            "type": "array"
+          },
+          "searchable_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Searchable Fields",
+            "type": "array"
+          }
+        },
+        "title": "GridConfig",
+        "type": "object"
+      },
+      "NavigationConfig": {
+        "properties": {
+          "visible": {
+            "default": true,
+            "title": "Visible",
+            "type": "boolean"
+          },
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "icon": {
+            "default": "folder",
+            "title": "Icon",
+            "type": "string"
+          },
+          "order": {
+            "default": 100,
+            "title": "Order",
+            "type": "integer"
+          }
+        },
+        "title": "NavigationConfig",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "id": {
+        "default": "app",
+        "title": "Id",
+        "type": "string"
+      },
+      "name": {
+        "default": "",
+        "title": "Name",
+        "type": "string"
+      },
+      "profile": {
+        "default": "fastapi-react",
+        "title": "Profile",
+        "type": "string"
+      },
+      "entities": {
+        "items": {
+          "$ref": "#/$defs/GoldEntity"
+        },
+        "title": "Entities",
+        "type": "array"
+      },
+      "enums": {
+        "items": {
+          "$ref": "#/$defs/GoldEnum"
+        },
+        "title": "Enums",
+        "type": "array"
+      }
+    },
+    "title": "GoldApplication",
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
 }
