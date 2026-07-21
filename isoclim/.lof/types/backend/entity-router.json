@@ -8,15 +8,7 @@
       "type": "string",
       "required": true
     },
-    "route": {
-      "type": "string",
-      "required": true
-    },
-    "pluralName": {
-      "type": "string",
-      "required": true
-    },
-    "operations": {
+    "fields": {
       "type": "array"
     }
   }

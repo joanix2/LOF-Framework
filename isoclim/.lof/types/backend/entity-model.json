@@ -9,12 +9,7 @@
       "required": true
     },
     "fields": {
-      "type": "array",
-      "required": true
-    },
-    "tableName": {
-      "type": "string",
-      "required": true
+      "type": "array"
     }
   }
 }

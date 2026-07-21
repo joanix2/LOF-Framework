@@ -49,42 +49,58 @@
     {
       "type": "entity-model",
       "condition": "always",
-      "template": ".lof/templates/backend/model.py.j2"
+      "template": ".lof/templates/backend/model.py.j2",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/model.py",
+      "targetType": "python-module"
     },
     {
       "type": "entity-schemas",
       "condition": "always",
-      "template": ".lof/templates/backend/schemas.py.j2"
+      "template": ".lof/templates/backend/schemas.py.j2",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/schemas.py",
+      "targetType": "python-module"
     },
     {
       "type": "entity-router",
       "condition": "has_operations",
-      "template": ".lof/templates/backend/router.py.j2"
+      "template": ".lof/templates/backend/router.py.j2",
+      "outputPattern": "generated-project/apps/api/src/app/modules/{{ name | snake_case }}/router.py",
+      "targetType": "python-module"
     },
     {
       "type": "entity-types",
       "condition": "always",
-      "template": ".lof/templates/frontend/types.ts.j2"
+      "template": ".lof/templates/frontend/types.ts.j2",
+      "outputPattern": "generated-project/apps/web/src/types/{{ name | snake_case }}.ts",
+      "targetType": "typescript-module"
     },
     {
       "type": "entity-hooks",
       "condition": "has_operations",
-      "template": ".lof/templates/frontend/hooks.ts.j2"
+      "template": ".lof/templates/frontend/hooks.ts.j2",
+      "outputPattern": "generated-project/apps/web/src/hooks/use{{ name | pascal_case }}.ts",
+      "targetType": "typescript-module"
     },
     {
       "type": "entity-list-page",
       "condition": "capability.list",
-      "template": ".lof/templates/frontend/list_page.tsx.j2"
+      "template": ".lof/templates/frontend/list_page.tsx.j2",
+      "outputPattern": "generated-project/apps/web/src/pages/{{ name | pascal_case }}ListPage.tsx",
+      "targetType": "react-component"
     },
     {
       "type": "entity-api-tests",
       "condition": "has_operations",
-      "template": ".lof/templates/backend/test_entity.py.j2"
+      "template": ".lof/templates/backend/test_entity.py.j2",
+      "outputPattern": "generated-project/apps/api/tests/modules/test_{{ name | snake_case }}.py",
+      "targetType": "python-module"
     },
     {
       "type": "entity-e2e-tests",
       "condition": "capability.list",
-      "template": ".lof/templates/frontend/test_e2e.ts.j2"
+      "template": ".lof/templates/frontend/test_e2e.ts.j2",
+      "outputPattern": "generated-project/apps/web/e2e/{{ name | snake_case }}.spec.ts",
+      "targetType": "typescript-module"
     }
   ],
   "closed_world_predicates": [
