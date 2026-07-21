@@ -78,19 +78,19 @@ def test_instance_generation_from_json():
     with tempfile.TemporaryDirectory() as tmp:
         gen = GoldInstanceGenerator(app)
         paths = gen.generate(Path(tmp))
-        assert len(paths) == 18  # 3 entities × 6 projections
+        assert len(paths) == 3  # one instance per entity
         for p in paths:
             data = json.loads(p.read_text())
-            assert data["type"] is not None
+            assert data["type"] == "entity"
 
 
 def test_book_relation_from_json():
     app = load_gold_application(LIBRARY_JSON)
     with tempfile.TemporaryDirectory() as tmp:
         GoldInstanceGenerator(app).generate(Path(tmp))
-        book_path = Path(tmp) / ".lof" / "instances" / "book-model.json"
+        book_path = Path(tmp) / ".lof" / "instances" / "book.json"
         book = json.loads(book_path.read_text())
-        rels = book["values"].get("relations", [])
+        rels = book.get("relations", [])
         assert len(rels) == 2
         targets = [r["target"] for r in rels]
         assert "author-model" in targets
@@ -110,4 +110,4 @@ def test_isoclim_generates_instances():
     app = load_gold_application(ISOCLIM_JSON)
     with tempfile.TemporaryDirectory() as tmp:
         paths = GoldInstanceGenerator(app).generate(Path(tmp))
-        assert len(paths) == 48  # 8 entities × 6 projections
+        assert len(paths) == 8  # 8 entities, one instance each
